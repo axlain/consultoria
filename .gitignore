@@ -1,0 +1,22 @@
+# Claude Code local config
+.claude/
+
+# Python (backend)
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Node (frontend)
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+
+# Markdown docs
+/CLAUDE.md
+/info.md
