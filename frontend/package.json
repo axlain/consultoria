@@ -10,15 +10,19 @@
   },
   "dependencies": {
     "date-fns": "^4.4.0",
+    "html5-qrcode": "^2.3.8",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-big-calendar": "^1.20.0",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.3.3",
     "vite": "^6.0.0"
   }
 }

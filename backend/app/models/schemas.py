@@ -1,13 +1,24 @@
+import re
 from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+
+# Letters (incl. accented/ñ) and spaces only — used for customer name fields.
+_NAME_RE = re.compile(r"^[A-Za-zÀ-ÿ\s]+$")
+
+
+def _validate_name(value: str) -> str:
+    stripped = value.strip()
+    if not stripped or not _NAME_RE.match(stripped):
+        raise ValueError("Solo se permiten letras.")
+    return stripped
 
 
 # ---- Tenant configuration (RF02, RF08) --------------------------------
 
 class BusinessInfo(BaseModel):
     name: str
-    type: Literal["barberia", "tattoo"]
+    type: str
     address: str
     phone: str
     map_embed_url: str
@@ -36,7 +47,6 @@ class Service(BaseModel):
     name: str
     duration_minutes: int
     price: float
-    requires_tattoo_details: bool = False
     color: str = "#c9a24b"
 
 
@@ -44,7 +54,6 @@ class ServiceInput(BaseModel):
     name: str
     duration_minutes: int
     price: float
-    requires_tattoo_details: bool = False
     color: str = "#c9a24b"
 
 
@@ -52,7 +61,6 @@ class ServiceUpdate(BaseModel):
     name: Optional[str] = None
     duration_minutes: Optional[int] = None
     price: Optional[float] = None
-    requires_tattoo_details: Optional[bool] = None
     color: Optional[str] = None
 
 
@@ -114,29 +122,37 @@ class TenantConfig(BaseModel):
     analytics_id: Optional[str] = None
 
 
-# ---- Booking wizard (RF03, RF04, RF05) ---------------------------------
+# ---- Booking wizard (RF03, RF05) ---------------------------------------
 
-class TattooDetails(BaseModel):
-    width_cm: float
-    height_cm: float
-    body_zone: str
-    reference_image_url: Optional[str] = None
+class SlotAvailability(BaseModel):
+    time: str
+    available: bool
+
+
+class DayAvailability(BaseModel):
+    # Whether anyone in scope is working at all that day — lets the frontend tell
+    # "closed" apart from "fully booked" instead of showing an identical wall of
+    # disabled slots for both.
+    open: bool
+    slots: list[SlotAvailability]
 
 
 class BookingRequest(BaseModel):
     service_id: str
-    professional_id: str
+    professional_id: str  # or the sentinel "any" for "cualquier profesional"
     date: str  # "YYYY-MM-DD"
     time: str  # "HH:MM"
     customer_name: str
-    customer_phone: str
-    tattoo_details: Optional[TattooDetails] = None
+    customer_last_name: str
+    customer_phone: str = Field(pattern=r"^\d{10}$")
+
+    _validate_names = field_validator("customer_name", "customer_last_name")(_validate_name)
 
 
-# scheduled: just booked by a client, awaiting staff confirmation (yellow).
-# confirmed: staff confirmed it will happen (green).
-# completed: the appointment happened (gray). no_show: client didn't show (red).
-AppointmentStatus = Literal["scheduled", "confirmed", "completed", "no_show"]
+# scheduled: booked and still upcoming — the only non-terminal state; if it's in the
+# list, it's on. completed: the appointment happened (set via QR check-in or manually).
+# no_show: client didn't show (always manual).
+AppointmentStatus = Literal["scheduled", "completed", "no_show"]
 
 
 class Appointment(BaseModel):
@@ -147,9 +163,9 @@ class Appointment(BaseModel):
     date: str
     time: str
     customer_name: str
+    customer_last_name: str
     customer_phone: str
     status: AppointmentStatus = "scheduled"
-    tattoo_details: Optional[TattooDetails] = None
 
 
 class AppointmentUpdate(BaseModel):
@@ -159,3 +175,18 @@ class AppointmentUpdate(BaseModel):
     professional_id: Optional[str] = None
     date: Optional[str] = None
     time: Optional[str] = None
+
+
+class AppointmentValidation(BaseModel):
+    """Response for the front-desk QR scan: the raw Appointment plus the service/
+    professional names, which the QR itself doesn't carry (it only encodes the id)."""
+
+    id: str
+    customer_name: str
+    customer_last_name: str
+    customer_phone: str
+    service_name: str
+    professional_name: str
+    date: str
+    time: str
+    status: AppointmentStatus

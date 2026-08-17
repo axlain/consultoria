@@ -5,10 +5,14 @@ import { NotFound } from '../NotFound'
 function TenantGateInner() {
   const { status } = useTenant()
 
-  if (status === 'loading') return <div className="page-status">Cargando...</div>
+  if (status === 'loading') return <div className="mx-auto max-w-[600px] py-8 px-6 text-center">Cargando...</div>
   if (status === 'not-found') return <NotFound />
   if (status === 'error') {
-    return <div className="page-status">Ocurrió un error al cargar el negocio. Intenta de nuevo más tarde.</div>
+    return (
+      <div className="mx-auto max-w-[600px] py-8 px-6 text-center">
+        Ocurrió un error al cargar el negocio. Intenta de nuevo más tarde.
+      </div>
+    )
   }
 
   return <Outlet />

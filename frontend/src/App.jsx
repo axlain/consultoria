@@ -4,6 +4,7 @@ import { TenantGate } from './pages/client/TenantGate'
 import { TenantHome } from './pages/client/TenantHome'
 import { BookingWizard } from './pages/client/wizard/BookingWizard'
 import { ThankYou } from './pages/client/ThankYou'
+import { AvailabilityCalendar } from './pages/client/AvailabilityCalendar'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { ResourceCalendar } from './pages/admin/ResourceCalendar'
 import { ServiceCatalog } from './pages/admin/ServiceCatalog'
@@ -19,6 +20,7 @@ function App() {
       <Route path="/demo/:slug" element={<TenantGate />}>
         <Route index element={<TenantHome />} />
         <Route path="reservar" element={<BookingWizard />} />
+        <Route path="disponibilidad" element={<AvailabilityCalendar />} />
         <Route path="gracias" element={<ThankYou />} />
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="agenda" replace />} />

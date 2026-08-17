@@ -41,6 +41,67 @@ def get_available_slots(tenant: TenantConfig, professional_id: str, date_str: st
     return [slot for slot in all_slots if slot not in booked]
 
 
+def get_day_slots(
+    tenant: TenantConfig,
+    date_str: str,
+    *,
+    service_id: str | None = None,
+    professional_id: str | None = None,
+) -> dict:
+    """Full grid of possible slots for the day, each tagged with availability — never
+    hides a taken slot, just marks it unavailable (frontend renders it disabled).
+    Also reports `open`: whether anyone in scope is even working that day, so the
+    frontend can tell "nobody's in today" apart from "fully booked" instead of
+    rendering both as an identical wall of disabled slots."""
+    if professional_id:
+        professionals = [p for p in tenant.professionals if p.id == professional_id]
+    elif service_id:
+        professionals = [p for p in tenant.professionals if service_id in p.service_ids]
+    else:
+        professionals = tenant.professionals
+
+    weekday_code = _WEEKDAY_CODES[date.fromisoformat(date_str).weekday()]
+    is_open = any(
+        p.active and weekday_code not in p.days_off for p in professionals
+    )
+
+    times: dict[str, bool] = {}
+    for professional in professionals:
+        free = set(get_available_slots(tenant, professional.id, date_str))
+        for slot in _generate_daily_slots(professional.schedule):
+            times[slot] = times.get(slot, False) or slot in free
+
+    slots = [{"time": t, "available": a} for t, a in sorted(times.items())]
+    return {"open": is_open, "slots": slots}
+
+
+def get_professionals_available_at(
+    tenant: TenantConfig, service_id: str, date_str: str, time_str: str
+):
+    return [
+        professional
+        for professional in tenant.professionals
+        if service_id in professional.service_ids
+        and time_str in get_available_slots(tenant, professional.id, date_str)
+    ]
+
+
+def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
+    """Load-balances the 'cualquier profesional' option: fewest active appointments
+    that day wins; ties keep the input order (deterministic)."""
+    counts = {
+        professional.id: sum(
+            1
+            for apt in store.get_appointments(tenant.slug)
+            if apt.professional_id == professional.id
+            and apt.date == date_str
+            and apt.status != "no_show"
+        )
+        for professional in professionals
+    }
+    return min(professionals, key=lambda p: counts[p.id])
+
+
 def _is_slot_taken(
     tenant_slug: str,
     professional_id: str,
@@ -60,7 +121,16 @@ def _is_slot_taken(
 
 def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appointment:
     """RF05: the slot is re-checked and locked at confirmation time to avoid double-booking."""
-    available = get_available_slots(tenant, booking.professional_id, booking.date)
+    professional_id = booking.professional_id
+    if professional_id == "any":
+        candidates = get_professionals_available_at(
+            tenant, booking.service_id, booking.date, booking.time
+        )
+        if not candidates:
+            raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
+        professional_id = pick_least_busy(tenant, candidates, booking.date).id
+
+    available = get_available_slots(tenant, professional_id, booking.date)
     if booking.time not in available:
         raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
 
@@ -68,12 +138,12 @@ def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appoint
         id=store.next_appointment_id(),
         tenant_slug=tenant.slug,
         service_id=booking.service_id,
-        professional_id=booking.professional_id,
+        professional_id=professional_id,
         date=booking.date,
         time=booking.time,
         customer_name=booking.customer_name,
+        customer_last_name=booking.customer_last_name,
         customer_phone=booking.customer_phone,
-        tattoo_details=booking.tattoo_details,
     )
     store.add_appointment(tenant.slug, appointment)
     return appointment

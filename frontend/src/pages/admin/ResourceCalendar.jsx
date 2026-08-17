@@ -7,6 +7,9 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import { useTenant } from '../../context/TenantContext'
 import { api } from '../../api/client'
+import { DateStrip, buildDateRange } from '../../components/DateStrip'
+import { AgendaListView } from './AgendaListView'
+import { STATUS_LABELS, appointmentAccentColor, isClosedStatus } from './appointmentStatus'
 
 const localizer = dateFnsLocalizer({
   format,
@@ -18,19 +21,8 @@ const localizer = dateFnsLocalizer({
 
 const DnDCalendar = withDragAndDrop(Calendar)
 
-const STATUS_LABELS = {
-  scheduled: 'Agendada',
-  confirmed: 'Confirmada',
-  completed: 'Completada',
-  no_show: 'Inasistencia',
-}
-
-const STATUS_COLORS = {
-  scheduled: '#f1c40f',
-  confirmed: '#2f9e44',
-  completed: '#868e96',
-  no_show: '#e03131',
-}
+const DATE_STRIP_DAYS = 14
+const DATE_STRIP = buildDateRange(DATE_STRIP_DAYS)
 
 function toMinutes(hhmm) {
   const [h, m] = hhmm.split(':').map(Number)
@@ -41,12 +33,9 @@ function minutesToDate(minutes) {
   return new Date(0, 0, 0, Math.floor(minutes / 60), minutes % 60)
 }
 
-function todayIso() {
-  return format(new Date(), 'yyyy-MM-dd')
-}
-
-// RF06 evolved: resource grid — columns per active barber, rows per time block,
-// color-coded by status, with drag & drop to reschedule.
+// RF06 evolved: date-strip navigation (shared with the client booking wizard) drives
+// the desktop resource grid; mobile gets its own week-ahead list view instead of the
+// drag-and-drop resource grid, which doesn't fit a phone width.
 export function ResourceCalendar() {
   const { tenant, refreshTenant } = useTenant()
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -54,6 +43,7 @@ export function ResourceCalendar() {
   const [appointments, setAppointments] = useState([])
   const [error, setError] = useState(null)
   const [selectedEvent, setSelectedEvent] = useState(null)
+  const [mobileMode, setMobileMode] = useState('citas')
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
 
@@ -94,11 +84,12 @@ export function ResourceCalendar() {
         const end = new Date(start.getTime() + durationMinutes * 60000)
         return {
           id: apt.id,
-          title: `${apt.customer_name} · ${service?.name ?? apt.service_id}`,
+          title: `${apt.customer_name} ${apt.customer_last_name} · ${service?.name ?? apt.service_id}`,
           start,
           end,
           resourceId: apt.professional_id,
           status: apt.status,
+          color: appointmentAccentColor(apt, service),
           appointment: apt,
         }
       })
@@ -107,9 +98,10 @@ export function ResourceCalendar() {
   function eventPropGetter(event) {
     return {
       style: {
-        backgroundColor: STATUS_COLORS[event.status] ?? '#4c6ef5',
+        backgroundColor: event.color,
         borderColor: 'transparent',
         color: '#fff',
+        opacity: isClosedStatus(event.status) ? 0.6 : 1,
       },
     }
   }
@@ -143,12 +135,16 @@ export function ResourceCalendar() {
 
   return (
     <div>
-      <div className="admin-page-header">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1>Agenda completa</h1>
-        <div className="admin-toolbar">
-          <label>
+        <div className="flex flex-wrap items-center gap-4">
+          <label className="mb-0 flex flex-col gap-1 text-[0.9rem]">
             Barbero
-            <select value={professionalFilter} onChange={(e) => setProfessionalFilter(e.target.value)}>
+            <select
+              className="rounded-md border border-[#ccc] p-[0.6rem] text-base"
+              value={professionalFilter}
+              onChange={(e) => setProfessionalFilter(e.target.value)}
+            >
               <option value="all">Ver todos los barberos</option>
               {tenant.professionals
                 .filter((p) => p.active)
@@ -159,32 +155,37 @@ export function ResourceCalendar() {
                 ))}
             </select>
           </label>
-          <button type="button" className="link-button" onClick={() => refreshTenant()}>
+          <button
+            type="button"
+            className="inline-block border-0 bg-transparent p-0 py-2 text-secondary"
+            onClick={() => refreshTenant()}
+          >
             Refrescar equipo
           </button>
         </div>
       </div>
 
-      <div className="calendar-legend">
-        {Object.entries(STATUS_LABELS).map(([key, label]) => (
-          <span key={key} className="legend-item">
-            <span className="legend-dot" style={{ backgroundColor: STATUS_COLORS[key] }} />
-            {label}
-          </span>
-        ))}
+      {error && <p className="text-[#c0392b]">{error}</p>}
+
+      {/* Shared date navigation — same strip as the client booking wizard's step 3. */}
+      <div className="mb-4">
+        <DateStrip
+          dates={DATE_STRIP}
+          selectedDate={dateStr}
+          onSelect={(iso) => setSelectedDate(parse(iso, 'yyyy-MM-dd', new Date()))}
+        />
       </div>
 
-      {error && <p className="form-error">{error}</p>}
-
-      <div className="resource-calendar">
+      {/* Desktop: multi-barber drag-and-drop resource grid. */}
+      <div className="hidden rounded-[10px] border border-[#e5e5e5] bg-white p-4 md:block">
         <DnDCalendar
           localizer={localizer}
           culture="es"
           date={selectedDate}
           onNavigate={setSelectedDate}
+          toolbar={false}
           defaultView={Views.DAY}
           views={[Views.DAY]}
-          toolbar
           resources={resources}
           resourceIdAccessor="id"
           resourceTitleAccessor="name"
@@ -201,33 +202,82 @@ export function ResourceCalendar() {
           resizable={false}
           style={{ height: 640 }}
         />
+        {resources.length === 0 && (
+          <p>No hay barberos activos {professionalFilter === 'all' ? '' : 'con ese filtro'} para mostrar.</p>
+        )}
       </div>
 
-      {resources.length === 0 && (
-        <p>No hay barberos activos {professionalFilter === 'all' ? '' : 'con ese filtro'} para mostrar.</p>
-      )}
+      {/* Mobile: week-ahead list. Citas and free-time gaps are kept in separate tabs
+          instead of interleaved — mixing them got visually noisy with several
+          barbers' gaps landing on the same day. */}
+      <div className="md:hidden">
+        <div className="border-line mb-4 inline-flex rounded-full border bg-white p-1">
+          <button
+            type="button"
+            onClick={() => setMobileMode('citas')}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mobileMode === 'citas' ? 'bg-secondary text-white' : 'text-muted'
+            }`}
+          >
+            Citas
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileMode('disponibilidad')}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mobileMode === 'disponibilidad' ? 'bg-secondary text-white' : 'text-muted'
+            }`}
+          >
+            Disponibilidad
+          </button>
+        </div>
+
+        <AgendaListView
+          tenantSlug={tenant.slug}
+          professionals={tenant.professionals}
+          services={tenant.services}
+          professionalFilter={professionalFilter}
+          onSelectEvent={setSelectedEvent}
+          mode={mobileMode}
+          startDate={selectedDate}
+        />
+      </div>
 
       {selectedEvent && (
-        <div className="event-popover-backdrop" onClick={() => setSelectedEvent(null)}>
-          <div className="event-popover" onClick={(e) => e.stopPropagation()}>
-            <h3>{selectedEvent.appointment.customer_name}</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/35"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div className="w-80 rounded-[10px] bg-white p-6" onClick={(e) => e.stopPropagation()}>
+            <h3>
+              {selectedEvent.appointment.customer_name} {selectedEvent.appointment.customer_last_name}
+            </h3>
             <p>{selectedEvent.title}</p>
             <p>
               {selectedEvent.appointment.date} · {selectedEvent.appointment.time}
             </p>
             <p>Tel: {selectedEvent.appointment.customer_phone}</p>
-            <p>Estado actual: {STATUS_LABELS[selectedEvent.status]}</p>
-            <div className="event-popover-actions">
-              <button type="button" onClick={() => handleStatusChange('confirmed')}>
-                Confirmar
-              </button>
-              <button type="button" onClick={() => handleStatusChange('completed')}>
+            <p>Estado actual: {STATUS_LABELS[selectedEvent.status] ?? 'En pie'}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
+                onClick={() => handleStatusChange('completed')}
+              >
                 Completada
               </button>
-              <button type="button" onClick={() => handleStatusChange('no_show')}>
+              <button
+                type="button"
+                className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
+                onClick={() => handleStatusChange('no_show')}
+              >
                 Inasistencia
               </button>
-              <button type="button" className="link-button" onClick={() => setSelectedEvent(null)}>
+              <button
+                type="button"
+                className="border-0 bg-transparent p-0 text-secondary"
+                onClick={() => setSelectedEvent(null)}
+              >
                 Cerrar
               </button>
             </div>

@@ -29,7 +29,6 @@
       "name": "Corte Clásico",
       "duration_minutes": 30,
       "price": 150,
-      "requires_tattoo_details": false,
       "color": "#4c6ef5"
     },
     {
@@ -37,7 +36,6 @@
       "name": "Corte + Barba",
       "duration_minutes": 45,
       "price": 220,
-      "requires_tattoo_details": false,
       "color": "#c9a24b"
     },
     {
@@ -45,7 +43,6 @@
       "name": "Afeitado Tradicional",
       "duration_minutes": 30,
       "price": 180,
-      "requires_tattoo_details": false,
       "color": "#12b886"
     }
   ],

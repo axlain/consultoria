@@ -6,13 +6,11 @@ const EMPTY_FORM = {
   name: '',
   duration_minutes: 30,
   price: 0,
-  requires_tattoo_details: false,
   color: '#4c6ef5',
 }
 
 export function ServiceCatalog() {
   const { tenant, refreshTenant } = useTenant()
-  const showTattooDetails = tenant.business.type === 'tattoo'
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState(null)
@@ -30,7 +28,6 @@ export function ServiceCatalog() {
       name: service.name,
       duration_minutes: service.duration_minutes,
       price: service.price,
-      requires_tattoo_details: service.requires_tattoo_details,
       color: service.color,
     })
     setError(null)
@@ -73,43 +70,93 @@ export function ServiceCatalog() {
 
   return (
     <div>
-      <div className="admin-page-header">
+      <div className="mb-6 flex items-center justify-between">
         <h1>Catálogo de servicios</h1>
         {editingId === null && (
-          <button type="button" onClick={startCreate}>
+          <button
+            type="button"
+            className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
+            onClick={startCreate}
+          >
             + Nuevo servicio
           </button>
         )}
       </div>
 
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className="text-[#c0392b]">{error}</p>}
 
-      <table className="crud-table">
+      {/* Mobile: one card per service instead of a table that would overflow. */}
+      <div className="mb-6 flex flex-col gap-3 md:hidden">
+        {tenant.services.map((service) => (
+          <div key={service.id} className="rounded-xl border border-[#e5e5e5] bg-white p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: service.color }}
+              />
+              <span className="font-semibold">{service.name}</span>
+            </div>
+            <dl className="mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[0.9rem]">
+              <dt className="text-[#888]">Duración</dt>
+              <dd className="m-0">{service.duration_minutes} min</dd>
+              <dt className="text-[#888]">Precio</dt>
+              <dd className="m-0">${service.price}</dd>
+            </dl>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-md border border-[#ccc] bg-white px-3 py-[0.5rem] text-[0.85rem]"
+                onClick={() => startEdit(service)}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-md border border-[#ccc] bg-white px-3 py-[0.5rem] text-[0.85rem]"
+                onClick={() => handleDelete(service.id)}
+              >
+                Borrar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table. */}
+      <table className="mb-6 hidden w-full border-collapse bg-white md:table">
         <thead>
           <tr>
-            <th>Color</th>
-            <th>Nombre</th>
-            <th>Duración</th>
-            <th>Precio</th>
-            {showTattooDetails && <th>Requiere detalles de tatuaje</th>}
-            <th>Acciones</th>
+            <th className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-left text-[0.9rem]">Color</th>
+            <th className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-left text-[0.9rem]">Nombre</th>
+            <th className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-left text-[0.9rem]">Duración</th>
+            <th className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-left text-[0.9rem]">Precio</th>
+            <th className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-left text-[0.9rem]">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {tenant.services.map((service) => (
             <tr key={service.id}>
-              <td>
-                <span className="color-swatch" style={{ backgroundColor: service.color }} />
+              <td className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-[0.9rem]">
+                <span className="inline-block h-[18px] w-[18px] rounded" style={{ backgroundColor: service.color }} />
               </td>
-              <td>{service.name}</td>
-              <td>{service.duration_minutes} min</td>
-              <td>${service.price}</td>
-              {showTattooDetails && <td>{service.requires_tattoo_details ? 'Sí' : 'No'}</td>}
-              <td>
-                <button type="button" onClick={() => startEdit(service)}>
+              <td className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-[0.9rem]">{service.name}</td>
+              <td className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-[0.9rem]">
+                {service.duration_minutes} min
+              </td>
+              <td className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-[0.9rem]">${service.price}</td>
+              <td className="border-b border-[#e5e5e5] px-3 py-[0.6rem] text-[0.9rem]">
+                <button
+                  type="button"
+                  className="mr-2 rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
+                  onClick={() => startEdit(service)}
+                >
                   Editar
                 </button>
-                <button type="button" onClick={() => handleDelete(service.id)}>
+                <button
+                  type="button"
+                  className="mr-2 rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
+                  onClick={() => handleDelete(service.id)}
+                >
                   Borrar
                 </button>
               </td>
@@ -119,57 +166,64 @@ export function ServiceCatalog() {
       </table>
 
       {editingId !== null && (
-        <form className="crud-form" onSubmit={handleSubmit}>
+        <form className="max-w-[480px] rounded-[10px] border border-[#e5e5e5] bg-white p-6" onSubmit={handleSubmit}>
           <h2>{editingId === '__new__' ? 'Nuevo servicio' : 'Editar servicio'}</h2>
-          <label>
+          <label className="mb-4 flex flex-col gap-1 text-[0.9rem]">
             Nombre
             <input
               type="text"
               required
+              className="rounded-md border border-[#ccc] p-[0.6rem] text-base"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
           </label>
-          <label>
+          <label className="mb-4 flex flex-col gap-1 text-[0.9rem]">
             Duración (min)
             <input
               type="number"
               min="5"
               required
+              className="rounded-md border border-[#ccc] p-[0.6rem] text-base"
               value={form.duration_minutes}
               onChange={(e) => setForm({ ...form, duration_minutes: Number(e.target.value) })}
             />
           </label>
-          <label>
+          <label className="mb-4 flex flex-col gap-1 text-[0.9rem]">
             Precio
             <input
               type="number"
               min="0"
               required
+              className="rounded-md border border-[#ccc] p-[0.6rem] text-base"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
             />
           </label>
-          {showTattooDetails && (
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={form.requires_tattoo_details}
-                onChange={(e) => setForm({ ...form, requires_tattoo_details: e.target.checked })}
-              />
-              Requiere detalles de tatuaje
-            </label>
-          )}
-          <label>
+          <label className="mb-4 flex flex-col gap-1 text-[0.9rem]">
             Color
-            <input type="color" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
+            <input
+              type="color"
+              className="h-10 w-16 rounded-md border border-[#ccc] p-[0.2rem]"
+              value={form.color}
+              onChange={(e) => setForm({ ...form, color: e.target.value })}
+            />
           </label>
 
-          <div className="wizard-actions">
-            <button type="button" className="link-button" onClick={cancelEdit} disabled={saving}>
+          <div className="mt-6 flex justify-between">
+            <button
+              type="button"
+              className="border-0 bg-transparent p-0 text-secondary disabled:opacity-50"
+              onClick={cancelEdit}
+              disabled={saving}
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={saving}>
+            <button
+              type="submit"
+              className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem] disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={saving}
+            >
               {saving ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

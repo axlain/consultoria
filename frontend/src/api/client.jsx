@@ -1,10 +1,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  })
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+      ...options,
+    })
+  } catch {
+    // Network-level failure (server down, no connection, CORS) — fetch() throws a raw,
+    // browser-specific TypeError here that isn't fit to show a user.
+    throw new Error('No se pudo conectar con el servidor. Verifica tu conexión e intenta de nuevo.')
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
@@ -20,10 +27,21 @@ async function request(path, options = {}) {
 export const api = {
   getTenant: (slug) => request(`/api/tenants/${slug}`),
 
-  getAvailability: (slug, professionalId, date) =>
-    request(
-      `/api/tenants/${slug}/availability?professional_id=${encodeURIComponent(professionalId)}&date=${encodeURIComponent(date)}`,
-    ),
+  // Full grid of the day's slots (never hides a taken one — tags it `available: false`
+  // so the UI can show it disabled instead). Pass serviceId for the wizard's datetime
+  // step (aggregates every professional offering that service) or professionalId for a
+  // single barber's day (public availability calendar); omit both for "everyone".
+  getAvailability: (slug, { date, serviceId, professionalId } = {}) => {
+    const params = new URLSearchParams({ date })
+    if (serviceId) params.set('service_id', serviceId)
+    if (professionalId) params.set('professional_id', professionalId)
+    return request(`/api/tenants/${slug}/availability?${params}`)
+  },
+
+  getAvailableProfessionals: (slug, { serviceId, date, time }) => {
+    const params = new URLSearchParams({ service_id: serviceId, date, time })
+    return request(`/api/tenants/${slug}/available-professionals?${params}`)
+  },
 
   createAppointment: (slug, booking) =>
     request(`/api/tenants/${slug}/appointments`, {
@@ -40,6 +58,10 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
+
+  // Front-desk QR check-in: resolves the scanned id to display-ready appointment details.
+  validateAppointment: (slug, appointmentId) =>
+    request(`/api/tenants/${slug}/admin/appointments/validate/${encodeURIComponent(appointmentId)}`),
 
   createService: (slug, service) =>
     request(`/api/tenants/${slug}/admin/services`, {

@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom'
 
-// Dev convenience entry point listing the seeded demo tenants.
+// Dev convenience entry point for the seeded demo tenant.
 export function Home() {
   return (
-    <div className="page">
-      <h1>Demos disponibles</h1>
-      <ul>
-        <li>
-          <Link to="/demo/barberia">Barbería El Corte</Link>
-        </li>
-        <li>
-          <Link to="/demo/tattoo">Ink Studio</Link>
-        </li>
-      </ul>
+    <div className="mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-6 py-8 text-center">
+      <p className="text-muted mb-1 text-xs font-semibold tracking-[0.12em] uppercase">Demo disponible</p>
+      <h1 className="mb-6 text-3xl">Barbería El Corte</h1>
+      <Link
+        to="/demo/barberia"
+        className="border-line flex items-center justify-between rounded-xl border bg-white px-5 py-4 text-left text-base font-medium text-inherit no-underline shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
+      >
+        Ver sitio
+        <span className="text-muted text-sm font-normal">→</span>
+      </Link>
     </div>
   )
 }

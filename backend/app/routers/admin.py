@@ -1,9 +1,12 @@
+from datetime import date as date_cls
+
 from fastapi import APIRouter, HTTPException
 
 from app.data import store
 from app.models.schemas import (
     Appointment,
     AppointmentUpdate,
+    AppointmentValidation,
     Professional,
     ProfessionalInput,
     ProfessionalUpdate,
@@ -62,6 +65,42 @@ def update_appointment(slug: str, appointment_id: str, update: AppointmentUpdate
         appointment.status = update.status
 
     return appointment
+
+
+@router.get("/appointments/validate/{appointment_id}", response_model=AppointmentValidation)
+def validate_appointment(slug: str, appointment_id: str) -> AppointmentValidation:
+    """Front-desk QR check-in: the QR only encodes the appointment id, so this looks
+    it up, confirms it's for today and not already resolved, and returns display-ready
+    details (service/professional names) for the scanner modal."""
+    tenant = _get_tenant_or_404(slug)
+    appointment = next(
+        (apt for apt in store.get_appointments(slug) if apt.id == appointment_id), None
+    )
+    if appointment is None:
+        raise HTTPException(status_code=404, detail="Código QR inválido: la cita no existe.")
+
+    if appointment.date != date_cls.today().isoformat():
+        raise HTTPException(status_code=410, detail="Este código QR es de otro día.")
+
+    if appointment.status in ("completed", "no_show"):
+        raise HTTPException(status_code=410, detail="Este código QR ya fue utilizado.")
+
+    service = next((s for s in tenant.services if s.id == appointment.service_id), None)
+    professional = next(
+        (p for p in tenant.professionals if p.id == appointment.professional_id), None
+    )
+
+    return AppointmentValidation(
+        id=appointment.id,
+        customer_name=appointment.customer_name,
+        customer_last_name=appointment.customer_last_name,
+        customer_phone=appointment.customer_phone,
+        service_name=service.name if service else appointment.service_id,
+        professional_name=professional.name if professional else appointment.professional_id,
+        date=appointment.date,
+        time=appointment.time,
+        status=appointment.status,
+    )
 
 
 # ---- Service catalog CRUD --------------------------------------------------
