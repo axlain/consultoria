@@ -92,4 +92,29 @@ export const api = {
 
   deleteProfessional: (slug, professionalId) =>
     request(`/api/tenants/${slug}/admin/professionals/${professionalId}`, { method: 'DELETE' }),
+
+  createPayment: ({ appointmentId, businessId, amountCents, currency = 'MXN' }) =>
+    request('/api/payments/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        appointment_id: appointmentId,
+        business_id: businessId,
+        amount_cents: amountCents,
+        currency,
+      }),
+    }),
+
+  confirmPayment: (paymentId) =>
+    request('/api/payments/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ payment_id: paymentId }),
+    }),
+
+  refundPayment: (paymentId) =>
+    request('/api/payments/refund', {
+      method: 'POST',
+      body: JSON.stringify({ payment_id: paymentId }),
+    }),
+
+  getPayment: (paymentId) => request(`/api/payments/${paymentId}`),
 }

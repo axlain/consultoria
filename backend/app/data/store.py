@@ -1,9 +1,13 @@
 import json
 import re
+import uuid
+from datetime import datetime, timezone
 
 from app.core.config import TENANTS_DIR
 from app.models.schemas import (
     Appointment,
+    Payment,
+    PaymentEvent,
     Professional,
     ProfessionalInput,
     ProfessionalUpdate,
@@ -16,6 +20,9 @@ from app.models.schemas import (
 _tenants: dict[str, TenantConfig] = {}
 _appointments: dict[str, list[Appointment]] = {}
 _next_appointment_id = 1
+
+_payments: dict[str, Payment] = {}
+_payment_events: list[PaymentEvent] = []
 
 
 def load_tenants() -> None:
@@ -109,3 +116,56 @@ def delete_professional(tenant: TenantConfig, professional_id: str) -> bool:
     before = len(tenant.professionals)
     tenant.professionals[:] = [p for p in tenant.professionals if p.id != professional_id]
     return len(tenant.professionals) < before
+
+
+# ---- Payments (Fase 1 — mock) -------------------------------------------
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def create_payment(
+    appointment_id: str,
+    business_id: str,
+    amount_cents: int,
+    currency: str,
+) -> Payment:
+    payment = Payment(
+        id=str(uuid.uuid4()),
+        appointment_id=appointment_id,
+        business_id=business_id,
+        amount_cents=amount_cents,
+        currency=currency,
+        status="pending",
+        provider="mock",
+        created_at=_now_iso(),
+        updated_at=_now_iso(),
+    )
+    _payments[payment.id] = payment
+    return payment
+
+
+def get_payment(payment_id: str) -> Payment | None:
+    return _payments.get(payment_id)
+
+
+def update_payment_status(payment_id: str, status: str) -> None:
+    payment = _payments.get(payment_id)
+    if payment:
+        _payments[payment_id] = payment.model_copy(update={"status": status, "updated_at": _now_iso()})
+
+
+def add_payment_event(payment_id: str, event_type: str, metadata: dict | None = None) -> PaymentEvent:
+    event = PaymentEvent(
+        id=str(uuid.uuid4()),
+        payment_id=payment_id,
+        event_type=event_type,
+        metadata=metadata,
+        created_at=_now_iso(),
+    )
+    _payment_events.append(event)
+    return event
+
+
+def get_payment_events(payment_id: str) -> list[PaymentEvent]:
+    return [e for e in _payment_events if e.payment_id == payment_id]

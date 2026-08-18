@@ -11,7 +11,7 @@ import { ClientShell } from '../../components/ClientShell'
 export function ThankYou() {
   const { tenant } = useTenant()
   const location = useLocation()
-  const { appointment } = location.state || {}
+  const { appointment, payment } = location.state || {}
   const [qrDataUrl, setQrDataUrl] = useState(null)
 
   useEffect(() => {
@@ -54,6 +54,12 @@ export function ThankYou() {
         </svg>
         <h1>¡Listo! Tu cita está confirmada</h1>
         <p className="text-muted mt-2">Te esperamos en {tenant.business.name}.</p>
+
+        {payment && (
+          <div className={`mt-4 rounded-lg px-4 py-2 text-sm font-medium ${payment.status === 'paid' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+            {payment.status === 'paid' ? '✓ Pago confirmado' : `Pago pendiente (${payment.status})`}
+          </div>
+        )}
 
         {qrDataUrl && (
           <div className="border-line mx-auto mt-7 flex w-fit flex-col items-center gap-3 rounded-2xl border bg-white p-5">

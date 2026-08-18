@@ -7,13 +7,14 @@ import { StepService } from './StepService'
 import { StepProfessional } from './StepProfessional'
 import { StepDateTime } from './StepDateTime'
 import { StepConfirm } from './StepConfirm'
+import { StepCheckout } from './StepCheckout'
+import { StepPaymentError } from './StepPaymentError'
 
-const STEPS = ['service', 'datetime', 'professional', 'confirm']
+const STEPS = ['service', 'datetime', 'professional', 'confirm', 'checkout']
 
-// RF03: orchestrates the 4-step booking wizard; no account creation required.
-// Order is service → datetime → professional so the "cualquier profesional" option
-// can be resolved (by the backend, at confirm time) against whoever's free at the
-// slot the client already picked, instead of asking them to pick a person first.
+// RF03 + RF-Pagos: 5-step wizard — service → datetime → professional → confirm → checkout.
+// Confirm creates the appointment; checkout creates + confirms the mock payment, then
+// navigates to /gracias with both appointment and payment in router state.
 export function BookingWizard() {
   const { tenant } = useTenant()
   const navigate = useNavigate()
@@ -27,18 +28,21 @@ export function BookingWizard() {
     customerLastName: '',
     customerPhone: '',
   })
+  const [appointment, setAppointment] = useState(null)
   const [submitError, setSubmitError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [paymentFailed, setPaymentFailed] = useState(false)
 
   const goNext = () => setStepIndex((i) => Math.min(i + 1, STEPS.length - 1))
   const goBack = () => setStepIndex((i) => Math.max(i - 1, 0))
   const updateBooking = (patch) => setBooking((prev) => ({ ...prev, ...patch }))
 
+  // Step 4 — create the appointment, then advance to checkout.
   async function handleConfirm() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const appointment = await api.createAppointment(tenant.slug, {
+      const apt = await api.createAppointment(tenant.slug, {
         service_id: booking.service.id,
         professional_id: booking.professional.id,
         date: booking.date,
@@ -47,7 +51,8 @@ export function BookingWizard() {
         customer_last_name: booking.customerLastName,
         customer_phone: booking.customerPhone,
       })
-      navigate(`/demo/${tenant.slug}/gracias`, { state: { appointment } })
+      setAppointment(apt)
+      goNext()
     } catch (err) {
       setSubmitError(err.message)
     } finally {
@@ -55,8 +60,47 @@ export function BookingWizard() {
     }
   }
 
+  // Step 5 — create + confirm mock payment, then navigate to /gracias.
+  async function handlePaid(amountCents) {
+    const { payment_id } = await api.createPayment({
+      appointmentId: appointment.id,
+      businessId: tenant.slug,
+      amountCents,
+      currency: 'MXN',
+    })
+    const confirmed = await api.confirmPayment(payment_id)
+    if (confirmed.status !== 'paid') {
+      setPaymentFailed(true)
+      throw new Error('El pago no pudo completarse.')
+    }
+    navigate(`/demo/${tenant.slug}/gracias`, {
+      state: { appointment, payment: confirmed },
+    })
+  }
+
+  function handlePaymentError(reason) {
+    if (reason === 'canceled') {
+      // Appointment already exists — skip payment, go to thank-you anyway.
+      navigate(`/demo/${tenant.slug}/gracias`, { state: { appointment, payment: null } })
+    } else {
+      setPaymentFailed(true)
+    }
+  }
+
   const step = STEPS[stepIndex]
   const accent = booking.service?.color || 'var(--color-secondary)'
+
+  // Payment error screen replaces the checkout step.
+  if (paymentFailed) {
+    return (
+      <ClientShell>
+        <StepPaymentError
+          onRetry={() => setPaymentFailed(false)}
+          onCancel={() => navigate(`/demo/${tenant.slug}/gracias`, { state: { appointment, payment: null } })}
+        />
+      </ClientShell>
+    )
+  }
 
   return (
     <ClientShell>
@@ -120,6 +164,15 @@ export function BookingWizard() {
             onConfirm={handleConfirm}
             submitting={submitting}
             error={submitError}
+          />
+        )}
+
+        {step === 'checkout' && appointment && (
+          <StepCheckout
+            booking={booking}
+            appointment={appointment}
+            onPaid={handlePaid}
+            onError={handlePaymentError}
           />
         )}
       </div>

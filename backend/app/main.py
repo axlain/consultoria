@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS
 from app.data.store import load_tenants
-from app.routers import admin, booking, tenants
+from app.routers import admin, booking, payments, tenants
 
 
 @asynccontextmanager
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(tenants.router)
 app.include_router(booking.router)
 app.include_router(admin.router)
+app.include_router(payments.router)
 
 
 @app.get("/api/health")

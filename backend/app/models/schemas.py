@@ -190,3 +190,50 @@ class AppointmentValidation(BaseModel):
     date: str
     time: str
     status: AppointmentStatus
+
+
+# ---- Payments (Fase 1 — mock provider) ------------------------------------
+
+PaymentStatus = Literal["pending", "authorized", "paid", "failed", "refunded", "canceled"]
+
+
+class Payment(BaseModel):
+    id: str
+    appointment_id: str
+    business_id: str
+    amount_cents: int
+    currency: str = "MXN"
+    status: PaymentStatus = "pending"
+    provider: str = "mock"
+    provider_reference: Optional[str] = None
+    created_at: str
+    updated_at: str
+
+
+class PaymentEvent(BaseModel):
+    id: str
+    payment_id: str
+    event_type: str  # created | authorized | captured | failed | refunded
+    metadata: Optional[dict] = None
+    created_at: str
+
+
+class CreatePaymentRequest(BaseModel):
+    appointment_id: str
+    business_id: str
+    amount_cents: int
+    currency: str = "MXN"
+
+
+class ConfirmPaymentRequest(BaseModel):
+    payment_id: str
+
+
+class RefundPaymentRequest(BaseModel):
+    payment_id: str
+
+
+class PaymentResponse(BaseModel):
+    payment_id: str
+    status: PaymentStatus
+    provider_reference: Optional[str] = None
