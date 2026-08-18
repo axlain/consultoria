@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { roleHome } from '../../components/ProtectedRoute'
+import { AuthShell } from '../../components/AuthShell'
 
 const DEMO_USERS = [
   { email: 'admin@barberia.com', password: 'admin123', role: 'Admin' },
@@ -24,6 +25,7 @@ export function Login() {
 
   if (user) return <Navigate to={from ?? roleHome(user.role)} replace />
 
+  // eslint-disable-next-line no-unused-vars
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -50,8 +52,8 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-md">
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <AuthShell>
         <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Iniciar sesión</h1>
 
         {/* Social login */}
@@ -138,7 +140,7 @@ export function Login() {
             ))}
           </div>
         </details>
-      </div>
+      </AuthShell>
     </div>
   )
 }

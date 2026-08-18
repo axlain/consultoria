@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { roleHome } from '../../components/ProtectedRoute'
+import { AuthShell } from '../../components/AuthShell'
 
 export function Register() {
   const { register, user } = useAuth()
@@ -31,8 +32,8 @@ export function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-md">
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <AuthShell>
         <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Crear cuenta</h1>
 
         {error && (
@@ -94,7 +95,7 @@ export function Register() {
             Inicia sesión
           </Link>
         </p>
-      </div>
+      </AuthShell>
     </div>
   )
 }
