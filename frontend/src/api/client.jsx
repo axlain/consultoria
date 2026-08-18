@@ -1,10 +1,21 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
 
+function _authHeader() {
+  try {
+    const raw = localStorage.getItem('auth_session')
+    if (raw) {
+      const { token } = JSON.parse(raw)
+      if (token) return { Authorization: `Bearer ${token}` }
+    }
+  } catch { /* ignore */ }
+  return {}
+}
+
 async function request(path, options = {}) {
   let response
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers: { 'Content-Type': 'application/json', ..._authHeader(), ...options.headers },
       ...options,
     })
   } catch {

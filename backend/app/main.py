@@ -4,13 +4,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS
-from app.data.store import load_tenants
-from app.routers import admin, booking, payments, tenants
+from app.data.store import load_tenants, seed_users
+from app.routers import admin, admin_transactions, admin_users, auth, booking, payments, tenants
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_tenants()
+    seed_users()
     yield
 
 
@@ -24,10 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(tenants.router)
 app.include_router(booking.router)
 app.include_router(admin.router)
 app.include_router(payments.router)
+app.include_router(admin_transactions.router)
+app.include_router(admin_users.router)
 
 
 @app.get("/api/health")

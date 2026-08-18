@@ -3,6 +3,70 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+# ---- Auth / Roles ---------------------------------------------------------
+
+UserRole = Literal["client", "employee", "host", "admin"]
+
+
+class UserProfile(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: UserRole
+    business_id: str
+    is_active: bool = True
+    created_at: str
+
+
+class UserBusinessRole(BaseModel):
+    id: str
+    user_id: str
+    business_id: str
+    role: UserRole
+    assigned_by: Optional[str] = None
+    created_at: str
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+    business_id: str = "barberia"
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: "UserPublic"
+
+
+class UserPublic(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: UserRole
+    business_id: str
+
+
+class InviteUserRequest(BaseModel):
+    email: str
+    name: str
+    role: UserRole
+    business_id: str
+
+
+class UpdateUserRoleRequest(BaseModel):
+    role: UserRole
+
+
+class DeactivateUserRequest(BaseModel):
+    user_id: str
+
 # Letters (incl. accented/ñ) and spaces only — used for customer name fields.
 _NAME_RE = re.compile(r"^[A-Za-zÀ-ÿ\s]+$")
 

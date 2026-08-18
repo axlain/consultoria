@@ -15,6 +15,7 @@ from app.models.schemas import (
     ServiceInput,
     ServiceUpdate,
     TenantConfig,
+    UserProfile,
 )
 
 _tenants: dict[str, TenantConfig] = {}
@@ -23,6 +24,11 @@ _next_appointment_id = 1
 
 _payments: dict[str, Payment] = {}
 _payment_events: list[PaymentEvent] = []
+
+# Keyed by email for fast lookup on login.
+_users: dict[str, UserProfile] = {}
+# Keyed by user_id for hash storage.
+_password_hashes: dict[str, str] = {}
 
 
 def load_tenants() -> None:
@@ -169,3 +175,85 @@ def add_payment_event(payment_id: str, event_type: str, metadata: dict | None = 
 
 def get_payment_events(payment_id: str) -> list[PaymentEvent]:
     return [e for e in _payment_events if e.payment_id == payment_id]
+
+
+def list_payments(business_id: str) -> list[Payment]:
+    return [p for p in _payments.values() if p.business_id == business_id]
+
+
+# ---- Users (mock auth store) --------------------------------------------
+
+def seed_users() -> None:
+    """Pre-load demo users so the app is usable without a real DB."""
+    from app.auth.pwd import hash_password
+
+    demo = [
+        ("admin@barberia.com", "admin123", "Admin Barbería", "admin"),
+        ("host@barberia.com", "host123", "Host Barbería", "host"),
+        ("empleado@barberia.com", "empleado123", "Juan Empleado", "employee"),
+        ("cliente@barberia.com", "cliente123", "Ana Cliente", "client"),
+    ]
+    for email, password, name, role in demo:
+        if email not in _users:
+            uid = str(uuid.uuid4())
+            _users[email] = UserProfile(
+                id=uid,
+                email=email,
+                name=name,
+                role=role,
+                business_id="barberia",
+                created_at=_now_iso(),
+            )
+            _password_hashes[uid] = hash_password(password)
+
+
+def get_user_by_email(email: str) -> UserProfile | None:
+    return _users.get(email)
+
+
+def get_user_by_id(user_id: str) -> UserProfile | None:
+    for u in _users.values():
+        if u.id == user_id:
+            return u
+    return None
+
+
+def create_user(email: str, name: str, role: str, business_id: str, hashed_password: str) -> UserProfile:
+    uid = str(uuid.uuid4())
+    user = UserProfile(
+        id=uid,
+        email=email,
+        name=name,
+        role=role,
+        business_id=business_id,
+        created_at=_now_iso(),
+    )
+    _users[email] = user
+    _password_hashes[uid] = hashed_password
+    return user
+
+
+def get_password_hash(user_id: str) -> str | None:
+    return _password_hashes.get(user_id)
+
+
+def list_users(business_id: str) -> list[UserProfile]:
+    return [u for u in _users.values() if u.business_id == business_id]
+
+
+def update_user_role(user_id: str, role: str) -> UserProfile | None:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+    updated = user.model_copy(update={"role": role})
+    _users[user.email] = updated
+    return updated
+
+
+def deactivate_user(user_id: str) -> UserProfile | None:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+    updated = user.model_copy(update={"is_active": False})
+    _users[user.email] = updated
+    return updated
