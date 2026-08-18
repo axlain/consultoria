@@ -5,6 +5,7 @@ import { TenantHome } from './pages/client/TenantHome'
 import { BookingWizard } from './pages/client/wizard/BookingWizard'
 import { ThankYou } from './pages/client/ThankYou'
 import { AvailabilityCalendar } from './pages/client/AvailabilityCalendar'
+import { CitaView } from './pages/client/CitaView'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { ResourceCalendar } from './pages/admin/ResourceCalendar'
 import { ServiceCatalog } from './pages/admin/ServiceCatalog'
@@ -83,6 +84,7 @@ function App() {
         <Route path="reservar" element={<BookingWizard />} />
         <Route path="disponibilidad" element={<AvailabilityCalendar />} />
         <Route path="gracias" element={<ThankYou />} />
+        <Route path="cita/:aptId" element={<CitaView />} />
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="agenda" replace />} />
           <Route path="agenda" element={<ResourceCalendar />} />

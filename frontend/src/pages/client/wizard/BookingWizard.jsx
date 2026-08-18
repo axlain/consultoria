@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTenant } from '../../../context/TenantContext'
+import { useAuth } from '../../../context/AuthContext'
 import { api } from '../../../api/client'
 import { ClientShell } from '../../../components/ClientShell'
+import { HamburgerMenu } from '../../../components/HamburgerMenu'
 import { StepService } from './StepService'
 import { StepProfessional } from './StepProfessional'
 import { StepDateTime } from './StepDateTime'
@@ -17,16 +19,27 @@ const STEPS = ['service', 'datetime', 'professional', 'confirm', 'checkout']
 // navigates to /gracias with both appointment and payment in router state.
 export function BookingWizard() {
   const { tenant } = useTenant()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
+
+  // Pre-fill name from auth session if the user is logged in as client.
+  function _prefillFromUser() {
+    if (!user) return { customerName: '', customerLastName: '' }
+    const parts = user.name.trim().split(/\s+/)
+    return {
+      customerName: parts[0] ?? '',
+      customerLastName: parts.slice(1).join(' ') ?? '',
+    }
+  }
+
   const [booking, setBooking] = useState({
     service: null,
     professional: null,
     date: '',
     time: '',
-    customerName: '',
-    customerLastName: '',
     customerPhone: '',
+    ..._prefillFromUser(),
   })
   const [appointment, setAppointment] = useState(null)
   const [submitError, setSubmitError] = useState(null)
@@ -104,6 +117,7 @@ export function BookingWizard() {
 
   return (
     <ClientShell>
+      <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
       <div className="mb-7">
         <div className="flex gap-1.5" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
           {STEPS.map((s, i) => (

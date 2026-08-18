@@ -72,6 +72,17 @@ export function HamburgerMenu({ faqs, slug }) {
               </ul>
             </nav>
 
+            <nav aria-label="Cuenta" className="mb-6">
+              <p className={SECTION_LABEL_CLASS}>Cuenta</p>
+              <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                <li>
+                  <Link to="/login" onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                    Iniciar sesión / Mi Panel
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
             <nav aria-label="Ayuda e información">
               <p className={SECTION_LABEL_CLASS}>Ayuda e información</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
