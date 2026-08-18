@@ -374,7 +374,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
           </div>
 
           <p className="text-muted mt-3 text-xs">
-            Entorno de prueba — ningún dato de tarjeta es procesado ni almacenado.
+            Simulado — ningún dato de tarjeta es procesado ni almacenado.
           </p>
         </fieldset>
       )}
@@ -386,7 +386,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
           {method === 'paypal'      && <PayPalButton        onClick={handleExternalPay} disabled={paying} />}
           {method === 'mercadopago' && <MercadoPagoButton   onClick={handleExternalPay} disabled={paying} />}
           <p className="text-muted mt-3 text-center text-xs">
-            Simulado — en Fase 2 se conectará al SDK real de {METHODS.find((m) => m.id === method)?.label}.
+            Simulado — entorno de prueba, no se realiza ningún cargo real.
           </p>
         </div>
       )}
