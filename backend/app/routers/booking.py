@@ -1,13 +1,13 @@
 import time as _time
-from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.auth import jwt_hs256
+from app.auth.dependencies import get_current_user
 from app.core.config import JWT_SECRET
 from app.core.rate_limit import enforce_booking_rate_limit
-from app.data import store
-from app.models.schemas import Appointment, BookingRequest, DayAvailability, Professional, TenantConfig
+from app.data import db, store
+from app.models.schemas import Appointment, BookingRequest, DayAvailability, Professional, TenantConfig, UserProfile
 from app.services.booking_service import (
     SlotUnavailableError,
     create_appointment,
@@ -15,7 +15,6 @@ from app.services.booking_service import (
     get_professionals_available_at,
 )
 
-# QR tokens expire 24 h after the appointment date (gives day-of slack).
 _QR_TTL_HOURS = 48
 
 router = APIRouter(prefix="/api/tenants/{slug}", tags=["booking"])
@@ -28,13 +27,16 @@ def _get_tenant_or_404(slug: str) -> TenantConfig:
     return tenant
 
 
+def _get_appointments_for_tenant(slug: str) -> list[Appointment]:
+    if db.IS_ENABLED:
+        return [Appointment(**row) for row in db.get_appointments(slug)]
+    return store.get_appointments(slug)
+
+
 @router.get("/availability", response_model=DayAvailability)
 def get_availability(
     slug: str, date: str, service_id: str | None = None, professional_id: str | None = None
 ) -> dict:
-    """Full grid of the day's slots, each tagged available/unavailable — used both by
-    the wizard's datetime step (service_id) and the public availability calendar
-    (professional_id or neither)."""
     tenant = _get_tenant_or_404(slug)
     return get_day_slots(tenant, date, service_id=service_id, professional_id=professional_id)
 
@@ -58,27 +60,46 @@ def book_appointment(slug: str, booking: BookingRequest) -> Appointment:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.get("/appointments/{apt_id}")
+@router.get("/appointments/{apt_id}", response_model=Appointment)
 def get_appointment(slug: str, apt_id: str) -> Appointment:
-    """Return a single appointment by ID (used by the cita-view page)."""
-    tenant = _get_tenant_or_404(slug)
-    for apt in store.get_appointments(slug):
-        if apt.id == apt_id:
-            return apt
+    _get_tenant_or_404(slug)
+    if db.IS_ENABLED:
+        row = db.get_appointment(slug, apt_id)
+        if row:
+            return Appointment(**row)
+    else:
+        for apt in store.get_appointments(slug):
+            if apt.id == apt_id:
+                return apt
     raise HTTPException(status_code=404, detail="Cita no encontrada")
+
+
+@router.get("/my-appointments", response_model=list[Appointment])
+def my_appointments(
+    slug: str,
+    current_user: UserProfile = Depends(get_current_user),
+) -> list[Appointment]:
+    """Return appointments linked to the authenticated user in this tenant."""
+    _get_tenant_or_404(slug)
+    if db.IS_ENABLED:
+        rows = db.get_user_appointments(current_user.id, slug)
+        return [Appointment(**r) for r in rows]
+    # Fallback: filter in-memory
+    return [
+        apt for apt in store.get_appointments(slug)
+        if apt.client_user_id == current_user.id
+    ]
 
 
 @router.get("/appointments/{apt_id}/qr")
 def appointment_qr(slug: str, apt_id: str, base_url: str = Query(default="http://localhost:5173")):
-    """
-    Generate a JWT-signed QR URL for the appointment.
-    Implements the same contract as @consultoria/qr generateAppointmentQr().
-    The token is signed with HMAC-SHA256 and expires in QR_TTL_HOURS hours.
-    """
     _get_tenant_or_404(slug)
-    # Verify the appointment exists.
-    appointments = store.get_appointments(slug)
-    if not any(a.id == apt_id for a in appointments):
+    found = False
+    if db.IS_ENABLED:
+        found = db.get_appointment(slug, apt_id) is not None
+    else:
+        found = any(a.id == apt_id for a in store.get_appointments(slug))
+    if not found:
         raise HTTPException(status_code=404, detail="Cita no encontrada")
 
     exp = int(_time.time()) + _QR_TTL_HOURS * 3600
@@ -89,10 +110,6 @@ def appointment_qr(slug: str, apt_id: str, base_url: str = Query(default="http:/
 
 @router.get("/appointments/{apt_id}/validate-qr")
 def validate_qr(slug: str, apt_id: str, t: str = Query(...)):
-    """
-    Validate a QR token and return appointment details.
-    Equivalent to @consultoria/qr validateQrToken() + DB lookup.
-    """
     try:
         payload = jwt_hs256.decode(t, JWT_SECRET)
     except jwt_hs256.TokenExpiredError:
@@ -104,14 +121,26 @@ def validate_qr(slug: str, apt_id: str, t: str = Query(...)):
         raise HTTPException(status_code=401, detail="QR no corresponde a esta cita")
 
     tenant = _get_tenant_or_404(slug)
-    for apt in store.get_appointments(slug):
-        if apt.id == apt_id:
-            service = next((s for s in tenant.services if s.id == apt.service_id), None)
-            professional = next((p for p in tenant.professionals if p.id == apt.professional_id), None)
-            return {
-                **apt.model_dump(),
-                "service_name": service.name if service else apt.service_id,
-                "professional_name": professional.name if professional else apt.professional_id,
-                "business_name": tenant.business.name,
-            }
-    raise HTTPException(status_code=404, detail="Cita no encontrada")
+
+    apt = None
+    if db.IS_ENABLED:
+        row = db.get_appointment(slug, apt_id)
+        if row:
+            apt = Appointment(**row)
+    else:
+        for a in store.get_appointments(slug):
+            if a.id == apt_id:
+                apt = a
+                break
+
+    if apt is None:
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
+
+    service = next((s for s in tenant.services if s.id == apt.service_id), None)
+    professional = next((p for p in tenant.professionals if p.id == apt.professional_id), None)
+    return {
+        **apt.model_dump(),
+        "service_name": service.name if service else apt.service_id,
+        "professional_name": professional.name if professional else apt.professional_id,
+        "business_name": tenant.business.name,
+    }

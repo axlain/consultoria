@@ -11,6 +11,7 @@
   "dependencies": {
     "@consultoria/payments": "file:../core-booking-engine/packages/payments",
     "@consultoria/qr": "file:../core-booking-engine/packages/qr",
+    "@supabase/supabase-js": "^2.112.3",
     "date-fns": "^4.4.0",
     "html5-qrcode": "^2.3.8",
     "qrcode": "^1.5.4",

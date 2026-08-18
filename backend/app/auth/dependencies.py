@@ -5,7 +5,6 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.auth import jwt_hs256
 from app.core.config import JWT_EXPIRE_MINUTES, JWT_SECRET
-from app.data import store
 from app.models.schemas import UserProfile, UserRole
 
 _bearer = HTTPBearer(auto_error=True)
@@ -15,6 +14,7 @@ def create_access_token(user: UserProfile) -> str:
     payload = {
         "sub": user.id,
         "email": user.email,
+        "name": user.name,
         "role": user.role,
         "business_id": user.business_id,
         "exp": int(time.time()) + JWT_EXPIRE_MINUTES * 60,
@@ -35,10 +35,16 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> UserProfile:
     payload = _decode_token(credentials.credentials)
-    user = store.get_user_by_id(payload["sub"])
-    if not user or not user.is_active:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
-    return user
+    # Trust the JWT claims — role and business_id are embedded at login time.
+    # This avoids a DB round-trip on every request. Tokens expire in 8 h.
+    return UserProfile(
+        id=payload["sub"],
+        email=payload.get("email", ""),
+        name=payload.get("name", ""),
+        role=payload["role"],
+        business_id=payload["business_id"],
+        created_at="",
+    )
 
 
 def require_role(*allowed: UserRole):

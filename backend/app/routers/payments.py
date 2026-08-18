@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app.data import store
+from app.data import db, store
 from app.models.schemas import (
     ConfirmPaymentRequest,
     CreatePaymentRequest,
@@ -64,6 +64,11 @@ async def webhook(request: Request) -> dict:
 
 @router.get("/{payment_id}", response_model=Payment)
 def get_payment(payment_id: str) -> Payment:
+    if db.IS_ENABLED:
+        row = db.get_payment(payment_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail=f"Pago '{payment_id}' no encontrado")
+        return Payment(**row)
     payment = store.get_payment(payment_id)
     if payment is None:
         raise HTTPException(status_code=404, detail=f"Pago '{payment_id}' no encontrado")

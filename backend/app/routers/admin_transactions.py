@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import require_role
-from app.data import store
+from app.data import db, store
 from app.models.schemas import Payment, UserProfile
 
 router = APIRouter(prefix="/api/admin/transactions", tags=["admin-transactions"])
@@ -23,6 +23,13 @@ def _parse_date(s: str | None) -> datetime | None:
         return None
 
 
+def _get_payments(business_id: str) -> list[Payment]:
+    if db.IS_ENABLED:
+        rows = db.get_payments_for_business(business_id)
+        return [Payment(**r) for r in rows]
+    return store.list_payments(business_id)
+
+
 @router.get("", response_model=list[Payment])
 def list_transactions(
     status: str | None = Query(None),
@@ -30,7 +37,7 @@ def list_transactions(
     date_to: str | None = Query(None),
     current_user: UserProfile = Depends(_admin_only),
 ):
-    payments = store.list_payments(current_user.business_id)
+    payments = _get_payments(current_user.business_id)
     if status:
         payments = [p for p in payments if p.status == status]
     df = _parse_date(date_from)
@@ -44,7 +51,7 @@ def list_transactions(
 
 @router.get("/summary")
 def transactions_summary(current_user: UserProfile = Depends(_admin_only)):
-    payments = store.list_payments(current_user.business_id)
+    payments = _get_payments(current_user.business_id)
     total_paid = sum(p.amount_cents for p in payments if p.status == "paid")
     total_refunded = sum(p.amount_cents for p in payments if p.status == "refunded")
     return {
@@ -60,12 +67,14 @@ def transactions_summary(current_user: UserProfile = Depends(_admin_only)):
 
 @router.get("/{payment_id}/events")
 def payment_events(payment_id: str, current_user: UserProfile = Depends(_admin_only)):
+    if db.IS_ENABLED:
+        return db.get_payment_events(payment_id)
     return store.get_payment_events(payment_id)
 
 
 @router.get("/export/csv")
 def export_csv(current_user: UserProfile = Depends(_admin_only)):
-    payments = store.list_payments(current_user.business_id)
+    payments = _get_payments(current_user.business_id)
     output = io.StringIO()
     writer = csv.DictWriter(
         output,

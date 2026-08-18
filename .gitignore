@@ -4,19 +4,32 @@
 # Python (backend)
 backend/venv/
 backend/.venv/
-__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .env
+.env.local
+.env.*.local
 
 # Node (frontend)
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 npm-debug.log*
+yarn-error.log
+*.local
 
 # Editor / OS
 .DS_Store
 Thumbs.db
+.vscode/settings.json
+*.swp
+*.swo
 
 # Markdown docs
 /CLAUDE.md

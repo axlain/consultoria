@@ -63,6 +63,7 @@ export function BookingWizard() {
         customer_name: booking.customerName,
         customer_last_name: booking.customerLastName,
         customer_phone: booking.customerPhone,
+        ...(user ? { client_user_id: user.id } : {}),
       })
       setAppointment(apt)
       goNext()

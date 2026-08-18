@@ -17,3 +17,7 @@ BOOKING_RATE_LIMIT_WINDOW_SECONDS = 60
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = 60 * 8  # 8 hours
+
+# Supabase — set these in .env to enable persistent storage.
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")

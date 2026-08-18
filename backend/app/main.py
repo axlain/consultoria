@@ -1,17 +1,24 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import CORS_ORIGINS
+from app.core.config import CORS_ORIGINS, SUPABASE_URL
 from app.data.store import load_tenants, seed_users
 from app.routers import admin, admin_transactions, admin_users, auth, booking, payments, tenants
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_tenants()
-    seed_users()
+    if SUPABASE_URL:
+        logger.info("Supabase habilitado — omitiendo seed de usuarios en memoria")
+    else:
+        logger.warning("SUPABASE_URL no configurado — usando store en memoria")
+        seed_users()
     yield
 
 

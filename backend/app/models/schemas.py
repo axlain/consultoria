@@ -209,6 +209,7 @@ class BookingRequest(BaseModel):
     customer_name: str
     customer_last_name: str
     customer_phone: str = Field(pattern=r"^\d{10}$")
+    client_user_id: Optional[str] = None  # logged-in user UUID, links appointment to account
 
     _validate_names = field_validator("customer_name", "customer_last_name")(_validate_name)
 
@@ -230,6 +231,7 @@ class Appointment(BaseModel):
     customer_last_name: str
     customer_phone: str
     status: AppointmentStatus = "scheduled"
+    client_user_id: Optional[str] = None
 
 
 class AppointmentUpdate(BaseModel):

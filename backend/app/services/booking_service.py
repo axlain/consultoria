@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from app.data import store
+from app.data import db, store
 from app.models.schemas import Appointment, BookingRequest, Schedule, TenantConfig
 
 _WEEKDAY_CODES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
@@ -21,6 +21,13 @@ def _generate_daily_slots(schedule: Schedule) -> list[str]:
     return slots
 
 
+def _get_appointments(tenant_slug: str) -> list:
+    """Return appointments as Appointment models, from DB or memory."""
+    if db.IS_ENABLED:
+        return [Appointment(**row) for row in db.get_appointments(tenant_slug)]
+    return store.get_appointments(tenant_slug)
+
+
 def get_available_slots(tenant: TenantConfig, professional_id: str, date_str: str) -> list[str]:
     professional = next((p for p in tenant.professionals if p.id == professional_id), None)
     if professional is None or not professional.active:
@@ -33,7 +40,7 @@ def get_available_slots(tenant: TenantConfig, professional_id: str, date_str: st
     all_slots = _generate_daily_slots(professional.schedule)
     booked = {
         apt.time
-        for apt in store.get_appointments(tenant.slug)
+        for apt in _get_appointments(tenant.slug)
         if apt.professional_id == professional_id
         and apt.date == date_str
         and apt.status != "no_show"
@@ -66,9 +73,9 @@ def get_day_slots(
     )
 
     times: dict[str, bool] = {}
-    for professional in professionals:
-        free = set(get_available_slots(tenant, professional.id, date_str))
-        for slot in _generate_daily_slots(professional.schedule):
+    for prof in professionals:
+        free = set(get_available_slots(tenant, prof.id, date_str))
+        for slot in _generate_daily_slots(prof.schedule):
             times[slot] = times.get(slot, False) or slot in free
 
     slots = [{"time": t, "available": a} for t, a in sorted(times.items())]
@@ -89,10 +96,11 @@ def get_professionals_available_at(
 def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
     """Load-balances the 'cualquier profesional' option: fewest active appointments
     that day wins; ties keep the input order (deterministic)."""
+    apts = _get_appointments(tenant.slug)
     counts = {
         professional.id: sum(
             1
-            for apt in store.get_appointments(tenant.slug)
+            for apt in apts
             if apt.professional_id == professional.id
             and apt.date == date_str
             and apt.status != "no_show"
@@ -115,7 +123,7 @@ def _is_slot_taken(
         and apt.time == time_str
         and apt.status != "no_show"
         and apt.id != exclude_appointment_id
-        for apt in store.get_appointments(tenant_slug)
+        for apt in _get_appointments(tenant_slug)
     )
 
 
@@ -144,8 +152,13 @@ def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appoint
         customer_name=booking.customer_name,
         customer_last_name=booking.customer_last_name,
         customer_phone=booking.customer_phone,
+        client_user_id=booking.client_user_id,
     )
-    store.add_appointment(tenant.slug, appointment)
+    if db.IS_ENABLED:
+        row = appointment.model_dump()
+        db.insert_appointment(row)
+    else:
+        store.add_appointment(tenant.slug, appointment)
     return appointment
 
 
