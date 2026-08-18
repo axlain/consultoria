@@ -4,6 +4,19 @@ const AuthContext = createContext(null)
 
 const STORAGE_KEY = 'auth_session'
 
+async function authFetch(path, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail ?? `Error ${res.status}`)
+  }
+  return res.json()
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
@@ -31,31 +44,13 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = useCallback(async (email, password) => {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? 'Error al iniciar sesión')
-    }
-    const data = await res.json()
+    const data = await authFetch('/api/auth/login', { email, password })
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])
 
   const register = useCallback(async (email, password, name, businessId = 'barberia') => {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, business_id: businessId }),
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.detail ?? 'Error al registrarse')
-    }
-    const data = await res.json()
+    const data = await authFetch('/api/auth/register', { email, password, name, business_id: businessId })
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])
