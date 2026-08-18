@@ -1,11 +1,10 @@
-from datetime import datetime, timedelta, timezone
-from typing import Literal
+import time
 
-import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.config import JWT_ALGORITHM, JWT_EXPIRE_MINUTES, JWT_SECRET
+from app.auth import jwt_hs256
+from app.core.config import JWT_EXPIRE_MINUTES, JWT_SECRET
 from app.data import store
 from app.models.schemas import UserProfile, UserRole
 
@@ -18,17 +17,17 @@ def create_access_token(user: UserProfile) -> str:
         "email": user.email,
         "role": user.role,
         "business_id": user.business_id,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=JWT_EXPIRE_MINUTES),
+        "exp": int(time.time()) + JWT_EXPIRE_MINUTES * 60,
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return jwt_hs256.encode(payload, JWT_SECRET)
 
 
 def _decode_token(token: str) -> dict:
     try:
-        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-    except jwt.ExpiredSignatureError:
+        return jwt_hs256.decode(token, JWT_SECRET)
+    except jwt_hs256.TokenExpiredError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado")
-    except jwt.InvalidTokenError:
+    except jwt_hs256.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
 
