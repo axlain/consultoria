@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@consultoria/payments": "file:../packages/core-booking-engine/packages/payments",
+    "@consultoria/qr": "file:../packages/core-booking-engine/packages/qr",
     "date-fns": "^4.4.0",
     "html5-qrcode": "^2.3.8",
     "qrcode": "^1.5.4",
