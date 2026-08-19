@@ -120,7 +120,7 @@ export function BookingWizard() {
     <ClientShell>
       <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
       <div className="mb-7">
-        <div className="flex gap-1.5" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
+        <div className="flex gap-1.5 pr-14" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
           {STEPS.map((s, i) => (
             <div key={s} className="bg-line h-1 flex-1 overflow-hidden rounded-full">
               <div

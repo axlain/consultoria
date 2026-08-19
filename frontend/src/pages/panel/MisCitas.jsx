@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { api } from '../../api/client'
+import { useTenant } from '../../context/TenantContext'
+import { ClientShell } from '../../components/ClientShell'
+import { HamburgerMenu } from '../../components/HamburgerMenu'
 
 const STATUS_LABEL = {
   scheduled: 'Confirmada',
@@ -16,28 +18,23 @@ const STATUS_COLOR = {
 
 export function MisCitas() {
   const { user, token } = useAuth()
+  const { tenant } = useTenant()
   const [citas, setCitas] = useState([])
-  const [tenant, setTenant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const slug = user?.business_id || 'barberia'
+  const slug = tenant?.slug || user?.business_id || 'barberia'
 
   useEffect(() => {
     if (!user) return
-    Promise.all([
-      fetch(`/api/tenants/${slug}/my-appointments`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(async res => {
+    fetch(`/api/tenants/${slug}/my-appointments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async res => {
         if (!res.ok) throw new Error(`Error ${res.status}`)
         return res.json()
-      }),
-      api.getTenant(slug),
-    ])
-      .then(([appointments, tenantConfig]) => {
-        setCitas(appointments)
-        setTenant(tenantConfig)
       })
+      .then(data => setCitas(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [user, token, slug])
@@ -52,14 +49,16 @@ export function MisCitas() {
   )
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <ClientShell>
+      <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} />
+
+      <div className="mb-6 flex items-center justify-between pr-14">
         <h1 className="text-2xl font-bold text-[#1c1c1e]">Mis citas</h1>
         <Link
-          to="/demo/barberia/reservar"
+          to={`/demo/${slug}/reservar`}
           className="rounded-lg bg-[#c9a24b] px-4 py-2 text-sm font-semibold text-white no-underline"
         >
-          + Agendar nueva
+          + Agendar
         </Link>
       </div>
 
@@ -100,6 +99,6 @@ export function MisCitas() {
           ))}
         </ul>
       )}
-    </div>
+    </ClientShell>
   )
 }

@@ -1,13 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
-const ROLE_LABEL = { client: 'Cliente', employee: 'Empleado', host: 'Host', admin: 'Admin' }
+const ROLE_LABEL = { employee: 'Empleado', host: 'Host', admin: 'Admin' }
 
 const ROLE_NAV = {
-  client: [
-    { to: '/panel/mis-citas', label: 'Mis citas' },
-    { to: '/panel/mis-rewards', label: 'Mis rewards' },
-  ],
   employee: [
     { to: '/panel/mi-agenda', label: 'Mi agenda' },
   ],

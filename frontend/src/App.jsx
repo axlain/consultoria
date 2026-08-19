@@ -14,6 +14,7 @@ import { NotFound } from './pages/NotFound'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { PanelLayout } from './pages/panel/PanelLayout'
+import { ClientPanelGate } from './pages/panel/ClientPanelGate'
 import { MisCitas } from './pages/panel/MisCitas'
 import { MisRewards } from './pages/panel/MisRewards'
 import { MiAgenda } from './pages/panel/MiAgenda'
@@ -48,14 +49,6 @@ function App() {
       >
         <Route index element={<RoleRedirect />} />
 
-        {/* client */}
-        <Route path="mis-citas" element={
-          <ProtectedRoute roles={['client', 'admin']}><MisCitas /></ProtectedRoute>
-        } />
-        <Route path="mis-rewards" element={
-          <ProtectedRoute roles={['client', 'admin']}><MisRewards /></ProtectedRoute>
-        } />
-
         {/* employee + host */}
         <Route path="mi-agenda" element={
           <ProtectedRoute roles={['employee', 'host', 'admin']}><MiAgenda /></ProtectedRoute>
@@ -77,6 +70,18 @@ function App() {
           <ProtectedRoute roles={['admin']}><Usuarios /></ProtectedRoute>
         } />
       </Route>
+
+      {/* Client panel — mobile-first ClientShell instead of the desktop panel sidebar */}
+      <Route path="/panel/mis-citas" element={
+        <ProtectedRoute roles={['client', 'admin']}>
+          <ClientPanelGate><MisCitas /></ClientPanelGate>
+        </ProtectedRoute>
+      } />
+      <Route path="/panel/mis-rewards" element={
+        <ProtectedRoute roles={['client', 'admin']}>
+          <ClientPanelGate><MisRewards /></ClientPanelGate>
+        </ProtectedRoute>
+      } />
 
       {/* Tenant-scoped public + legacy admin */}
       <Route path="/demo/:slug" element={<TenantGate />}>
