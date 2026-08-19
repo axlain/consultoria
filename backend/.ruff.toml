@@ -1,0 +1,16 @@
+target-version = "py310"
+line-length = 120
+
+[lint]
+# Base ruleset: pyflakes (bugs), pycodestyle errors, import sorting,
+# bugbear (common footguns). Kept intentionally narrow — broader categories
+# (pyupgrade, docstrings, complexity, exception style, etc.) are opinionated
+# and out of scope for a baseline; pyupgrade in particular would flag every
+# `Optional[...]` in schemas.py, which is this codebase's consistent style.
+select = ["E", "F", "I", "B"]
+
+ignore = [
+    # FastAPI's dependency-injection pattern relies on calling Depends()/
+    # Query() etc. as argument defaults — that's idiomatic here, not a bug.
+    "B008",
+]

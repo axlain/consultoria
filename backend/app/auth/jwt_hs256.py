@@ -42,14 +42,14 @@ def decode(token: str, secret: str) -> dict:
     expected = hmac.new(secret.encode(), msg, hashlib.sha256).digest()
     try:
         actual = _b64url_decode(sig)
-    except Exception:
-        raise InvalidTokenError("Bad signature encoding")
+    except Exception as exc:
+        raise InvalidTokenError("Bad signature encoding") from exc
     if not hmac.compare_digest(expected, actual):
         raise InvalidTokenError("Signature mismatch")
     try:
         payload = json.loads(_b64url_decode(body))
-    except Exception:
-        raise InvalidTokenError("Bad payload encoding")
+    except Exception as exc:
+        raise InvalidTokenError("Bad payload encoding") from exc
     if "exp" in payload and time.time() > payload["exp"]:
         raise TokenExpiredError("Token expired")
     return payload

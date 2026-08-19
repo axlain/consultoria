@@ -4,7 +4,6 @@ Supabase data access layer.
 IS_ENABLED = True when SUPABASE_URL + SUPABASE_SERVICE_KEY are set.
 When False, callers fall back to the in-memory store.
 """
-import uuid
 from datetime import datetime, timezone
 
 from app.core.config import SUPABASE_SERVICE_KEY, SUPABASE_URL

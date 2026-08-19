@@ -25,10 +25,10 @@ def create_access_token(user: UserProfile) -> str:
 def _decode_token(token: str) -> dict:
     try:
         return jwt_hs256.decode(token, JWT_SECRET)
-    except jwt_hs256.TokenExpiredError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado")
-    except jwt_hs256.InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+    except jwt_hs256.TokenExpiredError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado") from exc
+    except jwt_hs256.InvalidTokenError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido") from exc
 
 
 def get_current_user(

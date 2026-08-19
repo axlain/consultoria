@@ -1,10 +1,9 @@
 import secrets
 import string
-import uuid
 from datetime import datetime, timezone
 from typing import Union
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.dependencies import create_access_token, require_role
 from app.auth.pwd import hash_password, verify_password
@@ -31,7 +30,8 @@ def _now_iso() -> str:
 
 def _supa():
     from supabase import create_client
-    from app.core.config import SUPABASE_URL, SUPABASE_SERVICE_KEY
+
+    from app.core.config import SUPABASE_SERVICE_KEY, SUPABASE_URL
     return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 
@@ -80,8 +80,8 @@ def register(body: RegisterRequest):
         except Exception as exc:
             msg = str(exc).lower()
             if "already" in msg or "unique" in msg or "duplicate" in msg:
-                raise HTTPException(status_code=409, detail="El email ya está registrado")
-            raise HTTPException(status_code=400, detail=str(exc))
+                raise HTTPException(status_code=409, detail="El email ya está registrado") from exc
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         user_id = str(res.user.id)
         db.upsert_user_role(user_id, body.email, body.name, "client", body.business_id)
@@ -106,8 +106,8 @@ def login(body: LoginRequest):
     if db.IS_ENABLED:
         try:
             res = _supa().auth.sign_in_with_password({"email": body.email, "password": body.password})
-        except Exception:
-            raise HTTPException(status_code=401, detail="Credenciales inválidas")
+        except Exception as exc:
+            raise HTTPException(status_code=401, detail="Credenciales inválidas") from exc
 
         user_id = str(res.user.id)
         role_rows = [r for r in db.get_user_roles(user_id) if r.get("is_active", True)]
@@ -150,8 +150,8 @@ def oauth_session(body: OAuthSessionRequest):
 
     try:
         res = _supa().auth.get_user(body.access_token)
-    except Exception:
-        raise HTTPException(status_code=401, detail="Sesión de Supabase inválida")
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Sesión de Supabase inválida") from exc
 
     supa_user = res.user
     if not supa_user:
@@ -212,8 +212,8 @@ def invite_user(
     except Exception as exc:
         msg = str(exc).lower()
         if "already" in msg or "unique" in msg or "duplicate" in msg:
-            raise HTTPException(status_code=409, detail="El email ya está registrado")
-        raise HTTPException(status_code=400, detail=str(exc))
+            raise HTTPException(status_code=409, detail="El email ya está registrado") from exc
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     user_id = str(res.user.id)
     db.upsert_user_role(user_id, body.email, body.name, body.role, body.business_id)

@@ -112,10 +112,10 @@ def appointment_qr(slug: str, apt_id: str, base_url: str = Query(default="http:/
 def validate_qr(slug: str, apt_id: str, t: str = Query(...)):
     try:
         payload = jwt_hs256.decode(t, JWT_SECRET)
-    except jwt_hs256.TokenExpiredError:
-        raise HTTPException(status_code=410, detail="QR expirado")
-    except jwt_hs256.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="QR inválido")
+    except jwt_hs256.TokenExpiredError as exc:
+        raise HTTPException(status_code=410, detail="QR expirado") from exc
+    except jwt_hs256.InvalidTokenError as exc:
+        raise HTTPException(status_code=401, detail="QR inválido") from exc
 
     if payload.get("appointmentId") != apt_id or payload.get("slug") != slug:
         raise HTTPException(status_code=401, detail="QR no corresponde a esta cita")

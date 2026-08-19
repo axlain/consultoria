@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime, timezone
 
 from app.data import db, store
-from app.models.schemas import Payment
 from app.payments.provider import CreatePaymentInput, PaymentProvider, PaymentResult
 
 _VALID_TRANSITIONS: dict[str, set[str]] = {
@@ -39,7 +38,9 @@ class MockPaymentProvider(PaymentProvider):
                 "created_at": _now_iso(),
                 "updated_at": _now_iso(),
             })
-            db.insert_payment_event({"payment_id": payment_id, "event_type": "created", "metadata": {"simulated": True}})
+            db.insert_payment_event(
+                {"payment_id": payment_id, "event_type": "created", "metadata": {"simulated": True}}
+            )
         else:
             payment = store.create_payment(
                 appointment_id=input.appointment_id,
@@ -59,10 +60,14 @@ class MockPaymentProvider(PaymentProvider):
                 raise ValueError(f"Pago {payment_id} no encontrado")
             _assert_transition(row["status"], "authorized")
             db.update_payment_status(payment_id, "authorized")
-            db.insert_payment_event({"payment_id": payment_id, "event_type": "authorized", "metadata": {"simulated": True}})
+            db.insert_payment_event(
+                {"payment_id": payment_id, "event_type": "authorized", "metadata": {"simulated": True}}
+            )
             _assert_transition("authorized", "paid")
             db.update_payment_status(payment_id, "paid")
-            db.insert_payment_event({"payment_id": payment_id, "event_type": "captured", "metadata": {"simulated": True}})
+            db.insert_payment_event(
+                {"payment_id": payment_id, "event_type": "captured", "metadata": {"simulated": True}}
+            )
         else:
             payment = store.get_payment(payment_id)
             if payment is None:
@@ -83,7 +88,9 @@ class MockPaymentProvider(PaymentProvider):
                 raise ValueError(f"Pago {payment_id} no encontrado")
             _assert_transition(row["status"], "refunded")
             db.update_payment_status(payment_id, "refunded")
-            db.insert_payment_event({"payment_id": payment_id, "event_type": "refunded", "metadata": {"simulated": True}})
+            db.insert_payment_event(
+                {"payment_id": payment_id, "event_type": "refunded", "metadata": {"simulated": True}}
+            )
         else:
             payment = store.get_payment(payment_id)
             if payment is None:

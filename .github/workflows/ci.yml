@@ -89,7 +89,6 @@ jobs:
         run: |
           pip install ruff --quiet
           ruff check app/
-        continue-on-error: true # advertencia hasta que tengamos configuración base de ruff
 
       - name: Pytest (si hay tests)
         run: |
