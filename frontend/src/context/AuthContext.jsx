@@ -55,6 +55,12 @@ export function AuthProvider({ children }) {
     return data.user
   }, [_persist])
 
+  const loginWithSupabaseToken = useCallback(async (supabaseAccessToken, businessId = 'barberia') => {
+    const data = await authFetch('/api/auth/oauth-session', { access_token: supabaseAccessToken, business_id: businessId })
+    _persist(data.user, data.access_token)
+    return data.user
+  }, [_persist])
+
   const logout = useCallback(() => {
     setUser(null)
     setToken(null)
@@ -62,8 +68,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, token, loading, login, register, logout, isAuthenticated: !!user }),
-    [user, token, loading, login, register, logout]
+    () => ({ user, token, loading, login, register, loginWithSupabaseToken, logout, isAuthenticated: !!user }),
+    [user, token, loading, login, register, loginWithSupabaseToken, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

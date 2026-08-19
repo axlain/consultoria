@@ -3,6 +3,9 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { roleHome } from '../../components/ProtectedRoute'
 import { AuthShell } from '../../components/AuthShell'
+import { supabase } from '../../lib/supabase'
+
+const OAUTH_PROVIDERS = { Google: 'google', Facebook: 'facebook' }
 
 const DEMO_USERS = [
   { email: 'admin@barberia.com', password: 'admin123', role: 'Admin' },
@@ -46,8 +49,22 @@ export function Login() {
     setError('')
   }
 
-  function handleSocial(provider) {
-    setSocialMsg(`${provider} estará disponible en Fase 2 al configurar Supabase Auth OAuth.`)
+  async function handleSocial(provider) {
+    setSocialMsg('')
+    const providerId = OAUTH_PROVIDERS[provider]
+    if (!providerId) {
+      setSocialMsg(`${provider} estará disponible próximamente.`)
+      return
+    }
+    if (!supabase) {
+      setSocialMsg('Login social no configurado (faltan variables VITE_SUPABASE_*).')
+      return
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: providerId,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    })
+    if (error) setSocialMsg(error.message)
   }
 
   return (

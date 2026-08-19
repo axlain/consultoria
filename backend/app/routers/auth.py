@@ -11,6 +11,7 @@ from app.data import db, store
 from app.models.schemas import (
     InviteUserRequest,
     LoginRequest,
+    OAuthSessionRequest,
     RegisterRequest,
     TokenResponse,
     UserProfile,
@@ -107,6 +108,50 @@ def login(body: LoginRequest):
         if not user or not user.is_active or not stored or not verify_password(body.password, stored):
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
+    return TokenResponse(access_token=create_access_token(user), user=UserPublic(**user.model_dump()))
+
+
+# ---------------------------------------------------------------------------
+# OAuth (Google / Facebook via Supabase Auth)
+# ---------------------------------------------------------------------------
+
+@router.post("/oauth-session", response_model=TokenResponse)
+def oauth_session(body: OAuthSessionRequest):
+    """Exchange a Supabase OAuth session (from signInWithOAuth on the frontend)
+    for the app's own access token. The Supabase user already exists at this
+    point — Supabase Auth created it when the provider redirect completed —
+    this just links/creates the user_business_roles row for it."""
+    if not db.IS_ENABLED:
+        raise HTTPException(status_code=503, detail="Login social requiere Supabase configurado")
+
+    try:
+        res = _supa().auth.get_user(body.access_token)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Sesión de Supabase inválida")
+
+    supa_user = res.user
+    if not supa_user:
+        raise HTTPException(status_code=401, detail="Sesión de Supabase inválida")
+
+    user_id = str(supa_user.id)
+    email = supa_user.email or ""
+    metadata = supa_user.user_metadata or {}
+    name = metadata.get("full_name") or metadata.get("name") or email.split("@")[0]
+
+    row = db.get_user_role_row(user_id, body.business_id)
+    if not row:
+        row = db.upsert_user_role(user_id, email, name, "client", body.business_id)
+    elif not row.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Cuenta desactivada")
+
+    user = UserProfile(
+        id=user_id,
+        email=email,
+        name=row.get("name", name),
+        role=row["role"],
+        business_id=body.business_id,
+        created_at=str(supa_user.created_at or _now_iso()),
+    )
     return TokenResponse(access_token=create_access_token(user), user=UserPublic(**user.model_dump()))
 
 

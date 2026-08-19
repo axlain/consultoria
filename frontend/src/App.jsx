@@ -14,6 +14,7 @@ import { TeamPanel } from './pages/admin/TeamPanel'
 import { NotFound } from './pages/NotFound'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
+import { OAuthCallback } from './pages/auth/OAuthCallback'
 import { PanelLayout } from './pages/panel/PanelLayout'
 import { ClientPanelGate } from './pages/panel/ClientPanelGate'
 import { MisCitas } from './pages/panel/MisCitas'
@@ -53,6 +54,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
+        <Route path="/auth/callback" element={<OAuthCallback />} />
 
         {/* Role-based panel */}
         <Route

@@ -39,6 +39,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class OAuthSessionRequest(BaseModel):
+    access_token: str
+    business_id: str = "barberia"
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
