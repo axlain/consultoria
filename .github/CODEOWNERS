@@ -1,0 +1,14 @@
+# Dueño por defecto de todo el repo
+*                                       @axlain
+
+# Módulo de pagos — revisión obligatoria (código sensible con datos financieros)
+backend/app/payments/                   @axlain
+backend/app/routers/payments.py         @axlain
+core-booking-engine/packages/payments/  @axlain
+
+# Auth y JWT — revisión obligatoria
+backend/app/auth/                       @axlain
+backend/app/routers/auth.py             @axlain
+
+# Workflows de CI — cambios aquí también requieren revisión
+.github/workflows/                      @axlain
