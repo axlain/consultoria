@@ -37,7 +37,7 @@ jobs:
 
       - name: Auditar dependencias (falla en severidad alta/crítica)
         run: npm audit --audit-level=high
-        continue-on-error: true  # advertencia, no bloqueante hasta tener control de deps
+        continue-on-error: true # advertencia, no bloqueante hasta tener control de deps
 
       - name: Build de producción (Vite)
         run: npm run build
@@ -86,7 +86,7 @@ jobs:
         run: |
           pip install ruff --quiet
           ruff check app/
-        continue-on-error: true  # advertencia hasta que tengamos configuración base de ruff
+        continue-on-error: true # advertencia hasta que tengamos configuración base de ruff
 
       - name: Pytest (si hay tests)
         run: |
