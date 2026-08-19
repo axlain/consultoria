@@ -2,6 +2,7 @@ import secrets
 import string
 import uuid
 from datetime import datetime, timezone
+from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -10,6 +11,8 @@ from app.auth.pwd import hash_password, verify_password
 from app.core.config import FRONTEND_URL
 from app.data import db, store
 from app.models.schemas import (
+    BusinessOption,
+    BusinessSelectionResponse,
     InviteUserRequest,
     LoginRequest,
     OAuthSessionRequest,
@@ -30,6 +33,32 @@ def _supa():
     from supabase import create_client
     from app.core.config import SUPABASE_URL, SUPABASE_SERVICE_KEY
     return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+
+def _business_options(role_rows: list[dict]) -> list[BusinessOption]:
+    options = []
+    for row in role_rows:
+        tenant = store.get_tenant(row["business_id"])
+        options.append(BusinessOption(
+            business_id=row["business_id"],
+            business_name=tenant.business.name if tenant else row["business_id"],
+            role=row["role"],
+        ))
+    return options
+
+
+def _resolve_business_row(role_rows: list[dict], business_id: str | None) -> dict | None:
+    """Picks the role row to log the user into. Returns None when the caller
+    needs to ask the user which business to enter (more than one active role
+    and none was specified)."""
+    if len(role_rows) == 1:
+        return role_rows[0]
+    if business_id is None:
+        return None
+    for row in role_rows:
+        if row["business_id"] == business_id:
+            return row
+    raise HTTPException(status_code=403, detail="No tienes acceso a ese negocio")
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +101,7 @@ def register(body: RegisterRequest):
 # Login
 # ---------------------------------------------------------------------------
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=Union[TokenResponse, BusinessSelectionResponse])
 def login(body: LoginRequest):
     if db.IS_ENABLED:
         try:
@@ -81,20 +110,14 @@ def login(body: LoginRequest):
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
         user_id = str(res.user.id)
-        # business_id not in login body — default to first active business
-        role_rows = (
-            _supa()
-            .table("user_business_roles")
-            .select("*")
-            .eq("user_id", user_id)
-            .eq("is_active", True)
-            .limit(1)
-            .execute()
-            .data
-        )
+        role_rows = [r for r in db.get_user_roles(user_id) if r.get("is_active", True)]
         if not role_rows:
             raise HTTPException(status_code=401, detail="Sin acceso a ningún negocio")
-        row = role_rows[0]
+
+        row = _resolve_business_row(role_rows, body.business_id)
+        if row is None:
+            return BusinessSelectionResponse(businesses=_business_options(role_rows))
+
         user = UserProfile(
             id=user_id,
             email=res.user.email or body.email,
@@ -116,7 +139,7 @@ def login(body: LoginRequest):
 # OAuth (Google / Facebook via Supabase Auth)
 # ---------------------------------------------------------------------------
 
-@router.post("/oauth-session", response_model=TokenResponse)
+@router.post("/oauth-session", response_model=Union[TokenResponse, BusinessSelectionResponse])
 def oauth_session(body: OAuthSessionRequest):
     """Exchange a Supabase OAuth session (from signInWithOAuth on the frontend)
     for the app's own access token. The Supabase user already exists at this
@@ -139,18 +162,22 @@ def oauth_session(body: OAuthSessionRequest):
     metadata = supa_user.user_metadata or {}
     name = metadata.get("full_name") or metadata.get("name") or email.split("@")[0]
 
-    row = db.get_user_role_row(user_id, body.business_id)
-    if not row:
-        row = db.upsert_user_role(user_id, email, name, "client", body.business_id)
-    elif not row.get("is_active", True):
-        raise HTTPException(status_code=403, detail="Cuenta desactivada")
+    role_rows = [r for r in db.get_user_roles(user_id) if r.get("is_active", True)]
+    if not role_rows:
+        # First time this Supabase user logs in — auto-provision a client role
+        # for the business they're signing in from (defaults to the demo tenant).
+        role_rows = [db.upsert_user_role(user_id, email, name, "client", body.business_id or "barberia")]
+
+    row = _resolve_business_row(role_rows, body.business_id)
+    if row is None:
+        return BusinessSelectionResponse(businesses=_business_options(role_rows))
 
     user = UserProfile(
         id=user_id,
         email=email,
         name=row.get("name", name),
         role=row["role"],
-        business_id=body.business_id,
+        business_id=row["business_id"],
         created_at=str(supa_user.created_at or _now_iso()),
     )
     return TokenResponse(access_token=create_access_token(user), user=UserPublic(**user.model_dump()))

@@ -38,6 +38,19 @@ def get_user_role_row(user_id: str, business_id: str) -> dict | None:
     return rows[0] if rows else None
 
 
+def get_user_roles(user_id: str) -> list[dict]:
+    """All business-role rows for a user, active or not — used to detect
+    multi-tenant membership at login time."""
+    return (
+        _client()
+        .table("user_business_roles")
+        .select("*")
+        .eq("user_id", user_id)
+        .execute()
+        .data
+    )
+
+
 def upsert_user_role(user_id: str, email: str, name: str, role: str, business_id: str) -> dict:
     return (
         _client()

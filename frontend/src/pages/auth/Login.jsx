@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { roleHome } from '../../components/ProtectedRoute'
 import { AuthShell } from '../../components/AuthShell'
+import { BusinessSelect } from '../../components/BusinessSelect'
 import { supabase } from '../../lib/supabase'
 
 const OAUTH_PROVIDERS = { Google: 'google', Facebook: 'facebook' }
@@ -25,8 +26,13 @@ export function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [socialMsg, setSocialMsg] = useState('')
+  const [businessOptions, setBusinessOptions] = useState(null)
 
   if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : (from ?? roleHome(user.role))} replace />
+
+  function goHome(u) {
+    navigate(u.role === 'client' ? '/demo/barberia' : (from ?? roleHome(u.role)), { replace: true })
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -34,8 +40,25 @@ export function Login() {
     setSocialMsg('')
     setLoading(true)
     try {
-      const u = await login(email.trim(), password)
-      navigate(u.role === 'client' ? '/demo/barberia' : (from ?? roleHome(u.role)), { replace: true })
+      const result = await login(email.trim(), password)
+      if (result.requires_business_selection) {
+        setBusinessOptions(result.businesses)
+        return
+      }
+      goHome(result)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function chooseBusiness(businessId) {
+    setError('')
+    setLoading(true)
+    try {
+      const u = await login(email.trim(), password, businessId)
+      goHome(u)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -70,8 +93,18 @@ export function Login() {
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
       <AuthShell showMenu={false}>
-        <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Iniciar sesión</h1>
+        <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">
+          {businessOptions ? 'Elige un negocio' : 'Iniciar sesión'}
+        </h1>
 
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
+
+        {businessOptions ? (
+          <BusinessSelect businesses={businessOptions} onSelect={chooseBusiness} loading={loading} />
+        ) : (
+          <>
         {/* Social login */}
         <div className="flex flex-col gap-2 mb-5">
           <SocialButton onClick={() => handleSocial('Google')} icon={<GoogleIcon />} label="Continuar con Google" />
@@ -88,10 +121,6 @@ export function Login() {
           <span className="text-xs text-[#8e8e93]">o con email</span>
           <div className="h-px flex-1 bg-[#e5e5ea]" />
         </div>
-
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
-        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
@@ -156,6 +185,8 @@ export function Login() {
             ))}
           </div>
         </details>
+          </>
+        )}
       </AuthShell>
     </div>
   )

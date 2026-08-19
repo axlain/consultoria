@@ -43,8 +43,12 @@ export function AuthProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }))
   }, [])
 
-  const login = useCallback(async (email, password) => {
-    const data = await authFetch('/api/auth/login', { email, password })
+  // Returns the logged-in user, or { requires_business_selection: true, businesses }
+  // when the account belongs to more than one business and none was specified —
+  // callers should re-call with the chosen businessId to finish logging in.
+  const login = useCallback(async (email, password, businessId = null) => {
+    const data = await authFetch('/api/auth/login', { email, password, business_id: businessId })
+    if (data.requires_business_selection) return data
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])
@@ -55,8 +59,9 @@ export function AuthProvider({ children }) {
     return data.user
   }, [_persist])
 
-  const loginWithSupabaseToken = useCallback(async (supabaseAccessToken, businessId = 'barberia') => {
+  const loginWithSupabaseToken = useCallback(async (supabaseAccessToken, businessId = null) => {
     const data = await authFetch('/api/auth/oauth-session', { access_token: supabaseAccessToken, business_id: businessId })
+    if (data.requires_business_selection) return data
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])

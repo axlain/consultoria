@@ -37,11 +37,23 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+    business_id: Optional[str] = None
 
 
 class OAuthSessionRequest(BaseModel):
     access_token: str
-    business_id: str = "barberia"
+    business_id: Optional[str] = None
+
+
+class BusinessOption(BaseModel):
+    business_id: str
+    business_name: str
+    role: UserRole
+
+
+class BusinessSelectionResponse(BaseModel):
+    requires_business_selection: Literal[True] = True
+    businesses: list[BusinessOption]
 
 
 class TokenResponse(BaseModel):
