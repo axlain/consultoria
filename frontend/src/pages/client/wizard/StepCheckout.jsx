@@ -300,7 +300,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
               <input
                 type="text"
                 autoComplete="cc-name"
-                placeholder="Ej. Juan Pérez"
+                placeholder="Escribe el nombre del titular..."
                 className={inputClass('holder')}
                 value={holder}
                 onChange={(e) => setHolder(e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''))}
