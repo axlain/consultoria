@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { api } from '../../api/client'
 
 const STATUS_LABEL = {
   scheduled: 'Confirmada',
@@ -16,23 +17,39 @@ const STATUS_COLOR = {
 export function MisCitas() {
   const { user, token } = useAuth()
   const [citas, setCitas] = useState([])
+  const [tenant, setTenant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const slug = user?.business_id || 'barberia'
+
   useEffect(() => {
     if (!user) return
-    const slug = user.business_id || 'barberia'
-    fetch(`/api/tenants/${slug}/my-appointments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async res => {
+    Promise.all([
+      fetch(`/api/tenants/${slug}/my-appointments`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(async res => {
         if (!res.ok) throw new Error(`Error ${res.status}`)
         return res.json()
+      }),
+      api.getTenant(slug),
+    ])
+      .then(([appointments, tenantConfig]) => {
+        setCitas(appointments)
+        setTenant(tenantConfig)
       })
-      .then(data => setCitas(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [user, token])
+  }, [user, token, slug])
+
+  const serviceNames = useMemo(
+    () => Object.fromEntries((tenant?.services ?? []).map(s => [s.id, s.name])),
+    [tenant],
+  )
+  const professionalNames = useMemo(
+    () => Object.fromEntries((tenant?.professionals ?? []).map(p => [p.id, p.name])),
+    [tenant],
+  )
 
   return (
     <div>
@@ -74,10 +91,10 @@ export function MisCitas() {
                 </span>
               </div>
               <p className="text-sm text-[#6e6e73]">
-                Servicio: <span className="font-medium text-[#1c1c1e]">{c.service_id}</span>
+                Servicio: <span className="font-medium text-[#1c1c1e]">{serviceNames[c.service_id] ?? c.service_id}</span>
               </p>
               <p className="text-sm text-[#6e6e73]">
-                Profesional: <span className="font-medium text-[#1c1c1e]">{c.professional_id}</span>
+                Profesional: <span className="font-medium text-[#1c1c1e]">{professionalNames[c.professional_id] ?? c.professional_id}</span>
               </p>
             </li>
           ))}
