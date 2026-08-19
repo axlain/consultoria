@@ -8,7 +8,8 @@ export function Register() {
   const { register, user } = useAuth()
   const navigate = useNavigate()
 
-  const [name, setName] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [apellidoPaterno, setApellidoPaterno] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -22,7 +23,7 @@ export function Register() {
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
     setLoading(true)
     try {
-      const u = await register(email, password, name)
+      const u = await register(email, password, `${nombre.trim()} ${apellidoPaterno.trim()}`.trim())
       navigate(roleHome(u.role), { replace: true })
     } catch (err) {
       setError(err.message)
@@ -33,7 +34,7 @@ export function Register() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      <AuthShell>
+      <AuthShell showMenu={false}>
         <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Crear cuenta</h1>
 
         {error && (
@@ -42,15 +43,28 @@ export function Register() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
-            Nombre completo
+            Nombre
             <input
               type="text"
               required
-              value={name}
-              onChange={e => setName(e.target.value)}
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
               className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
-              placeholder="Ana García"
-              autoComplete="name"
+              placeholder="Escribe tu nombre..."
+              autoComplete="given-name"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+            Apellido paterno
+            <input
+              type="text"
+              required
+              value={apellidoPaterno}
+              onChange={e => setApellidoPaterno(e.target.value)}
+              className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
+              placeholder="Escribe tu apellido paterno..."
+              autoComplete="family-name"
             />
           </label>
 
@@ -62,7 +76,7 @@ export function Register() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
-              placeholder="tu@email.com"
+              placeholder="nombre@dominio.com"
               autoComplete="email"
             />
           </label>

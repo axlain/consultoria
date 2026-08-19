@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 const LINK_CLASS =
   'block rounded-lg border border-[#e5e5ea] bg-white px-3.5 py-2.5 text-sm font-medium text-[#1c1c1e] no-underline transition-colors hover:border-[#c9a24b] hover:bg-[#fdf8ef]'
 
-export function AuthShell({ children }) {
+export function AuthShell({ children, showMenu = true }) {
   const [open, setOpen] = useState(false)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -31,23 +31,25 @@ export function AuthShell({ children }) {
         </Link>
 
         {/* Hamburger button */}
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1 rounded-lg border border-[#e5e5ea] bg-white transition-colors hover:bg-[#f5f5f5]"
-          aria-label="Abrir menú"
-          aria-expanded={open}
-        >
-          <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
-          <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
-          <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
-        </button>
+        {showMenu && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1 rounded-lg border border-[#e5e5ea] bg-white transition-colors hover:bg-[#f5f5f5]"
+            aria-label="Abrir menú"
+            aria-expanded={open}
+          >
+            <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
+            <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
+            <span className="h-0.5 w-[18px] rounded-sm bg-[#1c1c1e]" />
+          </button>
+        )}
       </div>
 
       {children}
 
       {/* Drawer */}
-      {open && (
+      {showMenu && open && (
         <div
           className="fixed inset-0 z-[100] flex justify-end bg-black/40"
           onClick={() => setOpen(false)}

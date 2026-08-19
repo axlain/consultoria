@@ -52,7 +52,7 @@ export function Login() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      <AuthShell>
+      <AuthShell showMenu={false}>
         <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Iniciar sesión</h1>
 
         {/* Social login */}
@@ -85,7 +85,7 @@ export function Login() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
-              placeholder="tu@email.com"
+              placeholder="nombre@dominio.com"
               autoComplete="email"
             />
           </label>
