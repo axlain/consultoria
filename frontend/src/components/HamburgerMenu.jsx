@@ -70,6 +70,11 @@ export function HamburgerMenu({ faqs, slug }) {
               <p className={SECTION_LABEL_CLASS}>Reservas</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 <li>
+                  <Link to={`/demo/${slug}`} onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                    Inicio
+                  </Link>
+                </li>
+                <li>
                   <Link to={`/demo/${slug}/reservar`} onClick={closeDrawer} className={NAV_LINK_CLASS}>
                     Agendar cita
                   </Link>
@@ -167,9 +172,9 @@ export function HamburgerMenu({ faqs, slug }) {
                   )}
                 </li>
                 <li>
-                  <a href="#map-heading" onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                  <Link to={`/demo/${slug}#map-heading`} onClick={closeDrawer} className={NAV_LINK_CLASS}>
                     Ubicación / Contacto
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>

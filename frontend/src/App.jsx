@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { TenantGate } from './pages/client/TenantGate'
 import { TenantHome } from './pages/client/TenantHome'
@@ -30,77 +31,93 @@ function RoleRedirect() {
   return <Navigate to={user ? roleHome(user.role) : '/login'} replace />
 }
 
+// React Router doesn't reset scroll on navigation by default — without this, going
+// to a new page keeps whatever scroll offset the previous page was at, which can
+// visually land mid-page (e.g. near the map section) instead of at a clean top.
+// Skips when the URL carries a #hash — the target page owns scrolling to its anchor.
+function ScrollToTop() {
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    if (hash) return
+    window.scrollTo(0, 0)
+  }, [pathname, hash])
+  return null
+}
+
 function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/registro" element={<Register />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Register />} />
 
-      {/* Role-based panel */}
-      <Route
-        path="/panel"
-        element={
-          <ProtectedRoute>
-            <PanelLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<RoleRedirect />} />
+        {/* Role-based panel */}
+        <Route
+          path="/panel"
+          element={
+            <ProtectedRoute>
+              <PanelLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<RoleRedirect />} />
 
-        {/* employee + host */}
-        <Route path="mi-agenda" element={
-          <ProtectedRoute roles={['employee', 'host', 'admin']}><MiAgenda /></ProtectedRoute>
-        } />
+          {/* employee + host */}
+          <Route path="mi-agenda" element={
+            <ProtectedRoute roles={['employee', 'host', 'admin']}><MiAgenda /></ProtectedRoute>
+          } />
 
-        {/* host + admin */}
-        <Route path="equipo" element={
-          <ProtectedRoute roles={['host', 'admin']}><Equipo /></ProtectedRoute>
-        } />
-        <Route path="equipo/nueva-cita" element={
-          <ProtectedRoute roles={['host', 'admin']}><NuevaCita /></ProtectedRoute>
-        } />
+          {/* host + admin */}
+          <Route path="equipo" element={
+            <ProtectedRoute roles={['host', 'admin']}><Equipo /></ProtectedRoute>
+          } />
+          <Route path="equipo/nueva-cita" element={
+            <ProtectedRoute roles={['host', 'admin']}><NuevaCita /></ProtectedRoute>
+          } />
 
-        {/* admin only */}
-        <Route path="transacciones" element={
-          <ProtectedRoute roles={['admin']}><Transacciones /></ProtectedRoute>
-        } />
-        <Route path="usuarios" element={
-          <ProtectedRoute roles={['admin']}><Usuarios /></ProtectedRoute>
-        } />
-      </Route>
-
-      {/* Client panel — mobile-first ClientShell instead of the desktop panel sidebar */}
-      <Route path="/panel/mis-citas" element={
-        <ProtectedRoute roles={['client', 'admin']}>
-          <ClientPanelGate><MisCitas /></ClientPanelGate>
-        </ProtectedRoute>
-      } />
-      <Route path="/panel/mis-rewards" element={
-        <ProtectedRoute roles={['client', 'admin']}>
-          <ClientPanelGate><MisRewards /></ClientPanelGate>
-        </ProtectedRoute>
-      } />
-
-      {/* Tenant-scoped public + legacy admin */}
-      <Route path="/demo/:slug" element={<TenantGate />}>
-        <Route index element={<TenantHome />} />
-        <Route path="reservar" element={<BookingWizard />} />
-        <Route path="disponibilidad" element={<AvailabilityCalendar />} />
-        <Route path="gracias" element={<ThankYou />} />
-        <Route path="cita/:aptId" element={<CitaView />} />
-        <Route path="admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="agenda" replace />} />
-          <Route path="agenda" element={<ResourceCalendar />} />
-          <Route path="servicios" element={<ServiceCatalog />} />
-          <Route path="equipo" element={<TeamPanel />} />
+          {/* admin only */}
+          <Route path="transacciones" element={
+            <ProtectedRoute roles={['admin']}><Transacciones /></ProtectedRoute>
+          } />
+          <Route path="usuarios" element={
+            <ProtectedRoute roles={['admin']}><Usuarios /></ProtectedRoute>
+          } />
         </Route>
-        <Route path="*" element={<NotFound />} />
-      </Route>
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Client panel — mobile-first ClientShell instead of the desktop panel sidebar */}
+        <Route path="/panel/mis-citas" element={
+          <ProtectedRoute roles={['client', 'admin']}>
+            <ClientPanelGate><MisCitas /></ClientPanelGate>
+          </ProtectedRoute>
+        } />
+        <Route path="/panel/mis-rewards" element={
+          <ProtectedRoute roles={['client', 'admin']}>
+            <ClientPanelGate><MisRewards /></ClientPanelGate>
+          </ProtectedRoute>
+        } />
+
+        {/* Tenant-scoped public + legacy admin */}
+        <Route path="/demo/:slug" element={<TenantGate />}>
+          <Route index element={<TenantHome />} />
+          <Route path="reservar" element={<BookingWizard />} />
+          <Route path="disponibilidad" element={<AvailabilityCalendar />} />
+          <Route path="gracias" element={<ThankYou />} />
+          <Route path="cita/:aptId" element={<CitaView />} />
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="agenda" replace />} />
+            <Route path="agenda" element={<ResourceCalendar />} />
+            <Route path="servicios" element={<ServiceCatalog />} />
+            <Route path="equipo" element={<TeamPanel />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   )
 }
 

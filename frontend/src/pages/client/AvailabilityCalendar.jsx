@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTenant } from '../../context/TenantContext'
 import { api } from '../../api/client'
 import { ClientShell } from '../../components/ClientShell'
+import { HamburgerMenu } from '../../components/HamburgerMenu'
 import { DateStrip, buildDateRange, toIso } from '../../components/DateStrip'
 
 const DAYS_AHEAD = 14
@@ -49,7 +50,9 @@ export function AvailabilityCalendar() {
 
   return (
     <ClientShell>
-      <h2>Ver disponibilidad</h2>
+      <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
+
+      <h2 className="pr-14">Ver disponibilidad</h2>
       <p className="text-muted mb-5 text-sm">Consulta los horarios libres antes de reservar.</p>
 
       <div className="mb-5">
