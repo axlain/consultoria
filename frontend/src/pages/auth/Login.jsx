@@ -25,7 +25,6 @@ export function Login() {
 
   if (user) return <Navigate to={from ?? roleHome(user.role)} replace />
 
-  // eslint-disable-next-line no-unused-vars
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')

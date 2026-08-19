@@ -32,6 +32,9 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Lint (ESLint)
+        run: npm run lint
+
       - name: Auditar dependencias (falla en severidad alta/crítica)
         run: npm audit --audit-level=high
         continue-on-error: true  # advertencia, no bloqueante hasta tener control de deps

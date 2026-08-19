@@ -39,7 +39,6 @@ export function QrScannerModal({ tenantSlug, onClose }) {
       cancelled = true
       stopCamera()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanning])
 
   async function stopCamera() {
