@@ -23,7 +23,7 @@ export function Login() {
   const [loading, setLoading] = useState(false)
   const [socialMsg, setSocialMsg] = useState('')
 
-  if (user) return <Navigate to={from ?? roleHome(user.role)} replace />
+  if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : (from ?? roleHome(user.role))} replace />
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -32,7 +32,7 @@ export function Login() {
     setLoading(true)
     try {
       const u = await login(email.trim(), password)
-      navigate(from ?? roleHome(u.role), { replace: true })
+      navigate(u.role === 'client' ? '/demo/barberia' : (from ?? roleHome(u.role)), { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {

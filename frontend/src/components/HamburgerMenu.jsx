@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { roleHome } from './ProtectedRoute'
 
 const SECTION_LABEL_CLASS = 'text-muted mb-2 text-xs font-semibold tracking-[0.12em] uppercase'
 const NAV_LINK_CLASS =
@@ -12,9 +14,17 @@ export function HamburgerMenu({ faqs, slug }) {
   const [open, setOpen] = useState(false)
   const [faqOpen, setFaqOpen] = useState(false)
   const [openQuestion, setOpenQuestion] = useState(null)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   function closeDrawer() {
     setOpen(false)
+  }
+
+  function handleLogout() {
+    logout()
+    closeDrawer()
+    navigate('/', { replace: true })
   }
 
   return (
@@ -75,11 +85,41 @@ export function HamburgerMenu({ faqs, slug }) {
             <nav aria-label="Cuenta" className="mb-6">
               <p className={SECTION_LABEL_CLASS}>Cuenta</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
-                <li>
-                  <Link to="/login" onClick={closeDrawer} className={NAV_LINK_CLASS}>
-                    Iniciar sesión / Mi Panel
-                  </Link>
-                </li>
+                {!user && (
+                  <li>
+                    <Link to="/login" onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                      Iniciar sesión / Mi Panel
+                    </Link>
+                  </li>
+                )}
+                {user?.role === 'client' && (
+                  <>
+                    <li>
+                      <Link to="/panel/mis-citas" onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                        Mis citas
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/panel/mis-rewards" onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                        Mis rewards
+                      </Link>
+                    </li>
+                  </>
+                )}
+                {user && user.role !== 'client' && (
+                  <li>
+                    <Link to={roleHome(user.role)} onClick={closeDrawer} className={NAV_LINK_CLASS}>
+                      Mi panel
+                    </Link>
+                  </li>
+                )}
+                {user && (
+                  <li>
+                    <button type="button" onClick={handleLogout} className={`${NAV_LINK_CLASS} w-full text-left`}>
+                      Cerrar sesión
+                    </button>
+                  </li>
+                )}
               </ul>
             </nav>
 
