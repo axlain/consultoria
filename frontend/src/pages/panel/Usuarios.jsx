@@ -144,8 +144,14 @@ export function Usuarios() {
             {inviteResult ? (
               <div>
                 <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
-                  Usuario creado. Contraseña temporal: <strong>{inviteResult.temp_password}</strong>
-                  <br /><span className="text-xs">Compártela de forma segura y pídele que la cambie.</span>
+                  {inviteResult.temp_password ? (
+                    <>
+                      Usuario creado. Contraseña temporal: <strong>{inviteResult.temp_password}</strong>
+                      <br /><span className="text-xs">Compártela de forma segura y pídele que la cambie.</span>
+                    </>
+                  ) : (
+                    'Invitación enviada. Le llegará un correo para crear su contraseña y activar la cuenta.'
+                  )}
                 </div>
                 <button
                   onClick={() => { setInvite(i => ({ ...i, open: false, email: '', name: '' })); setInviteResult(null) }}

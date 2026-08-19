@@ -15,6 +15,7 @@ import { NotFound } from './pages/NotFound'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { OAuthCallback } from './pages/auth/OAuthCallback'
+import { SetPassword } from './pages/auth/SetPassword'
 import { PanelLayout } from './pages/panel/PanelLayout'
 import { ClientPanelGate } from './pages/panel/ClientPanelGate'
 import { MisCitas } from './pages/panel/MisCitas'
@@ -55,6 +56,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/auth/callback" element={<OAuthCallback />} />
+        <Route path="/auth/set-password" element={<SetPassword />} />
 
         {/* Role-based panel */}
         <Route

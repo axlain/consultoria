@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.dependencies import create_access_token, require_role
 from app.auth.pwd import hash_password, verify_password
+from app.core.config import FRONTEND_URL
 from app.data import db, store
 from app.models.schemas import (
     InviteUserRequest,
@@ -164,29 +165,30 @@ def invite_user(
     body: InviteUserRequest,
     _current_user=Depends(require_role("admin")),
 ):
-    temp_pwd = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
-
-    if db.IS_ENABLED:
-        try:
-            res = _supa().auth.admin.create_user(
-                {
-                    "email": body.email,
-                    "password": temp_pwd,
-                    "user_metadata": {"name": body.name, "business_id": body.business_id},
-                    "email_confirm": True,
-                }
-            )
-        except Exception as exc:
-            msg = str(exc).lower()
-            if "already" in msg or "unique" in msg or "duplicate" in msg:
-                raise HTTPException(status_code=409, detail="El email ya está registrado")
-            raise HTTPException(status_code=400, detail=str(exc))
-
-        user_id = str(res.user.id)
-        db.upsert_user_role(user_id, body.email, body.name, body.role, body.business_id)
-    else:
+    if not db.IS_ENABLED:
+        # In-memory dev fallback — no email delivery available, so the admin
+        # has to hand the temp password to the invitee out of band.
         if store.get_user_by_email(body.email):
             raise HTTPException(status_code=409, detail="El email ya está registrado")
+        temp_pwd = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
         store.create_user(body.email, body.name, body.role, body.business_id, hash_password(temp_pwd))
+        return {"message": "Usuario creado", "temp_password": temp_pwd}
 
-    return {"message": "Usuario creado", "temp_password": temp_pwd}
+    try:
+        res = _supa().auth.admin.invite_user_by_email(
+            body.email,
+            {
+                "data": {"name": body.name, "business_id": body.business_id},
+                "redirect_to": f"{FRONTEND_URL}/auth/set-password",
+            },
+        )
+    except Exception as exc:
+        msg = str(exc).lower()
+        if "already" in msg or "unique" in msg or "duplicate" in msg:
+            raise HTTPException(status_code=409, detail="El email ya está registrado")
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    user_id = str(res.user.id)
+    db.upsert_user_role(user_id, body.email, body.name, body.role, body.business_id)
+
+    return {"message": "Invitación enviada"}

@@ -24,3 +24,7 @@ JWT_EXPIRE_MINUTES = 60 * 8  # 8 hours
 # Supabase — set these in .env to enable persistent storage.
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+
+# Where the frontend runs — used to build redirect links for Supabase emails
+# (invite, magic link). Override in production.
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
