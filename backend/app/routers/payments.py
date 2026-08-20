@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
+from app.core.config import PAYMENT_PROVIDER, STRIPE_SECRET_KEY
 from app.data import db, store
 from app.models.schemas import (
     ConfirmPaymentRequest,
@@ -11,15 +12,23 @@ from app.models.schemas import (
     RefundPaymentRequest,
 )
 from app.payments.mock_provider import MockPaymentProvider
-from app.payments.provider import CreatePaymentInput
+from app.payments.provider import CreatePaymentInput, PaymentProvider
+from app.payments.stripe_provider import StripePaymentProvider
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
-# Single point of instantiation — swap MockPaymentProvider for StripeProvider
-# or MercadoPagoProvider here in Phase 2; nothing else in the codebase changes.
-_provider = MockPaymentProvider()
+
+def _get_payment_provider() -> PaymentProvider:
+    if PAYMENT_PROVIDER.lower() == "stripe" or (STRIPE_SECRET_KEY and PAYMENT_PROVIDER.lower() != "mock"):
+        logger.info("Pasarela de pagos configurada en modo STRIPE")
+        return StripePaymentProvider(secret_key=STRIPE_SECRET_KEY)
+    logger.info("Pasarela de pagos configurada en modo MOCK (simulación)")
+    return MockPaymentProvider()
+
+
+_provider = _get_payment_provider()
 
 
 @router.post("/create", response_model=PaymentResponse)
@@ -32,7 +41,11 @@ async def create_payment(body: CreatePaymentRequest) -> PaymentResponse:
             currency=body.currency,
         )
     )
-    return PaymentResponse(payment_id=result.payment_id, status=result.status)
+    return PaymentResponse(
+        payment_id=result.payment_id,
+        status=result.status,
+        client_secret=result.client_secret,
+    )
 
 
 @router.post("/confirm", response_model=PaymentResponse)

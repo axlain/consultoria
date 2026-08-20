@@ -16,6 +16,7 @@ class PaymentResult:
     payment_id: str
     status: Literal["pending", "authorized", "paid", "failed", "refunded"]
     provider_reference: str | None = None
+    client_secret: str | None = None  # Stripe only — used by frontend Elements
 
 
 class PaymentProvider(ABC):

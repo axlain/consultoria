@@ -1,3 +1,4 @@
+import logging
 import secrets
 import string
 from datetime import datetime, timezone
@@ -20,6 +21,8 @@ from app.models.schemas import (
     UserProfile,
     UserPublic,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -151,7 +154,8 @@ def oauth_session(body: OAuthSessionRequest):
     try:
         res = _supa().auth.get_user(body.access_token)
     except Exception as exc:
-        raise HTTPException(status_code=401, detail="Sesión de Supabase inválida") from exc
+        logger.error("Fallo la verificación de token de Supabase: %s", exc)
+        raise HTTPException(status_code=401, detail=f"Sesión de Supabase inválida ({exc})") from exc
 
     supa_user = res.user
     if not supa_user:

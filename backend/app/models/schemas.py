@@ -320,3 +320,4 @@ class PaymentResponse(BaseModel):
     payment_id: str
     status: PaymentStatus
     provider_reference: Optional[str] = None
+    client_secret: Optional[str] = None

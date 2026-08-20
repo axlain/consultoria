@@ -142,8 +142,12 @@ def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appoint
     if booking.time not in available:
         raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
 
+    import uuid
+
+    apt_id = f"apt-{uuid.uuid4().hex[:8]}" if db.IS_ENABLED else store.next_appointment_id()
+
     appointment = Appointment(
-        id=store.next_appointment_id(),
+        id=apt_id,
         tenant_slug=tenant.slug,
         service_id=booking.service_id,
         professional_id=professional_id,

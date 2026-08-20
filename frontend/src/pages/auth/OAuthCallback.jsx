@@ -24,8 +24,11 @@ export function OAuthCallback() {
     }
 
     let cancelled = false
+    let handled = false
 
     async function finish(session) {
+      if (handled) return
+      handled = true
       try {
         const result = await loginWithSupabaseToken(session.access_token)
         if (cancelled) return
@@ -36,16 +39,21 @@ export function OAuthCallback() {
         }
         navigate(result.role === 'client' ? '/demo/barberia' : roleHome(result.role), { replace: true })
       } catch (err) {
+        handled = false
         if (!cancelled) setError(err.message)
       }
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) finish(data.session)
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+        finish(session)
+      }
     })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) finish(session)
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session && !handled) {
+        finish(data.session)
+      }
     })
 
     return () => {

@@ -13,6 +13,8 @@
   "dependencies": {
     "@consultoria/payments": "file:../core-booking-engine/packages/payments",
     "@consultoria/qr": "file:../core-booking-engine/packages/qr",
+    "@stripe/react-stripe-js": "^6.8.1",
+    "@stripe/stripe-js": "^9.13.0",
     "@supabase/supabase-js": "^2.112.3",
     "date-fns": "^4.4.0",
     "html5-qrcode": "^2.3.8",

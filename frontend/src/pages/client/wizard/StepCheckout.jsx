@@ -1,4 +1,9 @@
 import { useState } from 'react'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+const _STRIPE_PK = import.meta.env.VITE_STRIPE_PK
+const _stripePromise = _STRIPE_PK ? loadStripe(_STRIPE_PK) : null
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
@@ -35,8 +40,6 @@ const METHODS = [
   { id: 'card', label: 'Tarjeta' },
   { id: 'apple', label: 'Apple Pay' },
   { id: 'google', label: 'Google Pay' },
-  { id: 'paypal', label: 'PayPal' },
-  { id: 'mercadopago', label: 'Mercado Pago' },
 ]
 
 // ── Brand SVG icons (inline, no external deps) ────────────────────────────────
@@ -69,30 +72,11 @@ function IconGoogle() {
   )
 }
 
-function IconPayPal() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.067 8.478c.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H15.62l-.42 2.65a.32.32 0 01-.316.27H13.08a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.316-.27h3.483c.665 0 1.286.17 1.916.42zm-1.24 1.568c-.1-.4-.45-.63-.86-.63h-2.2l-.7 4.42h1.9c1.11 0 2.06-.76 2.23-1.86.13-.84-.1-1.58-.37-1.93zM5.355 7.307H8.84c1.356 0 2.58.73 3.024 2.016.49 1.412-.063 3.006-1.305 3.77-.508.314-1.09.47-1.68.47H7.21l-.42 2.656a.32.32 0 01-.316.27H4.67a.213.213 0 01-.21-.245L5.04 7.577a.32.32 0 01.315-.27zm1.42 1.57l-.7 4.42h1.46c1.11 0 2.06-.76 2.23-1.86.19-1.22-.58-2.2-1.77-2.56H6.775z" fill="#003087"/>
-      <path d="M11.47 7.307h3.485c.665 0 1.287.17 1.916.42.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H12.43l-.42 2.65a.32.32 0 01-.316.27h-1.805a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.31-.27z" fill="#009cde"/>
-    </svg>
-  )
-}
-
-function IconMP() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 40 24" fill="none">
-      <rect width="40" height="24" rx="4" fill="#009ee3"/>
-      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="sans-serif">MP</text>
-    </svg>
-  )
-}
 
 const METHOD_ICONS = {
   card: <IconCard />,
   apple: <IconApple />,
   google: <IconGoogle />,
-  paypal: <IconPayPal />,
-  mercadopago: <IconMP />,
 }
 
 // ── External method buttons (branded, cosmetic in Phase 1) ────────────────────
@@ -126,45 +110,52 @@ function GooglePayButton({ onClick, disabled }) {
   )
 }
 
-function PayPalButton({ onClick, disabled }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-white text-base font-bold transition-opacity disabled:opacity-50"
-      style={{ background: '#0070ba' }}
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-        <path d="M20.067 8.478c.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H15.62l-.42 2.65a.32.32 0 01-.316.27H13.08a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.316-.27h3.483c.665 0 1.286.17 1.916.42zm-1.24 1.568c-.1-.4-.45-.63-.86-.63h-2.2l-.7 4.42h1.9c1.11 0 2.06-.76 2.23-1.86.13-.84-.1-1.58-.37-1.93zM5.355 7.307H8.84c1.356 0 2.58.73 3.024 2.016.49 1.412-.063 3.006-1.305 3.77-.508.314-1.09.47-1.68.47H7.21l-.42 2.656a.32.32 0 01-.316.27H4.67a.213.213 0 01-.21-.245L5.04 7.577a.32.32 0 01.315-.27zm1.42 1.57l-.7 4.42h1.46c1.11 0 2.06-.76 2.23-1.86.19-1.22-.58-2.2-1.77-2.56H6.775z"/>
-      </svg>
-      <span>PayPal</span>
-    </button>
-  )
-}
 
-function MercadoPagoButton({ onClick, disabled }) {
+// ── Stripe Payment Element inner component ────────────────────────────────────
+
+function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountCents }) {
+  const stripe = useStripe()
+  const elements = useElements()
+
+  async function handleStripeSubmit(e) {
+    e.preventDefault()
+    if (!stripe || !elements) return
+    setPaying(true)
+    setApiError(null)
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+      })
+      if (error) throw new Error(error.message)
+      await onPaid(amountCents)
+    } catch (err) {
+      setApiError(err.message)
+      setPaying(false)
+    }
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-white text-base font-bold transition-opacity disabled:opacity-50"
-      style={{ background: '#009ee3' }}
-    >
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <circle cx="12" cy="12" r="10"/>
-        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#009ee3" fontSize="8" fontWeight="bold" fontFamily="sans-serif">MP</text>
-      </svg>
-      <span>Mercado Pago</span>
-    </button>
+    <form onSubmit={handleStripeSubmit} className="mb-4">
+      {/* wallets: 'auto' shows Apple Pay / Google Pay express buttons at the top
+          when the browser/device supports them — no extra code needed. */}
+      <PaymentElement options={{ wallets: { applePay: 'auto', googlePay: 'auto' } }} />
+      <button
+        type="submit"
+        disabled={!stripe || paying}
+        className="bg-secondary mt-4 w-full rounded-full px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+      >
+        {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
+      </button>
+    </form>
   )
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
 // RF-Pagos step 5: cosmetic form — no card data or credentials reach the server.
-export function StepCheckout({ booking, appointment, onPaid, onError }) {
+// When clientSecret is provided (Stripe mode), renders Stripe Payment Element instead.
+export function StepCheckout({ booking, appointment, onPaid, onError, clientSecret }) {
   const [method,   setMethod]  = useState('card')
   const [holder,   setHolder]  = useState('')
   const [card,     setCard]    = useState('')
@@ -262,6 +253,20 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
         </div>
       </div>
 
+      {/* Stripe mode — renders Stripe Payment Element when clientSecret is available */}
+      {_stripePromise && clientSecret ? (
+        <Elements stripe={_stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+          <StripeForm
+            formatted={formatted}
+            paying={paying}
+            setPaying={setPaying}
+            setApiError={setApiError}
+            onPaid={onPaid}
+            amountCents={amountCents}
+          />
+        </Elements>
+      ) : (
+      <>
       {/* Method selector */}
       <div className="mb-4">
         <p className="text-muted mb-2 text-xs font-semibold uppercase tracking-wide">Método de pago</p>
@@ -381,10 +386,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
 
       {method !== 'card' && (
         <div className="mb-4 rounded-xl border border-[#e2e8f0] p-4">
-          {method === 'apple'       && <ApplePayButton      onClick={handleExternalPay} disabled={paying} />}
-          {method === 'google'      && <GooglePayButton     onClick={handleExternalPay} disabled={paying} />}
-          {method === 'paypal'      && <PayPalButton        onClick={handleExternalPay} disabled={paying} />}
-          {method === 'mercadopago' && <MercadoPagoButton   onClick={handleExternalPay} disabled={paying} />}
+          {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
+          {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
           <p className="text-muted mt-3 text-center text-xs">
             Simulado — entorno de prueba, no se realiza ningún cargo real.
           </p>
@@ -403,6 +406,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
         >
           {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
         </button>
+      )}
+      </>
       )}
 
       <button
