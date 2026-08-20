@@ -20,9 +20,9 @@ const ROLE_NAV = {
   ],
 }
 
-const BASE = 'block rounded-md px-3 py-[0.6rem] text-[0.9rem] no-underline'
-const INACTIVE = `${BASE} text-[#cfcfcf] hover:bg-[#2c2c2e] hover:text-white`
-const ACTIVE = `${BASE} bg-[#c9a24b] font-semibold text-[#1c1c1e]`
+const BASE = 'block rounded-xl px-3 py-2.5 text-sm no-underline transition-colors duration-150'
+const INACTIVE = `${BASE} text-[#7A7065] hover:bg-[#1E1B15] hover:text-[#F2EBE0]`
+const ACTIVE = `${BASE} bg-[#C8973E] font-semibold text-[#0C0B09]`
 const navClass = ({ isActive }) => (isActive ? ACTIVE : INACTIVE)
 
 export function PanelLayout() {
@@ -36,10 +36,11 @@ export function PanelLayout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="hidden w-60 shrink-0 flex-col bg-[#1c1c1e] py-6 px-4 text-[#f5f5f5] md:flex">
-        <div className="mb-1 px-2 text-[1.1rem] font-bold">Panel</div>
-        <div className="mb-6 px-2 text-xs text-[#8e8e93]">
+    <div className="flex min-h-screen flex-col bg-[#0C0B09] md:flex-row">
+      {/* Sidebar */}
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-[#2A2520] bg-[#161410] py-6 px-4 md:flex">
+        <div className="mb-1 px-2 text-[1rem] font-bold text-[#F2EBE0]">Panel</div>
+        <div className="mb-6 px-2 text-xs text-[#7A7065]">
           {user?.name} · <span className="capitalize">{ROLE_LABEL[user?.role]}</span>
         </div>
 
@@ -53,19 +54,19 @@ export function PanelLayout() {
 
         <button
           onClick={handleLogout}
-          className="mt-4 rounded-md px-3 py-[0.6rem] text-left text-[0.9rem] text-[#cfcfcf] hover:bg-[#2c2c2e] hover:text-white"
+          className="mt-4 rounded-xl px-3 py-2.5 text-left text-sm text-[#7A7065] hover:bg-[#1E1B15] hover:text-red-400 transition-colors"
         >
           Cerrar sesión
         </button>
       </aside>
 
       {/* Mobile top bar */}
-      <header className="flex items-center justify-between bg-[#1c1c1e] px-4 py-3 text-[#f5f5f5] md:hidden">
-        <span className="font-semibold">Panel · {ROLE_LABEL[user?.role]}</span>
-        <button onClick={handleLogout} className="text-sm text-[#cfcfcf]">Salir</button>
+      <header className="flex items-center justify-between border-b border-[#2A2520] bg-[#161410] px-4 py-3 text-[#F2EBE0] md:hidden">
+        <span className="font-semibold text-sm">Panel · {ROLE_LABEL[user?.role]}</span>
+        <button onClick={handleLogout} className="text-sm text-[#7A7065] hover:text-red-400">Salir</button>
       </header>
 
-      <main className="flex-1 overflow-x-auto p-4 md:p-8">
+      <main className="flex-1 overflow-x-auto p-4 md:p-8 text-[#F2EBE0]">
         <Outlet />
       </main>
     </div>

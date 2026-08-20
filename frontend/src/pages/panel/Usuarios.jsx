@@ -3,11 +3,13 @@ import { useAuth } from '../../context/AuthContext'
 
 const ROLE_LABEL = { client: 'Cliente', employee: 'Empleado', host: 'Host', admin: 'Admin' }
 const ROLE_COLOR = {
-  client: 'bg-blue-100 text-blue-800',
-  employee: 'bg-green-100 text-green-800',
-  host: 'bg-purple-100 text-purple-800',
-  admin: 'bg-orange-100 text-orange-800',
+  client:   'bg-blue-500/15 text-blue-400 border border-blue-500/20',
+  employee: 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20',
+  host:     'bg-purple-500/15 text-purple-400 border border-purple-500/20',
+  admin:    'bg-[#C8973E]/15 text-[#C8973E] border border-[#C8973E]/20',
 }
+
+const inputClass = 'rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors'
 
 export function Usuarios() {
   const { token, user: me } = useAuth()
@@ -72,36 +74,38 @@ export function Usuarios() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#1c1c1e]">Usuarios</h1>
+        <h1 className="text-2xl font-bold text-[#F2EBE0]">Usuarios</h1>
         <button
           onClick={() => { setInvite(i => ({ ...i, open: true })); setInviteResult(null) }}
-          className="rounded-lg bg-[#c9a24b] px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
         >
           + Invitar usuario
         </button>
       </div>
 
-      {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {error && (
+        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+      )}
 
       {loading ? (
-        <p className="text-sm text-[#6e6e73]">Cargando…</p>
+        <p className="text-sm text-[#7A7065]">Cargando…</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[#d1d1d6]">
+        <div className="overflow-x-auto rounded-xl border border-[#2A2520]">
           <table className="min-w-full text-sm">
-            <thead className="bg-[#f5f5f5] text-xs text-[#6e6e73]">
+            <thead className="border-b border-[#2A2520] bg-[#161410] text-xs text-[#7A7065]">
               <tr>
                 {['Nombre', 'Email', 'Rol', 'Acciones'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left font-semibold uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f0f0f0]">
+            <tbody className="divide-y divide-[#2A2520]">
               {users.map(u => (
-                <tr key={u.id} className="hover:bg-[#fafafa]">
-                  <td className="px-4 py-3 font-medium text-[#1c1c1e]">{u.name}</td>
-                  <td className="px-4 py-3 text-[#6e6e73]">{u.email}</td>
+                <tr key={u.id} className="hover:bg-[#1E1B15] transition-colors">
+                  <td className="px-4 py-3 font-medium text-[#F2EBE0]">{u.name}</td>
+                  <td className="px-4 py-3 text-[#7A7065]">{u.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${ROLE_COLOR[u.role]}`}>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ROLE_COLOR[u.role] ?? 'bg-[#2A2520] text-[#7A7065]'}`}>
                       {ROLE_LABEL[u.role]}
                     </span>
                   </td>
@@ -111,19 +115,19 @@ export function Usuarios() {
                         <select
                           value={u.role}
                           onChange={e => changeRole(u.id, e.target.value)}
-                          className="rounded border border-[#d1d1d6] px-2 py-1 text-xs"
+                          className="rounded-lg border border-[#2A2520] bg-[#161410] px-2 py-1 text-xs text-[#F2EBE0] outline-none focus:border-[#C8973E]"
                         >
                           {Object.entries(ROLE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                         </select>
                         <button
                           onClick={() => deactivate(u.id)}
-                          className="text-xs text-red-500 hover:underline"
+                          className="text-xs text-red-400 hover:text-red-300 transition-colors"
                         >
                           Desactivar
                         </button>
                       </div>
                     )}
-                    {u.id === me.id && <span className="text-xs text-[#6e6e73]">(tú)</span>}
+                    {u.id === me.id && <span className="text-xs text-[#7A7065]">(tú)</span>}
                   </td>
                 </tr>
               ))}
@@ -134,20 +138,20 @@ export function Usuarios() {
 
       {/* Invite modal */}
       {invite.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setInvite(i => ({ ...i, open: false }))}>
+          <div className="w-full max-w-sm rounded-2xl border border-[#2A2520] bg-[#161410] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-bold text-[#1c1c1e]">Invitar usuario</h2>
-              <button onClick={() => setInvite(i => ({ ...i, open: false }))} className="text-[#6e6e73]">✕</button>
+              <h2 className="font-bold text-[#F2EBE0]">Invitar usuario</h2>
+              <button onClick={() => setInvite(i => ({ ...i, open: false }))} className="text-[#7A7065] hover:text-[#F2EBE0] text-xl leading-none transition-colors">✕</button>
             </div>
 
             {inviteResult ? (
               <div>
-                <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+                <div className="mb-4 rounded-xl border border-[#10B981]/20 bg-[#10B981]/10 p-3 text-sm text-[#10B981]">
                   {inviteResult.temp_password ? (
                     <>
                       Usuario creado. Contraseña temporal: <strong>{inviteResult.temp_password}</strong>
-                      <br /><span className="text-xs">Compártela de forma segura y pídele que la cambie.</span>
+                      <br /><span className="text-xs opacity-80">Compártela de forma segura y pídele que la cambie.</span>
                     </>
                   ) : (
                     'Invitación enviada. Le llegará un correo para crear su contraseña y activar la cuenta.'
@@ -155,36 +159,24 @@ export function Usuarios() {
                 </div>
                 <button
                   onClick={() => { setInvite(i => ({ ...i, open: false, email: '', name: '' })); setInviteResult(null) }}
-                  className="w-full rounded-lg bg-[#c9a24b] py-2 text-sm font-semibold text-white"
+                  className="w-full rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
                 >
                   Cerrar
                 </button>
               </div>
             ) : (
               <form onSubmit={sendInvite} className="flex flex-col gap-3">
-                <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
                   Nombre
-                  <input
-                    required value={invite.name}
-                    onChange={e => setInvite(i => ({ ...i, name: e.target.value }))}
-                    className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b]"
-                  />
+                  <input required value={invite.name} onChange={e => setInvite(i => ({ ...i, name: e.target.value }))} className={inputClass} />
                 </label>
-                <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
                   Email
-                  <input
-                    type="email" required value={invite.email}
-                    onChange={e => setInvite(i => ({ ...i, email: e.target.value }))}
-                    className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b]"
-                  />
+                  <input type="email" required value={invite.email} onChange={e => setInvite(i => ({ ...i, email: e.target.value }))} className={inputClass} />
                 </label>
-                <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
                   Rol
-                  <select
-                    value={invite.role}
-                    onChange={e => setInvite(i => ({ ...i, role: e.target.value }))}
-                    className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b]"
-                  >
+                  <select value={invite.role} onChange={e => setInvite(i => ({ ...i, role: e.target.value }))} className={inputClass}>
                     <option value="employee">Empleado</option>
                     <option value="host">Host</option>
                     <option value="admin">Admin</option>
@@ -193,7 +185,7 @@ export function Usuarios() {
                 <button
                   type="submit"
                   disabled={inviteLoading}
-                  className="mt-2 rounded-lg bg-[#c9a24b] py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  className="mt-2 rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
                 >
                   {inviteLoading ? 'Creando…' : 'Crear e invitar'}
                 </button>

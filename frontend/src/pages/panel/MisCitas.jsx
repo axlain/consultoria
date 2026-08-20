@@ -11,9 +11,26 @@ const STATUS_LABEL = {
   no_show: 'No se presentó',
 }
 const STATUS_COLOR = {
-  scheduled: 'bg-green-50 text-green-700',
-  completed: 'bg-blue-50 text-blue-700',
-  no_show: 'bg-red-50 text-red-700',
+  scheduled: 'border-[#C8973E]/30 bg-[#C8973E]/10 text-[#C8973E]',
+  completed: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+  no_show: 'border-red-500/30 bg-red-500/10 text-red-400',
+}
+
+const now = new Date()
+now.setHours(0, 0, 0, 0)
+
+function toDateObj(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function CalendarIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  )
 }
 
 export function MisCitas() {
@@ -23,6 +40,7 @@ export function MisCitas() {
   const [citas, setCitas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState('proximas')
 
   const slug = tenant?.slug || user?.business_id || 'barberia'
 
@@ -48,77 +66,184 @@ export function MisCitas() {
     () => Object.fromEntries((tenant?.professionals ?? []).map(p => [p.id, p.name])),
     [tenant],
   )
+  const servicePrices = useMemo(
+    () => Object.fromEntries((tenant?.services ?? []).map(s => [s.id, s.price])),
+    [tenant],
+  )
+
+  const proximas = citas.filter(c => c.status === 'scheduled' && toDateObj(c.date) >= now)
+  const historial = citas.filter(c => c.status !== 'scheduled' || toDateObj(c.date) < now)
+  const displayed = tab === 'proximas' ? proximas : historial
 
   return (
-    <ClientShell>
+    <ClientShell reserveCta={false}>
       <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} />
 
-      <div className="mb-6 flex items-center justify-between pr-14">
-        <h1 className="text-2xl font-bold text-[#1c1c1e]">Mis citas</h1>
-        <Link
-          to={`/demo/${slug}/reservar`}
-          className="rounded-lg bg-[#c9a24b] px-4 py-2 text-sm font-semibold text-white no-underline"
-        >
-          + Agendar
-        </Link>
+      <div className="px-5 pt-10 pb-28">
+        <div className="mb-6 flex items-center justify-between pr-4">
+          <h1 className="text-2xl font-extrabold text-[#F2EBE0]">Mis citas</h1>
+          <Link
+            to={`/demo/${slug}/reservar`}
+            className="rounded-2xl bg-[#C8973E] px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-[#E8B86D] active:scale-[0.98]"
+          >
+            + Agendar
+          </Link>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex rounded-xl border border-[#2A2520] bg-[#161410] p-1 mb-6">
+          {[
+            { id: 'proximas', label: 'Próximas', count: proximas.length },
+            { id: 'historial', label: 'Historial', count: historial.length },
+          ].map(({ id, label, count }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={[
+                'flex-1 rounded-lg py-2 text-sm font-semibold transition-all duration-150 flex items-center justify-center gap-1.5',
+                tab === id
+                  ? 'bg-[#C8973E] text-[#0C0B09]'
+                  : 'text-[#7A7065] hover:text-[#F2EBE0]',
+              ].join(' ')}
+            >
+              {label}
+              {count > 0 && tab !== id && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#2A2520] text-[#7A7065]">
+                  {count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {loading && (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-[140px] animate-pulse rounded-2xl bg-[#1E1B15]" />
+            ))}
+          </div>
+        )}
+
+        {error && !loading && (
+          <p className="text-sm text-red-400">{error}</p>
+        )}
+
+        {!loading && !error && displayed.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#2A2520] p-12 text-center">
+            <p className="text-base text-[#7A7065]">
+              {tab === 'proximas' ? 'No tienes citas próximas' : 'Sin historial de citas'}
+            </p>
+            {tab === 'proximas' && (
+              <Link
+                to={`/demo/${slug}/reservar`}
+                className="mt-4 inline-block rounded-2xl bg-[#C8973E] px-5 py-2.5 text-sm font-bold text-[#0C0B09] no-underline hover:bg-[#E8B86D] transition-colors"
+              >
+                Agendar ahora
+              </Link>
+            )}
+          </div>
+        )}
+
+        {!loading && displayed.length > 0 && (
+          <ul className="flex flex-col gap-3">
+            {displayed.map(c => {
+              const serviceName = serviceNames[c.service_id] ?? c.service_id
+              const proName = professionalNames[c.professional_id] ?? c.professional_id
+              const price = servicePrices[c.service_id]
+              return (
+                <li key={c.id} className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] overflow-hidden">
+                  <div className="p-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-1">
+                      <div>
+                        <p className="font-semibold text-sm text-[#F2EBE0]">{serviceName}</p>
+                        <p className="text-xs text-[#7A7065] mt-0.5">{proName}</p>
+                      </div>
+                      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold shrink-0 ml-2 ${STATUS_COLOR[c.status] ?? 'border-[#2A2520] bg-[#161410] text-[#7A7065]'}`}>
+                        {STATUS_LABEL[c.status] ?? c.status}
+                      </span>
+                    </div>
+
+                    {/* Date + price */}
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="flex items-center gap-1.5 text-xs text-[#7A7065]">
+                        <CalendarIcon />
+                        {c.date}, {c.time}
+                      </span>
+                      {price != null && (
+                        <span className="text-sm font-bold text-[#C8973E]">${price}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="grid grid-cols-2 border-t border-[#2A2520]">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/demo/${slug}/cita/${c.id}`, {
+                        state: {
+                          cita: {
+                            ...c,
+                            service_name: serviceNames[c.service_id] ?? c.service_id,
+                            professional_name: professionalNames[c.professional_id] ?? c.professional_id,
+                          }
+                        }
+                      })}
+                      className="py-3 text-center text-sm font-semibold text-[#7A7065] hover:text-[#F2EBE0] transition-colors border-r border-[#2A2520] w-full"
+                    >
+                      Ver detalle
+                    </button>
+                    {c.status === 'scheduled' ? (
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/demo/${slug}/reservar`, {
+                          state: {
+                            rebook: {
+                              service: tenant?.services?.find(s => s.id === c.service_id) ?? { id: c.service_id, name: serviceName, price: 0, color: '#C8973E' },
+                              professional: tenant?.professionals?.find(p => p.id === c.professional_id) ?? null,
+                              customerName: c.customer_name,
+                              customerLastName: c.customer_last_name,
+                              customerPhone: c.customer_phone,
+                            },
+                          },
+                        })}
+                        className="py-3 text-center text-sm font-semibold text-[#C8973E] hover:bg-[#C8973E]/8 transition-colors"
+                      >
+                        Reagendar
+                      </button>
+                    ) : (
+                      <span className="py-3 text-center text-sm text-[#2A2520]">—</span>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </div>
 
-      {loading && (
-        <p className="text-sm text-[#6e6e73]">Cargando citas…</p>
-      )}
-
-      {error && !loading && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
-
-      {!loading && !error && citas.length === 0 && (
-        <div className="rounded-xl border border-dashed border-[#d1d1d6] p-12 text-center text-[#6e6e73]">
-          <p className="text-lg">No tienes citas próximas</p>
-          <p className="mt-1 text-sm">Usa el botón de arriba para agendar.</p>
-        </div>
-      )}
-
-      {!loading && citas.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {citas.map(c => (
-            <li key={c.id} className="rounded-xl border border-[#d1d1d6] bg-white p-4">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#1c1c1e]">
-                  {c.date} — {c.time}
-                </span>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-gray-100 text-gray-700'}`}>
-                  {STATUS_LABEL[c.status] ?? c.status}
-                </span>
-              </div>
-              <p className="text-sm text-[#6e6e73]">
-                Servicio: <span className="font-medium text-[#1c1c1e]">{serviceNames[c.service_id] ?? c.service_id}</span>
-              </p>
-              <p className="text-sm text-[#6e6e73]">
-                Profesional: <span className="font-medium text-[#1c1c1e]">{professionalNames[c.professional_id] ?? c.professional_id}</span>
-              </p>
-              {c.status === 'scheduled' && (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/demo/${slug}/reservar`, {
-                    state: {
-                      rebook: {
-                        service: tenant?.services?.find(s => s.id === c.service_id) ?? { id: c.service_id, name: c.service_id, price: 0, color: '#c9a24b' },
-                        professional: tenant?.professionals?.find(p => p.id === c.professional_id) ?? null,
-                        customerName: c.customer_name,
-                        customerLastName: c.customer_last_name,
-                        customerPhone: c.customer_phone,
-                      },
-                    },
-                  })}
-                  className="mt-3 w-full rounded-lg border border-[#c9a24b] py-1.5 text-sm font-semibold text-[#c9a24b] hover:bg-amber-50"
-                >
-                  Reagendar
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-[430px] flex border-t border-[#2A2520] bg-[#0C0B09]">
+        {[
+          { to: `/demo/${slug}`, label: 'Inicio', icon: '🏠' },
+          { to: `/panel/mis-citas`, label: 'Mis citas', icon: '📅', active: true },
+          { to: `/panel/mis-rewards`, label: 'Rewards', icon: '⭐' },
+          { to: `/login`, label: 'Perfil', icon: '👤' },
+        ].map(({ to, label, icon, active }) => (
+          <Link
+            key={to}
+            to={to}
+            className={[
+              'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-semibold no-underline transition-colors',
+              active ? 'text-[#C8973E]' : 'text-[#7A7065] hover:text-[#F2EBE0]',
+            ].join(' ')}
+          >
+            <span className="text-xl leading-none">{icon}</span>
+            {label}
+          </Link>
+        ))}
+      </nav>
     </ClientShell>
   )
 }

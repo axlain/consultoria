@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTenant } from '../../../context/TenantContext'
 import { useAuth } from '../../../context/AuthContext'
 import { api } from '../../../api/client'
@@ -170,8 +170,6 @@ export function BookingWizard() {
   }
 
   const step = STEPS[stepIndex]
-  const accent = booking.service?.color || 'var(--color-secondary)'
-
   if (paymentFailed) {
     return (
       <ClientShell>
@@ -186,28 +184,54 @@ export function BookingWizard() {
   return (
     <ClientShell>
       <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
-      <div className="mb-7">
-        <div className="flex gap-1.5 pr-14" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
-          {STEPS.map((s, i) => (
-            <div key={s} className="bg-line h-1 flex-1 overflow-hidden rounded-full">
-              <div
-                className="h-full rounded-full transition-[width] duration-300 ease-out"
-                style={{ width: i <= stepIndex ? '100%' : '0%', backgroundColor: accent }}
-              />
-            </div>
-          ))}
-        </div>
-        <p className="text-muted mt-2.5 text-center text-xs font-semibold tracking-[0.12em] uppercase">
-          {rebook ? 'Reagendar — elige nueva fecha' : `Paso ${stepIndex + 1} de ${STEPS.length}`}
+      {/* X — volver al home del tenant */}
+      <Link
+        to={`/demo/${tenant.slug}`}
+        className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 text-[#7A7065] no-underline backdrop-blur-sm transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0]"
+        aria-label="Cerrar y volver al inicio"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </Link>
+      <div className="mb-7 px-5 pt-10">
+        {rebook ? (
+          <p className="text-center text-[10px] font-bold tracking-[0.14em] uppercase text-[#7A7065]">
+            Reagendar — elige nueva fecha
+          </p>
+        ) : (
+          <div role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}
+            className="flex items-center justify-center pr-10">
+            {STEPS.map((s, i) => (
+              <div key={s} className="flex items-center">
+                <div className={[
+                  'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-200',
+                  i < stepIndex ? 'bg-[#C8973E] text-[#0C0B09]' :
+                  i === stepIndex ? 'bg-[#C8973E] text-[#0C0B09] ring-2 ring-[#C8973E]/30 ring-offset-2 ring-offset-[#0C0B09]' :
+                  'bg-[#2A2520] text-[#7A7065]',
+                ].join(' ')}>
+                  {i < stepIndex ? (
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  ) : i + 1}
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={`h-px w-6 mx-0.5 transition-colors duration-200 ${i < stepIndex ? 'bg-[#C8973E]' : 'bg-[#2A2520]'}`} />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="mt-2.5 text-center text-[10px] font-bold tracking-[0.14em] uppercase text-[#7A7065]">
+          {rebook ? '' : `Paso ${stepIndex + 1} de ${STEPS.length}`}
         </p>
       </div>
 
       {submitError && (
-        <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</p>
+        <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{submitError}</p>
       )}
 
       {submitting && (
-        <p className="mb-4 text-center text-sm text-[#6e6e73]">Procesando…</p>
+        <p className="mb-4 text-center text-sm text-[#888]">Procesando…</p>
       )}
 
       <div key={step} className="motion-safe:animate-fade-in">

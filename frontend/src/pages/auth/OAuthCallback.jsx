@@ -78,22 +78,22 @@ export function OAuthCallback() {
   if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : roleHome(user.role)} replace />
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#0C0B09]">
       <AuthShell showMenu={false}>
-        {businessOptions && <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Elige un negocio</h1>}
+        {businessOptions && <h1 className="mb-6 text-2xl font-bold text-[#F2EBE0]">Elige un negocio</h1>}
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+          <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
         )}
 
         {businessOptions ? (
           <BusinessSelect businesses={businessOptions} onSelect={chooseBusiness} loading={choosing} />
         ) : error ? (
-          <Link to="/login" className="font-medium text-[#c9a24b] hover:underline">
+          <Link to="/login" className="font-medium text-[#C8973E] hover:underline">
             Volver a iniciar sesión
           </Link>
         ) : (
-          <p className="text-center text-sm text-[#6e6e73]">Conectando tu cuenta…</p>
+          <p className="text-center text-sm text-[#7A7065]">Conectando tu cuenta…</p>
         )}
       </AuthShell>
     </div>

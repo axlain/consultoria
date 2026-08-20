@@ -146,17 +146,17 @@ export function AgendaListView({
     return (
       <div className="flex flex-col gap-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-line h-16 animate-pulse rounded-xl" />
+          <div key={i} className="h-16 animate-pulse rounded-xl bg-[#1E1B15]" />
         ))}
       </div>
     )
   }
 
-  if (error) return <p className="text-sm text-[#c0392b]">{error}</p>
+  if (error) return <p className="text-sm text-red-400">{error}</p>
 
   if (groupedDays.length === 0) {
     return (
-      <p className="text-muted text-sm">
+      <p className="text-sm text-[#7A7065]">
         {entryKind === 'gap' ? 'No hay espacios libres esta semana.' : 'No hay citas próximas esta semana.'}
       </p>
     )
@@ -166,7 +166,7 @@ export function AgendaListView({
     <div className="flex flex-col gap-6">
       {groupedDays.map(({ date, iso, entries }) => (
         <div key={iso}>
-          <h3 className="text-muted mb-2 border-0 p-0 text-sm font-semibold tracking-wide uppercase">
+          <h3 className="mb-2 border-0 p-0 text-sm font-semibold uppercase tracking-wide text-[#7A7065]">
             {dayLabel(date)}
           </h3>
           <div className="flex flex-col gap-2">
@@ -176,12 +176,12 @@ export function AgendaListView({
                 return (
                   <div
                     key={`gap-${gap.professional.id}-${gap.start}`}
-                    className="border-line flex items-center gap-3 rounded-xl border border-dashed p-3"
+                    className="flex items-center gap-3 rounded-xl border border-dashed border-[#2A2520] p-3"
                   >
-                    <span className="w-12 shrink-0 text-sm tabular-nums text-[#aaa]">
+                    <span className="w-12 shrink-0 text-sm tabular-nums text-[#7A7065]">
                       {formatMinutes(gap.start)}
                     </span>
-                    <span className="text-sm text-[#aaa]">
+                    <span className="text-sm text-[#7A7065]">
                       {formatMinutes(gap.start)}–{formatMinutes(gap.end)} · Espacio libre · {gap.professional.name}
                     </span>
                   </div>
@@ -203,7 +203,7 @@ export function AgendaListView({
                       appointment: apt,
                     })
                   }
-                  className={`border-line flex items-center gap-3 rounded-xl border bg-white p-3 text-left ${
+                  className={`flex items-center gap-3 rounded-xl border border-[#2A2520] bg-[#1E1B15] p-3 text-left hover:border-[#C8973E]/20 transition-colors ${
                     isClosedStatus(apt.status) ? 'opacity-60' : ''
                   }`}
                 >
@@ -211,12 +211,12 @@ export function AgendaListView({
                     className="h-8 w-1 shrink-0 rounded-full"
                     style={{ backgroundColor: appointmentAccentColor(apt, service) }}
                   />
-                  <span className="w-12 shrink-0 text-sm font-semibold tabular-nums">{apt.time}</span>
+                  <span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-[#F2EBE0]">{apt.time}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">
+                    <span className="block truncate font-medium text-[#F2EBE0]">
                       {apt.customer_name} {apt.customer_last_name}
                     </span>
-                    <span className="text-muted block truncate text-sm">
+                    <span className="block truncate text-sm text-[#7A7065]">
                       {service?.name ?? apt.service_id} · {professional?.name ?? apt.professional_id}
                     </span>
                   </span>

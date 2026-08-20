@@ -8,10 +8,6 @@ export function toIso(d) {
   return `${y}-${m}-${day}`
 }
 
-// Days starting at `startDate` (local time), forward-looking — defaults to today.
-// Used by both the booking wizard and the admin agenda so "today" always means
-// the viewer's today, and the admin list can also be re-centered on whichever
-// date is picked in the strip.
 export function buildDateRange(days, startDate = new Date()) {
   const start = new Date(startDate)
   start.setHours(0, 0, 0, 0)
@@ -22,12 +18,10 @@ export function buildDateRange(days, startDate = new Date()) {
   })
 }
 
-// Horizontal swipeable day picker shared by the client booking wizard (step 3) and
-// the admin agenda, so both surfaces navigate dates the same way.
 export function DateStrip({ dates, selectedDate, onSelect }) {
   return (
     <div
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="listbox"
       aria-label="Selecciona una fecha"
     >
@@ -41,14 +35,18 @@ export function DateStrip({ dates, selectedDate, onSelect }) {
             role="option"
             aria-selected={active}
             onClick={() => onSelect(iso)}
-            className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-3.5 py-2.5 text-sm transition-colors ${
-              active ? 'border-secondary bg-secondary text-white' : 'border-line bg-white hover:border-secondary/50'
+            className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-3.5 py-2.5 text-sm transition-all ${
+              active
+                ? 'border-[#C8973E] bg-[#C8973E] text-[#0C0B09] font-bold'
+                : 'border-[#2A2520] bg-[#1E1B15] text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0]'
             }`}
           >
             <span className="font-semibold whitespace-nowrap">
               {MONTHS_ES[d.getMonth()]} {d.getDate()}
             </span>
-            <span className={active ? 'text-white/80' : 'text-muted'}>{WEEKDAYS_ES[d.getDay()]}</span>
+            <span className={active ? 'text-[#0C0B09]/70 text-xs' : 'text-[#7A7065]/70 text-xs'}>
+              {WEEKDAYS_ES[d.getDay()]}
+            </span>
           </button>
         )
       })}

@@ -8,9 +8,9 @@ const STATUS_LABEL = {
   no_show: 'No se presentó',
 }
 const STATUS_COLOR = {
-  scheduled: 'bg-green-50 text-green-700',
-  completed: 'bg-blue-50 text-blue-700',
-  no_show: 'bg-red-50 text-red-700',
+  scheduled: 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20',
+  completed: 'bg-blue-500/15 text-blue-400 border border-blue-500/20',
+  no_show:   'bg-red-500/15 text-red-400 border border-red-500/20',
 }
 
 export function MiAgenda() {
@@ -25,7 +25,6 @@ export function MiAgenda() {
   useEffect(() => {
     api.getAgenda(slug, today)
       .then(data => {
-        // Show only appointments assigned to this professional.
         setCitas(data.filter(c => c.professional_id === user?.id || true))
       })
       .catch(err => setError(err.message))
@@ -34,34 +33,42 @@ export function MiAgenda() {
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold text-[#1c1c1e]">Mi agenda</h1>
-      <p className="mb-6 text-sm text-[#6e6e73]">
+      <h1 className="mb-1 text-2xl font-bold text-[#F2EBE0]">Mi agenda</h1>
+      <p className="mb-6 text-sm text-[#7A7065]">
         {user?.name} — {today}
       </p>
 
-      {loading && <p className="text-sm text-[#6e6e73]">Cargando citas…</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-[#1E1B15]" />
+          ))}
+        </div>
+      )}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {!loading && !error && citas.length === 0 && (
-        <div className="rounded-xl border border-dashed border-[#d1d1d6] p-12 text-center text-[#6e6e73]">
-          <p className="text-lg">Sin citas para hoy</p>
+        <div className="rounded-xl border border-dashed border-[#2A2520] p-12 text-center">
+          <p className="text-[#7A7065]">Sin citas para hoy</p>
         </div>
       )}
 
       {!loading && citas.length > 0 && (
         <ul className="flex flex-col gap-3">
           {citas.map(c => (
-            <li key={c.id} className="rounded-xl border border-[#d1d1d6] bg-white p-4">
+            <li key={c.id} className="rounded-xl border border-[#2A2520] bg-[#1E1B15] p-4 hover:border-[#C8973E]/20 transition-colors">
               <div className="mb-1 flex items-center justify-between">
-                <span className="font-semibold text-[#1c1c1e]">{c.time}</span>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                <span className="text-base font-bold text-[#F2EBE0]">{c.time}</span>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-[#2A2520] text-[#7A7065]'}`}>
                   {STATUS_LABEL[c.status] ?? c.status}
                 </span>
               </div>
-              <p className="text-sm text-[#6e6e73]">
+              <p className="text-sm text-[#F2EBE0]/80">
                 {c.customer_name} {c.customer_last_name}
               </p>
-              <p className="text-sm text-[#6e6e73]">Servicio: <span className="font-medium text-[#1c1c1e]">{c.service_id}</span></p>
+              <p className="text-sm text-[#7A7065]">
+                Servicio: <span className="font-medium text-[#F2EBE0]/70">{c.service_id}</span>
+              </p>
             </li>
           ))}
         </ul>
