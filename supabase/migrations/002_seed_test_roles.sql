@@ -1,0 +1,22 @@
+-- Usuarios de prueba para 'barberia'.
+-- NO ejecutar directamente — usar el script de Python:
+--
+--   cd backend && source .venv/bin/activate
+--   python scripts/create_test_users.py
+--
+-- El script crea los usuarios en Supabase Auth y los inserta en user_business_roles
+-- con los roles: client, employee, host, admin (contraseña temporal: Test1234!)
+--
+-- Si prefieres crear usuarios manualmente en Auth > Users del dashboard:
+--   1. Crea cada usuario con email confirmado.
+--   2. Copia el UUID de cada uno.
+--   3. Ejecuta el INSERT de abajo reemplazando los UUIDs reales.
+
+-- INSERT INTO user_business_roles (user_id, business_id, role, email, name, is_active)
+-- VALUES
+--   ('<uuid-client>',   'barberia', 'client',   'client@test.local',   'Cliente Test',  true),
+--   ('<uuid-employee>', 'barberia', 'employee', 'employee@test.local',  'Empleado Test', true),
+--   ('<uuid-host>',     'barberia', 'host',     'host@test.local',      'Host Test',     true),
+--   ('<uuid-admin>',    'barberia', 'admin',    'admin@test.local',     'Admin Test',    true)
+-- ON CONFLICT (user_id, business_id) DO UPDATE
+--   SET role = EXCLUDED.role, name = EXCLUDED.name, is_active = true;

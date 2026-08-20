@@ -128,4 +128,12 @@ export const api = {
     }),
 
   getPayment: (paymentId) => request(`/api/payments/${paymentId}`),
+
+  getProfile: () => request('/api/me/profile'),
+
+  updateProfile: (patch) =>
+    request('/api/me/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
 }

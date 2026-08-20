@@ -37,6 +37,23 @@ def get_user_role_row(user_id: str, business_id: str) -> dict | None:
     return rows[0] if rows else None
 
 
+def get_user_profile(user_id: str, business_id: str) -> dict | None:
+    return get_user_role_row(user_id, business_id)
+
+
+def update_user_phone(user_id: str, business_id: str, phone: str) -> dict | None:
+    rows = (
+        _client()
+        .table("user_business_roles")
+        .update({"phone": phone})
+        .eq("user_id", user_id)
+        .eq("business_id", business_id)
+        .execute()
+        .data
+    )
+    return rows[0] if rows else None
+
+
 def get_user_roles(user_id: str) -> list[dict]:
     """All business-role rows for a user, active or not — used to detect
     multi-tenant membership at login time."""
@@ -138,6 +155,18 @@ def get_appointment(tenant_slug: str, apt_id: str) -> dict | None:
 
 def insert_appointment(row: dict) -> dict:
     return _client().table("appointments").insert(row).execute().data[0]
+
+
+def update_appointment(apt_id: str, fields: dict) -> dict | None:
+    rows = (
+        _client()
+        .table("appointments")
+        .update(fields)
+        .eq("id", apt_id)
+        .execute()
+        .data
+    )
+    return rows[0] if rows else None
 
 
 def get_user_appointments(user_id: str, tenant_slug: str) -> list[dict]:

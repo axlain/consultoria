@@ -110,7 +110,9 @@ function App() {
           <Route path="disponibilidad" element={<AvailabilityCalendar />} />
           <Route path="gracias" element={<ThankYou />} />
           <Route path="cita/:aptId" element={<CitaView />} />
-          <Route path="admin" element={<AdminLayout />}>
+          <Route path="admin" element={
+            <ProtectedRoute roles={['host', 'admin']}><AdminLayout /></ProtectedRoute>
+          }>
             <Route index element={<Navigate to="agenda" replace />} />
             <Route path="agenda" element={<ResourceCalendar />} />
             <Route path="servicios" element={<ServiceCatalog />} />

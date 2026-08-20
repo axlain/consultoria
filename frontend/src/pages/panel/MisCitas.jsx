@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTenant } from '../../context/TenantContext'
 import { ClientShell } from '../../components/ClientShell'
@@ -19,6 +19,7 @@ const STATUS_COLOR = {
 export function MisCitas() {
   const { user, token } = useAuth()
   const { tenant } = useTenant()
+  const navigate = useNavigate()
   const [citas, setCitas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -95,6 +96,25 @@ export function MisCitas() {
               <p className="text-sm text-[#6e6e73]">
                 Profesional: <span className="font-medium text-[#1c1c1e]">{professionalNames[c.professional_id] ?? c.professional_id}</span>
               </p>
+              {c.status === 'scheduled' && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/demo/${slug}/reservar`, {
+                    state: {
+                      rebook: {
+                        service: tenant?.services?.find(s => s.id === c.service_id) ?? { id: c.service_id, name: c.service_id, price: 0, color: '#c9a24b' },
+                        professional: tenant?.professionals?.find(p => p.id === c.professional_id) ?? null,
+                        customerName: c.customer_name,
+                        customerLastName: c.customer_last_name,
+                        customerPhone: c.customer_phone,
+                      },
+                    },
+                  })}
+                  className="mt-3 w-full rounded-lg border border-[#c9a24b] py-1.5 text-sm font-semibold text-[#c9a24b] hover:bg-amber-50"
+                >
+                  Reagendar
+                </button>
+              )}
             </li>
           ))}
         </ul>

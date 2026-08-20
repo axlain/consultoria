@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import CORS_ORIGINS, SUPABASE_URL
 from app.data.store import load_tenants, seed_users
-from app.routers import admin, admin_transactions, admin_users, auth, booking, payments, tenants
+from app.routers import admin, admin_transactions, admin_users, auth, booking, me, payments, tenants
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ app = FastAPI(title="Multitenant Booking API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,6 +40,7 @@ app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(admin_transactions.router)
 app.include_router(admin_users.router)
+app.include_router(me.router)
 
 
 @app.get("/api/health")

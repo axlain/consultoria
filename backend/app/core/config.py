@@ -28,3 +28,7 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 # Where the frontend runs — used to build redirect links for Supabase emails
 # (invite, magic link). Override in production.
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+
+# Payments — set PAYMENT_PROVIDER=stripe and STRIPE_SECRET_KEY in .env to use Stripe instead of mock
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+PAYMENT_PROVIDER = os.environ.get("PAYMENT_PROVIDER", "mock")

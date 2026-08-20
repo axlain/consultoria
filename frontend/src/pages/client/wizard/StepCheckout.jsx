@@ -1,4 +1,9 @@
 import { useState } from 'react'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+const _STRIPE_PK = import.meta.env.VITE_STRIPE_PK
+const _stripePromise = _STRIPE_PK ? loadStripe(_STRIPE_PK) : null
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
 
@@ -35,8 +40,6 @@ const METHODS = [
   { id: 'card', label: 'Tarjeta' },
   { id: 'apple', label: 'Apple Pay' },
   { id: 'google', label: 'Google Pay' },
-  { id: 'paypal', label: 'PayPal' },
-  { id: 'mercadopago', label: 'Mercado Pago' },
 ]
 
 // ── Brand SVG icons (inline, no external deps) ────────────────────────────────
@@ -91,8 +94,6 @@ const METHOD_ICONS = {
   card: <IconCard />,
   apple: <IconApple />,
   google: <IconGoogle />,
-  paypal: <IconPayPal />,
-  mercadopago: <IconMP />,
 }
 
 // ── External method buttons (branded, cosmetic in Phase 1) ────────────────────
@@ -161,10 +162,51 @@ function MercadoPagoButton({ onClick, disabled }) {
   )
 }
 
+// ── Stripe Payment Element inner component ────────────────────────────────────
+
+function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountCents }) {
+  const stripe = useStripe()
+  const elements = useElements()
+
+  async function handleStripeSubmit(e) {
+    e.preventDefault()
+    if (!stripe || !elements) return
+    setPaying(true)
+    setApiError(null)
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+      })
+      if (error) throw new Error(error.message)
+      await onPaid(amountCents)
+    } catch (err) {
+      setApiError(err.message)
+      setPaying(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleStripeSubmit} className="mb-4">
+      {/* wallets: 'auto' shows Apple Pay / Google Pay express buttons at the top
+          when the browser/device supports them — no extra code needed. */}
+      <PaymentElement options={{ wallets: { applePay: 'auto', googlePay: 'auto' } }} />
+      <button
+        type="submit"
+        disabled={!stripe || paying}
+        className="bg-secondary mt-4 w-full rounded-full px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+      >
+        {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
+      </button>
+    </form>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 // RF-Pagos step 5: cosmetic form — no card data or credentials reach the server.
-export function StepCheckout({ booking, appointment, onPaid, onError }) {
+// When clientSecret is provided (Stripe mode), renders Stripe Payment Element instead.
+export function StepCheckout({ booking, appointment, onPaid, onError, clientSecret }) {
   const [method,   setMethod]  = useState('card')
   const [holder,   setHolder]  = useState('')
   const [card,     setCard]    = useState('')
@@ -262,6 +304,20 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
         </div>
       </div>
 
+      {/* Stripe mode — renders Stripe Payment Element when clientSecret is available */}
+      {_stripePromise && clientSecret ? (
+        <Elements stripe={_stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+          <StripeForm
+            formatted={formatted}
+            paying={paying}
+            setPaying={setPaying}
+            setApiError={setApiError}
+            onPaid={onPaid}
+            amountCents={amountCents}
+          />
+        </Elements>
+      ) : (
+      <>
       {/* Method selector */}
       <div className="mb-4">
         <p className="text-muted mb-2 text-xs font-semibold uppercase tracking-wide">Método de pago</p>
@@ -381,10 +437,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
 
       {method !== 'card' && (
         <div className="mb-4 rounded-xl border border-[#e2e8f0] p-4">
-          {method === 'apple'       && <ApplePayButton      onClick={handleExternalPay} disabled={paying} />}
-          {method === 'google'      && <GooglePayButton     onClick={handleExternalPay} disabled={paying} />}
-          {method === 'paypal'      && <PayPalButton        onClick={handleExternalPay} disabled={paying} />}
-          {method === 'mercadopago' && <MercadoPagoButton   onClick={handleExternalPay} disabled={paying} />}
+          {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
+          {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
           <p className="text-muted mt-3 text-center text-xs">
             Simulado — entorno de prueba, no se realiza ningún cargo real.
           </p>
@@ -403,6 +457,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError }) {
         >
           {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
         </button>
+      )}
+      </>
       )}
 
       <button
