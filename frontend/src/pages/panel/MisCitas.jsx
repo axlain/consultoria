@@ -76,11 +76,27 @@ export function MisCitas() {
   const displayed = tab === 'proximas' ? proximas : historial
 
   return (
-    <ClientShell reserveCta={false}>
-      <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} />
+    <ClientShell wide reserveCta={false}>
+      <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} className="lg:hidden" />
 
-      <div className="px-5 pt-10 pb-28">
-        <div className="mb-6 flex items-center justify-between pr-4">
+      {/* Desktop card: same shared-block language as the rest of the client app. */}
+      <div className="md:max-w-2xl md:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-[#2A2520] lg:bg-[#1E1B15] lg:overflow-hidden">
+        {/* Unified header bar (desktop only) */}
+        <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-[#2A2520] lg:px-8 lg:py-5">
+          <h1 className="m-0 text-lg font-bold text-[#F2EBE0]">Mis citas</h1>
+          <div className="flex items-center gap-3">
+            <Link
+              to={`/demo/${slug}/reservar`}
+              className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-[#E8B86D] active:scale-[0.98]"
+            >
+              + Agendar
+            </Link>
+            <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} inline />
+          </div>
+        </div>
+
+      <div className="px-5 pt-10 pb-28 lg:px-8 lg:pt-8 lg:pb-8">
+        <div className="mb-6 flex items-center justify-between pr-4 lg:hidden">
           <h1 className="text-2xl font-extrabold text-[#F2EBE0]">Mis citas</h1>
           <Link
             to={`/demo/${slug}/reservar`}
@@ -91,7 +107,7 @@ export function MisCitas() {
         </div>
 
         {/* Tabs */}
-        <div className="flex rounded-xl border border-[#2A2520] bg-[#161410] p-1 mb-6">
+        <div className="flex rounded-xl border border-[#2A2520] bg-[#161410] p-1 mb-6 lg:max-w-sm">
           {[
             { id: 'proximas', label: 'Próximas', count: proximas.length },
             { id: 'historial', label: 'Historial', count: historial.length },
@@ -146,7 +162,7 @@ export function MisCitas() {
         )}
 
         {!loading && displayed.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
             {displayed.map(c => {
               const serviceName = serviceNames[c.service_id] ?? c.service_id
               const proName = professionalNames[c.professional_id] ?? c.professional_id
@@ -222,28 +238,7 @@ export function MisCitas() {
           </ul>
         )}
       </div>
-
-      {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-[430px] flex border-t border-[#2A2520] bg-[#0C0B09]">
-        {[
-          { to: `/demo/${slug}`, label: 'Inicio', icon: '🏠' },
-          { to: `/panel/mis-citas`, label: 'Mis citas', icon: '📅', active: true },
-          { to: `/panel/mis-rewards`, label: 'Rewards', icon: '⭐' },
-          { to: `/login`, label: 'Perfil', icon: '👤' },
-        ].map(({ to, label, icon, active }) => (
-          <Link
-            key={to}
-            to={to}
-            className={[
-              'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-semibold no-underline transition-colors',
-              active ? 'text-[#C8973E]' : 'text-[#7A7065] hover:text-[#F2EBE0]',
-            ].join(' ')}
-          >
-            <span className="text-xl leading-none">{icon}</span>
-            {label}
-          </Link>
-        ))}
-      </nav>
+      </div>
     </ClientShell>
   )
 }

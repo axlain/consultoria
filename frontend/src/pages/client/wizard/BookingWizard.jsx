@@ -172,7 +172,7 @@ export function BookingWizard() {
   const step = STEPS[stepIndex]
   if (paymentFailed) {
     return (
-      <ClientShell>
+      <ClientShell wide>
         <StepPaymentError
           onRetry={() => setPaymentFailed(false)}
           onCancel={() => navigate(`/demo/${tenant.slug}/gracias`, { state: { appointment, payment: null } })}
@@ -182,19 +182,39 @@ export function BookingWizard() {
   }
 
   return (
-    <ClientShell>
-      <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
-      {/* X — volver al home del tenant */}
+    <ClientShell wide>
+      <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} className="lg:hidden" />
+      {/* X — volver al home del tenant (mobile/tablet) */}
       <Link
         to={`/demo/${tenant.slug}`}
-        className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 text-[#7A7065] no-underline backdrop-blur-sm transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0]"
+        className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 text-[#7A7065] no-underline backdrop-blur-sm transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0] lg:hidden"
         aria-label="Cerrar y volver al inicio"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </Link>
-      <div className="mb-7 px-5 pt-10">
+
+      {/* Shared card: contains both columns on every step so nothing floats loose on desktop. */}
+      <div className="lg:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-[#2A2520] lg:bg-[#1E1B15] lg:overflow-hidden">
+      {/* Unified header bar (desktop): keeps close + menu controls anchored to the card instead of floating loose. */}
+      <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-[#2A2520] lg:px-8 lg:py-5">
+        <Link
+          to={`/demo/${tenant.slug}`}
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#2A2520] bg-[#161410] text-[#7A7065] no-underline transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0]"
+          aria-label="Cerrar y volver al inicio"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </Link>
+        <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} inline />
+      </div>
+      <div className="lg:flex lg:items-stretch">
+      {/* Scrollable body: keeps the header fixed-looking while step content
+          (and its final CTA row) always stays reachable, even under a mobile keyboard. */}
+      <div className="max-h-dvh overflow-y-auto md:max-h-none md:overflow-visible md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0 lg:flex-1 lg:min-w-0 lg:p-10">
+      <div className="mb-7 px-5 pt-10 lg:px-0 lg:pt-0">
         {rebook ? (
           <p className="text-center text-[10px] font-bold tracking-[0.14em] uppercase text-[#7A7065]">
             Reagendar — elige nueva fecha
@@ -226,6 +246,7 @@ export function BookingWizard() {
         </p>
       </div>
 
+      <div className="px-5 pb-12 lg:px-0 lg:pb-0">
       {submitError && (
         <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{submitError}</p>
       )}
@@ -293,6 +314,41 @@ export function BookingWizard() {
             clientSecret={clientSecret}
           />
         )}
+      </div>
+      </div>
+      </div>
+
+      {/* Live booking summary — desktop only, right column of the shared card */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:shrink-0 lg:border-l lg:border-[#2A2520] lg:p-10">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065] mb-4">
+          {rebook ? 'Reagendar cita' : 'Resumen de tu cita'}
+        </p>
+        <dl className="flex flex-col gap-3 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[#7A7065]">Servicio</dt>
+            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.service?.name || 'Por elegir'}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[#7A7065]">Profesional</dt>
+            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.professional?.name || 'Por elegir'}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[#7A7065]">Fecha</dt>
+            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.date || 'Por elegir'}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[#7A7065]">Hora</dt>
+            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.time || 'Por elegir'}</dd>
+          </div>
+        </dl>
+        {booking.service && (
+          <div className="mt-4 flex items-center justify-between border-t border-[#2A2520] pt-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Total</span>
+            <span className="text-xl font-extrabold text-[#C8973E]">${booking.service.price}</span>
+          </div>
+        )}
+      </aside>
+      </div>
       </div>
     </ClientShell>
   )

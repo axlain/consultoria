@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { Home } from './pages/Home'
 import { TenantGate } from './pages/client/TenantGate'
 import { TenantHome } from './pages/client/TenantHome'
 import { BookingWizard } from './pages/client/wizard/BookingWizard'
@@ -52,7 +51,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* Public */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/demo/barberia" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/auth/callback" element={<OAuthCallback />} />

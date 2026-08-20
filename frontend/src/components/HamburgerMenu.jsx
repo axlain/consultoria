@@ -6,7 +6,7 @@ import { roleHome } from './ProtectedRoute'
 const NAV_LINK_CLASS =
   'block rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3.5 py-2.5 text-sm font-medium text-[#F2EBE0] no-underline transition-colors hover:border-[#C8973E]/40 hover:bg-[#2A2520]'
 
-export function HamburgerMenu({ faqs, slug }) {
+export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
   const [open, setOpen] = useState(false)
   const [faqOpen, setFaqOpen] = useState(false)
   const [openQuestion, setOpenQuestion] = useState(null)
@@ -21,11 +21,15 @@ export function HamburgerMenu({ faqs, slug }) {
     navigate('/', { replace: true })
   }
 
+  const buttonBase = inline
+    ? 'flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 backdrop-blur-sm transition-colors hover:border-[#C8973E]/40'
+    : 'absolute top-5 right-4 z-20 flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 backdrop-blur-sm transition-colors hover:border-[#C8973E]/40'
+
   return (
     <>
       <button
         type="button"
-        className="absolute top-5 right-4 z-20 flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 backdrop-blur-sm transition-colors hover:border-[#C8973E]/40"
+        className={[buttonBase, className].filter(Boolean).join(' ')}
         aria-label="Abrir menú"
         aria-expanded={open}
         aria-controls="site-drawer"
