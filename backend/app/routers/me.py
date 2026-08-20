@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_user
-from app.data import db, store
+from app.data import db
 from app.models.schemas import UserProfile
 
 router = APIRouter(prefix="/api/me", tags=["me"])

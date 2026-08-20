@@ -5,7 +5,6 @@ import stripe
 
 from app.core.config import STRIPE_SECRET_KEY
 from app.data import db, store
-from app.models.schemas import Payment
 from app.payments.provider import CreatePaymentInput, PaymentProvider, PaymentResult
 
 
@@ -99,7 +98,11 @@ class StripePaymentProvider(PaymentProvider):
 
         if db.IS_ENABLED:
             db.update_payment_status(payment_id, "refunded")
-            db.insert_payment_event({"payment_id": payment_id, "event_type": "refunded", "metadata": {"provider": "stripe"}})
+            db.insert_payment_event({
+                "payment_id": payment_id,
+                "event_type": "refunded",
+                "metadata": {"provider": "stripe"},
+            })
         else:
             store.update_payment_status(payment_id, "refunded")
             store.add_payment_event(payment_id, "refunded", {"provider": "stripe"})

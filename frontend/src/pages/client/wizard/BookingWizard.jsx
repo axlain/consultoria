@@ -77,7 +77,7 @@ export function BookingWizard() {
         setClientSecret(data.client_secret)
         setPaymentId(data.payment_id)
       }
-    } catch (_) { /* falls back to mock mode */ }
+    } catch { /* falls back to mock mode */ }
   }
 
   // Step 4 (normal flow) — creates appointment, init Stripe, advance to checkout.

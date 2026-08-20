@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
+from app.core.config import PAYMENT_PROVIDER, STRIPE_SECRET_KEY
 from app.data import db, store
 from app.models.schemas import (
     ConfirmPaymentRequest,
@@ -10,7 +11,6 @@ from app.models.schemas import (
     PaymentResponse,
     RefundPaymentRequest,
 )
-from app.core.config import PAYMENT_PROVIDER, STRIPE_SECRET_KEY
 from app.payments.mock_provider import MockPaymentProvider
 from app.payments.provider import CreatePaymentInput, PaymentProvider
 from app.payments.stripe_provider import StripePaymentProvider

@@ -72,23 +72,6 @@ function IconGoogle() {
   )
 }
 
-function IconPayPal() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.067 8.478c.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H15.62l-.42 2.65a.32.32 0 01-.316.27H13.08a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.316-.27h3.483c.665 0 1.286.17 1.916.42zm-1.24 1.568c-.1-.4-.45-.63-.86-.63h-2.2l-.7 4.42h1.9c1.11 0 2.06-.76 2.23-1.86.13-.84-.1-1.58-.37-1.93zM5.355 7.307H8.84c1.356 0 2.58.73 3.024 2.016.49 1.412-.063 3.006-1.305 3.77-.508.314-1.09.47-1.68.47H7.21l-.42 2.656a.32.32 0 01-.316.27H4.67a.213.213 0 01-.21-.245L5.04 7.577a.32.32 0 01.315-.27zm1.42 1.57l-.7 4.42h1.46c1.11 0 2.06-.76 2.23-1.86.19-1.22-.58-2.2-1.77-2.56H6.775z" fill="#003087"/>
-      <path d="M11.47 7.307h3.485c.665 0 1.287.17 1.916.42.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H12.43l-.42 2.65a.32.32 0 01-.316.27h-1.805a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.31-.27z" fill="#009cde"/>
-    </svg>
-  )
-}
-
-function IconMP() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 40 24" fill="none">
-      <rect width="40" height="24" rx="4" fill="#009ee3"/>
-      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="sans-serif">MP</text>
-    </svg>
-  )
-}
 
 const METHOD_ICONS = {
   card: <IconCard />,
@@ -127,40 +110,6 @@ function GooglePayButton({ onClick, disabled }) {
   )
 }
 
-function PayPalButton({ onClick, disabled }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-white text-base font-bold transition-opacity disabled:opacity-50"
-      style={{ background: '#0070ba' }}
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-        <path d="M20.067 8.478c.492.315.844.825.983 1.39.466 1.868-.73 3.746-2.498 4.087-.318.062-.64.09-.963.088H15.62l-.42 2.65a.32.32 0 01-.316.27H13.08a.213.213 0 01-.21-.245l1.482-9.39a.32.32 0 01.316-.27h3.483c.665 0 1.286.17 1.916.42zm-1.24 1.568c-.1-.4-.45-.63-.86-.63h-2.2l-.7 4.42h1.9c1.11 0 2.06-.76 2.23-1.86.13-.84-.1-1.58-.37-1.93zM5.355 7.307H8.84c1.356 0 2.58.73 3.024 2.016.49 1.412-.063 3.006-1.305 3.77-.508.314-1.09.47-1.68.47H7.21l-.42 2.656a.32.32 0 01-.316.27H4.67a.213.213 0 01-.21-.245L5.04 7.577a.32.32 0 01.315-.27zm1.42 1.57l-.7 4.42h1.46c1.11 0 2.06-.76 2.23-1.86.19-1.22-.58-2.2-1.77-2.56H6.775z"/>
-      </svg>
-      <span>PayPal</span>
-    </button>
-  )
-}
-
-function MercadoPagoButton({ onClick, disabled }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-white text-base font-bold transition-opacity disabled:opacity-50"
-      style={{ background: '#009ee3' }}
-    >
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <circle cx="12" cy="12" r="10"/>
-        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#009ee3" fontSize="8" fontWeight="bold" fontFamily="sans-serif">MP</text>
-      </svg>
-      <span>Mercado Pago</span>
-    </button>
-  )
-}
 
 // ── Stripe Payment Element inner component ────────────────────────────────────
 
