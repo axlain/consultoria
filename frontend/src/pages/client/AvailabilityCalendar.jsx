@@ -52,17 +52,17 @@ export function AvailabilityCalendar() {
     <ClientShell>
       <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} />
 
-      <h2 className="pr-14">Ver disponibilidad</h2>
-      <p className="text-muted mb-5 text-sm">Consulta los horarios libres antes de reservar.</p>
+      <h2 className="pr-14 text-[#F2EBE0]">Ver disponibilidad</h2>
+      <p className="mb-5 text-sm text-[#7A7065]">Consulta los horarios libres antes de reservar.</p>
 
       <div className="mb-5">
         <DateStrip dates={DATE_STRIP} selectedDate={selectedDate} onSelect={setSelectedDate} />
       </div>
 
-      <label className="mb-5 flex flex-col gap-1.5 text-sm font-medium">
+      <label className="mb-5 flex flex-col gap-1.5 text-sm font-medium text-[#7A7065]">
         Profesional
         <select
-          className="border-line focus-visible:border-secondary rounded-lg border bg-white p-[0.6rem] text-base"
+          className="rounded-xl border border-[#2A2520] bg-[#1E1B15] p-[0.6rem] text-base text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors"
           value={professionalId}
           onChange={(e) => setProfessionalId(e.target.value)}
         >
@@ -78,25 +78,25 @@ export function AvailabilityCalendar() {
       {loading && (
         <div className="flex flex-wrap gap-2" aria-live="polite" aria-busy="true">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-line h-[42px] w-20 animate-pulse rounded-full" />
+            <div key={i} className="h-[42px] w-20 animate-pulse rounded-xl bg-[#1E1B15]" />
           ))}
         </div>
       )}
 
       {!loading && error && (
-        <div className="border-line rounded-xl border bg-white px-4 py-5 text-center">
-          <p className="text-muted text-sm">Hubo un problema al cargar la disponibilidad. Intenta de nuevo.</p>
+        <div className="rounded-xl border border-[#2A2520] bg-[#161410] px-4 py-5 text-center">
+          <p className="text-sm text-[#7A7065]">Hubo un problema al cargar la disponibilidad. Intenta de nuevo.</p>
         </div>
       )}
 
       {!loading && !error && !open && (
-        <p className="text-muted text-sm">
+        <p className="text-sm text-[#7A7065]">
           {professionalId ? 'Este profesional no labora este día.' : 'Nadie labora este día.'} Elige otra fecha.
         </p>
       )}
 
       {!loading && !error && open && slots.length === 0 && (
-        <p className="text-muted text-sm">No hay horarios configurados para esta fecha.</p>
+        <p className="text-sm text-[#7A7065]">No hay horarios configurados para esta fecha.</p>
       )}
 
       {!loading && !error && open && slots.length > 0 && (
@@ -106,8 +106,8 @@ export function AvailabilityCalendar() {
               key={time}
               className={
                 available
-                  ? 'rounded-full border border-[#2e7d32] bg-[#2e7d3214] px-4 py-2.5 text-sm font-medium tabular-nums text-[#2e7d32]'
-                  : 'border-line text-muted rounded-full border bg-white px-4 py-2.5 text-sm font-medium tabular-nums line-through opacity-60'
+                  ? 'rounded-xl border border-[#C8973E] bg-[#C8973E]/10 px-4 py-2.5 text-sm font-medium tabular-nums text-[#C8973E]'
+                  : 'rounded-xl border border-[#2A2520] bg-[#161410] px-4 py-2.5 text-sm font-medium tabular-nums text-[#2A2520] line-through opacity-40'
               }
             >
               {time}
@@ -118,7 +118,7 @@ export function AvailabilityCalendar() {
 
       <Link
         to={`/demo/${tenant.slug}/reservar`}
-        className="bg-secondary mt-7 inline-block rounded-full px-6 py-2.5 text-sm font-semibold text-white no-underline transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
+        className="mt-7 inline-block rounded-2xl bg-[#C8973E] px-6 py-2.5 text-sm font-semibold text-[#0C0B09] no-underline transition-all hover:bg-[#E8B86D] active:scale-[0.98]"
       >
         Reservar cita
       </Link>

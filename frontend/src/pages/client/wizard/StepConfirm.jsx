@@ -1,6 +1,5 @@
 const NAME_RE = /^[A-Za-zÀ-ÿ\s]+$/
 
-// RF03 step 4: confirmation.
 export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, error }) {
   const canSubmit =
     NAME_RE.test(booking.customerName.trim()) &&
@@ -19,42 +18,42 @@ export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, 
     onChange({ customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })
   }
 
-  const inputClass = 'border-line focus-visible:border-secondary rounded-lg border p-[0.6rem] text-base'
+  const inputClass = 'w-full rounded-xl border border-[#2A2520] bg-[#1E1B15] px-4 py-3.5 text-base text-[#F2EBE0] placeholder-[#7A7065] outline-none transition-colors focus:border-[#C8973E] focus:ring-1 focus:ring-[#C8973E]/30'
+  const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]'
 
   return (
     <section>
-      <h2>Confirma tu cita</h2>
+      <h2 className="text-xl font-bold text-[#F2EBE0] mb-5">Confirma tu cita</h2>
 
-      <div className="border-line mb-6 rounded-xl border bg-white p-4">
+      {/* Summary card */}
+      <div className="mb-6 rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
-          <dt className="text-muted">Servicio</dt>
-          <dd className="m-0 text-right font-medium">{booking.service.name}</dd>
-          <dt className="text-muted">Profesional</dt>
-          <dd className="m-0 text-right font-medium">{booking.professional.name}</dd>
-          <dt className="text-muted">Fecha</dt>
-          <dd className="m-0 text-right font-medium">{booking.date}</dd>
-          <dt className="text-muted">Hora</dt>
-          <dd className="m-0 text-right font-medium">{booking.time}</dd>
+          <dt className="text-[#7A7065]">Servicio</dt>
+          <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.service.name}</dd>
+          <dt className="text-[#7A7065]">Profesional</dt>
+          <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.professional.name}</dd>
+          <dt className="text-[#7A7065]">Fecha</dt>
+          <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.date}</dd>
+          <dt className="text-[#7A7065]">Hora</dt>
+          <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.time}</dd>
         </dl>
-        <div className="border-line mt-3 flex items-center justify-between border-t pt-3">
-          <span className="text-muted text-xs font-semibold tracking-wide uppercase">Total</span>
-          <span className="text-lg font-bold" style={{ color: booking.service.color }}>
-            ${booking.service.price}
-          </span>
+        <div className="mt-3 flex items-center justify-between border-t border-[#2A2520] pt-3">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Total</span>
+          <span className="text-xl font-extrabold text-[#C8973E]">${booking.service.price}</span>
         </div>
       </div>
 
-      <label className="mb-4 flex flex-col gap-1.5 text-sm font-medium">
+      <label className={`mb-4 ${labelClass}`}>
         Nombre
-        <input type="text" className={inputClass} value={booking.customerName} onChange={handleNameChange} />
+        <input type="text" className={inputClass} value={booking.customerName} onChange={handleNameChange} placeholder="Tu nombre" />
       </label>
 
-      <label className="mb-4 flex flex-col gap-1.5 text-sm font-medium">
+      <label className={`mb-4 ${labelClass}`}>
         Apellido Paterno
-        <input type="text" className={inputClass} value={booking.customerLastName} onChange={handleLastNameChange} />
+        <input type="text" className={inputClass} value={booking.customerLastName} onChange={handleLastNameChange} placeholder="Tu apellido" />
       </label>
 
-      <label className="mb-4 flex flex-col gap-1.5 text-sm font-medium">
+      <label className={`mb-4 ${labelClass}`}>
         Teléfono
         <input
           type="tel"
@@ -68,12 +67,14 @@ export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, 
         />
       </label>
 
-      {error && <p className="text-[#c0392b]">{error}</p>}
+      {error && (
+        <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         <button
           type="button"
-          className="text-secondary border-0 bg-transparent p-0 text-sm font-semibold disabled:opacity-50"
+          className="border-0 bg-transparent p-0 text-sm font-semibold text-[#C8973E] hover:opacity-70 transition-opacity disabled:opacity-30"
           onClick={onBack}
           disabled={submitting}
         >
@@ -81,7 +82,7 @@ export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, 
         </button>
         <button
           type="button"
-          className="bg-secondary rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+          className="rounded-2xl bg-[#C8973E] px-6 py-2.5 text-sm font-bold text-[#0C0B09] transition-all duration-150 hover:bg-[#E8B86D] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onConfirm}
           disabled={!canSubmit || submitting}
         >

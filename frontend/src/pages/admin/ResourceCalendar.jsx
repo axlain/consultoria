@@ -136,12 +136,12 @@ export function ResourceCalendar() {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1>Agenda completa</h1>
+        <h1 className="text-2xl font-bold text-[#F2EBE0]">Agenda completa</h1>
         <div className="flex flex-wrap items-center gap-4">
-          <label className="mb-0 flex flex-col gap-1 text-[0.9rem]">
+          <label className="mb-0 flex flex-col gap-1 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
             Barbero
             <select
-              className="rounded-md border border-[#ccc] p-[0.6rem] text-base"
+              className="rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors"
               value={professionalFilter}
               onChange={(e) => setProfessionalFilter(e.target.value)}
             >
@@ -157,7 +157,7 @@ export function ResourceCalendar() {
           </label>
           <button
             type="button"
-            className="inline-block border-0 bg-transparent p-0 py-2 text-secondary"
+            className="rounded-xl border border-[#2A2520] px-3 py-2 text-sm font-semibold text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0] transition-colors"
             onClick={() => refreshTenant()}
           >
             Refrescar equipo
@@ -165,7 +165,7 @@ export function ResourceCalendar() {
         </div>
       </div>
 
-      {error && <p className="text-[#c0392b]">{error}</p>}
+      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
       {/* Shared date navigation — same strip as the client booking wizard's step 3. */}
       <div className="mb-4">
@@ -177,7 +177,7 @@ export function ResourceCalendar() {
       </div>
 
       {/* Desktop: multi-barber drag-and-drop resource grid. */}
-      <div className="hidden rounded-[10px] border border-[#e5e5e5] bg-white p-4 md:block">
+      <div className="hidden rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4 md:block">
         <DnDCalendar
           localizer={localizer}
           culture="es"
@@ -211,12 +211,12 @@ export function ResourceCalendar() {
           instead of interleaved — mixing them got visually noisy with several
           barbers' gaps landing on the same day. */}
       <div className="md:hidden">
-        <div className="border-line mb-4 inline-flex rounded-full border bg-white p-1">
+        <div className="mb-4 inline-flex rounded-xl border border-[#2A2520] bg-[#161410] p-1">
           <button
             type="button"
             onClick={() => setMobileMode('citas')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-              mobileMode === 'citas' ? 'bg-secondary text-white' : 'text-muted'
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mobileMode === 'citas' ? 'bg-[#C8973E] text-[#0C0B09]' : 'text-[#7A7065] hover:text-[#F2EBE0]'
             }`}
           >
             Citas
@@ -224,8 +224,8 @@ export function ResourceCalendar() {
           <button
             type="button"
             onClick={() => setMobileMode('disponibilidad')}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-              mobileMode === 'disponibilidad' ? 'bg-secondary text-white' : 'text-muted'
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mobileMode === 'disponibilidad' ? 'bg-[#C8973E] text-[#0C0B09]' : 'text-[#7A7065] hover:text-[#F2EBE0]'
             }`}
           >
             Disponibilidad
@@ -245,41 +245,25 @@ export function ResourceCalendar() {
 
       {selectedEvent && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/35"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           onClick={() => setSelectedEvent(null)}
         >
-          <div className="w-80 rounded-[10px] bg-white p-6" onClick={(e) => e.stopPropagation()}>
-            <h3>
-              {selectedEvent.appointment.customer_name} {selectedEvent.appointment.customer_last_name}
-            </h3>
-            <p>{selectedEvent.title}</p>
-            <p>
-              {selectedEvent.appointment.date} · {selectedEvent.appointment.time}
-            </p>
-            <p>Tel: {selectedEvent.appointment.customer_phone}</p>
-            <p>Estado actual: {STATUS_LABELS[selectedEvent.status] ?? 'En pie'}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
-                onClick={() => handleStatusChange('completed')}
-              >
-                Completada
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-[#ccc] bg-white px-3 py-[0.4rem] text-[0.85rem]"
-                onClick={() => handleStatusChange('no_show')}
-              >
-                Inasistencia
-              </button>
-              <button
-                type="button"
-                className="border-0 bg-transparent p-0 text-secondary"
-                onClick={() => setSelectedEvent(null)}
-              >
-                Cerrar
-              </button>
+          <div className="w-full max-w-sm rounded-2xl border border-[#2A2520] bg-[#161410] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-[#F2EBE0]">
+                {selectedEvent.appointment.customer_name} {selectedEvent.appointment.customer_last_name}
+              </h3>
+              <button type="button" className="text-xl leading-none text-[#7A7065] hover:text-[#F2EBE0] transition-colors" onClick={() => setSelectedEvent(null)}>×</button>
+            </div>
+            <div className="rounded-xl border border-[#2A2520] bg-[#0C0B09] p-4 mb-4">
+              <p className="text-sm text-[#7A7065]">{selectedEvent.title}</p>
+              <p className="text-sm text-[#7A7065]">{selectedEvent.appointment.date} · {selectedEvent.appointment.time}</p>
+              <p className="text-sm text-[#7A7065]">Tel: {selectedEvent.appointment.customer_phone}</p>
+              <p className="mt-2 text-xs font-semibold text-[#C8973E]">Estado: {STATUS_LABELS[selectedEvent.status] ?? 'En pie'}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="flex-1 rounded-xl bg-[#10B981]/15 border border-[#10B981]/20 py-2.5 text-sm font-semibold text-[#10B981] hover:bg-[#10B981]/25 transition-colors" onClick={() => handleStatusChange('completed')}>Completada</button>
+              <button type="button" className="flex-1 rounded-xl bg-red-500/10 border border-red-500/20 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-500/20 transition-colors" onClick={() => handleStatusChange('no_show')}>Inasistencia</button>
             </div>
           </div>
         </div>

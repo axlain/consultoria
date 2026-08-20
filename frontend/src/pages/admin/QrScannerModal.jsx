@@ -95,13 +95,13 @@ export function QrScannerModal({ tenantSlug, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4" onClick={handleClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4" onClick={handleClose}>
+      <div className="w-full max-w-sm rounded-2xl border border-[#2A2520] bg-[#161410] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="m-0 border-0 p-0">Escanear código QR</h2>
+          <h2 className="m-0 border-0 p-0 text-lg font-bold text-[#F2EBE0]">Escanear código QR</h2>
           <button
             type="button"
-            className="border-0 bg-transparent p-1 text-[1.5rem] leading-none text-primary"
+            className="border-0 bg-transparent p-1 text-[1.5rem] leading-none text-[#7A7065] hover:text-[#F2EBE0] transition-colors"
             aria-label="Cerrar"
             onClick={handleClose}
           >
@@ -113,26 +113,26 @@ export function QrScannerModal({ tenantSlug, onClose }) {
           <>
             <div id={READER_ID} className="min-h-[250px] overflow-hidden rounded-xl bg-black" />
             {cameraError ? (
-              <p className="mt-3 text-sm text-[#c0392b]">{cameraError}</p>
+              <p className="mt-3 text-sm text-red-400">{cameraError}</p>
             ) : (
-              <p className="text-muted mt-3 text-center text-xs">Apunta la cámara al código QR del cliente.</p>
+              <p className="mt-3 text-center text-xs text-[#7A7065]">Apunta la cámara al código QR del cliente.</p>
             )}
           </>
         )}
 
         {!scanning && loading && (
           <div className="flex flex-col items-center gap-3 py-10">
-            <div className="border-line h-8 w-8 animate-spin rounded-full border-2 border-t-secondary" />
-            <p className="text-muted text-sm">Validando código...</p>
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2A2520] border-t-[#C8973E]" />
+            <p className="text-sm text-[#7A7065]">Validando código...</p>
           </div>
         )}
 
         {!scanning && !loading && validationError && (
           <div className="py-6 text-center">
-            <p className="mb-4 text-sm font-medium text-[#c0392b]">{validationError}</p>
+            <p className="mb-4 text-sm font-medium text-red-400">{validationError}</p>
             <button
               type="button"
-              className="bg-secondary rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+              className="rounded-2xl bg-[#C8973E] px-5 py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
               onClick={handleScanAgain}
             >
               Escanear otro código
@@ -142,28 +142,28 @@ export function QrScannerModal({ tenantSlug, onClose }) {
 
         {!scanning && !loading && result && !completed && (
           <div>
-            <div className="border-line rounded-xl border p-4">
-              <p className="text-lg font-semibold">
+            <div className="rounded-xl border border-[#2A2520] bg-[#0C0B09] p-4">
+              <p className="text-lg font-semibold text-[#F2EBE0]">
                 {result.customer_name} {result.customer_last_name}
               </p>
-              <p className="text-muted mt-1 text-sm">
+              <p className="mt-1 text-sm text-[#7A7065]">
                 {result.service_name} · {result.professional_name}
               </p>
-              <p className="text-muted text-sm">
+              <p className="text-sm text-[#7A7065]">
                 {result.date} · {result.time}
               </p>
             </div>
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
-                className="border-line flex-1 rounded-full border py-2.5 text-sm font-semibold"
+                className="flex-1 rounded-2xl border border-[#2A2520] py-2.5 text-sm font-semibold text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0] transition-colors"
                 onClick={handleScanAgain}
               >
                 Escanear otro
               </button>
               <button
                 type="button"
-                className="bg-secondary flex-1 rounded-full py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                className="flex-1 rounded-2xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
                 onClick={handleComplete}
                 disabled={completing}
               >
@@ -175,10 +175,10 @@ export function QrScannerModal({ tenantSlug, onClose }) {
 
         {completed && (
           <div className="py-6 text-center">
-            <p className="mb-4 text-sm font-medium text-[#2f9e44]">Cita marcada como completada ✓</p>
+            <p className="mb-4 text-sm font-medium text-[#10B981]">Cita marcada como completada ✓</p>
             <button
               type="button"
-              className="bg-secondary rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+              className="rounded-2xl bg-[#C8973E] px-5 py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
               onClick={handleScanAgain}
             >
               Escanear otra cita

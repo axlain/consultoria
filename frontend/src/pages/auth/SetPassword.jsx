@@ -53,36 +53,36 @@ export function SetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#0C0B09]">
       <AuthShell showMenu={false}>
-        <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">Crea tu contraseña</h1>
+        <h1 className="mb-6 text-2xl font-bold text-[#F2EBE0]">Crea tu contraseña</h1>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+          <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
         )}
 
         {ready && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+            <label className="flex flex-col gap-1 text-sm font-medium text-[#7A7065]">
               Contraseña
               <input
                 type="password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
+                className="rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] focus:ring-1 focus:ring-[#C8973E]/20 transition-colors"
                 autoComplete="new-password"
               />
             </label>
 
-            <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
+            <label className="flex flex-col gap-1 text-sm font-medium text-[#7A7065]">
               Confirmar contraseña
               <input
                 type="password"
                 required
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
-                className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
+                className="rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] focus:ring-1 focus:ring-[#C8973E]/20 transition-colors"
                 autoComplete="new-password"
               />
             </label>
@@ -90,7 +90,7 @@ export function SetPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 rounded-lg bg-[#c9a24b] py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+              className="mt-1 rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
             >
               {loading ? 'Guardando…' : 'Guardar y entrar'}
             </button>

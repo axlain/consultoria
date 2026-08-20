@@ -9,9 +9,9 @@ const STATUS_LABEL = {
   no_show: 'No se presentó',
 }
 const STATUS_COLOR = {
-  scheduled: 'bg-green-50 text-green-700',
-  completed: 'bg-blue-50 text-blue-700',
-  no_show: 'bg-red-50 text-red-700',
+  scheduled: 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20',
+  completed: 'bg-blue-500/15 text-blue-400 border border-blue-500/20',
+  no_show:   'bg-red-500/15 text-red-400 border border-red-500/20',
 }
 
 export function Equipo() {
@@ -36,53 +36,59 @@ export function Equipo() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#1c1c1e]">Equipo</h1>
+        <h1 className="text-2xl font-bold text-[#F2EBE0]">Equipo</h1>
         <Link
           to="/panel/equipo/nueva-cita"
-          className="rounded-lg bg-[#c9a24b] px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-semibold text-[#0C0B09] no-underline hover:bg-[#E8B86D] transition-colors"
         >
           + Nueva cita (walk-in)
         </Link>
       </div>
 
       <div className="mb-5 flex items-center gap-3">
-        <label className="text-sm font-medium text-[#3a3a3c]">
+        <label className="flex items-center gap-2 text-sm font-medium text-[#7A7065]">
           Fecha
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="ml-2 rounded-lg border border-[#d1d1d6] px-3 py-1.5 text-sm outline-none focus:border-[#c9a24b]"
+            className="rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-1.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors"
           />
         </label>
       </div>
 
-      {loading && <p className="text-sm text-[#6e6e73]">Cargando agenda…</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-[#1E1B15]" />
+          ))}
+        </div>
+      )}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {!loading && !error && citas.length === 0 && (
-        <div className="rounded-xl border border-dashed border-[#d1d1d6] p-12 text-center text-[#6e6e73]">
-          <p className="text-lg">Sin citas para este día</p>
+        <div className="rounded-xl border border-dashed border-[#2A2520] p-12 text-center">
+          <p className="text-[#7A7065]">Sin citas para este día</p>
         </div>
       )}
 
       {!loading && citas.length > 0 && (
         <ul className="flex flex-col gap-3">
           {citas.map(c => (
-            <li key={c.id} className="rounded-xl border border-[#d1d1d6] bg-white p-4">
+            <li key={c.id} className="rounded-xl border border-[#2A2520] bg-[#1E1B15] p-4 hover:border-[#C8973E]/20 transition-colors">
               <div className="mb-1 flex items-center justify-between">
-                <span className="font-semibold text-[#1c1c1e]">{c.time}</span>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                <span className="text-base font-bold text-[#F2EBE0]">{c.time}</span>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-[#2A2520] text-[#7A7065]'}`}>
                   {STATUS_LABEL[c.status] ?? c.status}
                 </span>
               </div>
-              <p className="text-sm text-[#6e6e73]">
+              <p className="text-sm text-[#F2EBE0]/80">
                 {c.customer_name} {c.customer_last_name}
               </p>
-              <p className="text-sm text-[#6e6e73]">
-                Servicio: <span className="font-medium text-[#1c1c1e]">{c.service_id}</span>
+              <p className="text-sm text-[#7A7065]">
+                Servicio: <span className="font-medium text-[#F2EBE0]/70">{c.service_id}</span>
                 {' · '}
-                Profesional: <span className="font-medium text-[#1c1c1e]">{c.professional_id}</span>
+                Profesional: <span className="font-medium text-[#F2EBE0]/70">{c.professional_id}</span>
               </p>
             </li>
           ))}

@@ -1,65 +1,58 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1c1c1e;
-  --color-secondary: #c9a24b;
-  --color-line: #e7e5e0;
-  --color-muted: #6b6b6b;
-  --color-paper: #faf9f7;
+  --color-primary: #F2EBE0;
+  --color-secondary: #C8973E;
+  --color-secondary-light: #E8B86D;
+  --color-line: #2A2520;
+  --color-muted: #7A7065;
+  --color-paper: #0C0B09;
+  --color-surface: #1E1B15;
+  --color-surface-alt: #161410;
 
   --breakpoint-md: 700px;
   --breakpoint-lg: 1000px;
 
   --animate-fade-in: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-up: slide-up 0.5s ease forwards;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 :root {
-  --font-family: system-ui, sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 @layer base {
   body {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     color: var(--color-primary);
     background: var(--color-paper);
     -webkit-font-smoothing: antialiased;
   }
 
-  h1,
-  h2,
-  h3 {
+  h1, h2, h3 {
     margin: 0;
-    font-family: var(--font-family), system-ui, sans-serif;
-    line-height: 1.05;
+    line-height: 1.1;
   }
 
   h1 {
-    font-size: clamp(1.85rem, 1.3rem + 2.4vw, 2.75rem);
-    font-weight: 700;
-    letter-spacing: 0.005em;
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 
   h2 {
-    padding-bottom: 0.55rem;
-    margin-bottom: 1.1rem;
-    border-bottom: 1px solid var(--color-line);
-    font-size: 1.05rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
   a {
@@ -75,4 +68,14 @@
     outline: 2px solid var(--color-secondary);
     outline-offset: 2px;
   }
+}
+
+/* ── Slot hover: amber fill on available time slots ─── */
+.slot-available {
+  transition: all 0.15s ease;
+}
+.slot-available:hover:not(:disabled) {
+  background: var(--color-secondary);
+  color: var(--color-paper);
+  border-color: var(--color-secondary);
 }

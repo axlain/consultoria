@@ -90,113 +90,113 @@ export function Login() {
     if (error) setSocialMsg(error.message)
   }
 
+  const inputClass = 'w-full rounded-xl border border-[#2A2520] bg-[#1E1B15] px-4 py-3 text-sm text-white placeholder-[#7A7065] outline-none transition-colors focus:border-[#C8973E]/50 focus:ring-1 focus:ring-[#C8973E]/30'
+
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <AuthShell showMenu={false}>
-        <h1 className="mb-6 text-2xl font-bold text-[#1c1c1e]">
-          {businessOptions ? 'Elige un negocio' : 'Iniciar sesión'}
-        </h1>
+    <AuthShell showMenu={false}>
+      <h1 className="mb-6 text-3xl" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+        {businessOptions ? 'Elige un negocio' : 'Iniciar sesión'}
+      </h1>
 
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
-        )}
+      {error && (
+        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+      )}
 
-        {businessOptions ? (
-          <BusinessSelect businesses={businessOptions} onSelect={chooseBusiness} loading={loading} />
-        ) : (
-          <>
-        {/* Social login */}
-        <div className="flex flex-col gap-2 mb-5">
-          <SocialButton onClick={() => handleSocial('Google')} icon={<GoogleIcon />} label="Continuar con Google" />
-          <SocialButton onClick={() => handleSocial('Apple')} icon={<AppleIcon />} label="Continuar con Apple" dark />
-          <SocialButton onClick={() => handleSocial('Facebook')} icon={<FacebookIcon />} label="Continuar con Facebook" blue />
-        </div>
-
-        {socialMsg && (
-          <div className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">{socialMsg}</div>
-        )}
-
-        <div className="relative mb-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#e5e5ea]" />
-          <span className="text-xs text-[#8e8e93]">o con email</span>
-          <div className="h-px flex-1 bg-[#e5e5ea]" />
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
-            Email
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
-              placeholder="nombre@dominio.com"
-              autoComplete="email"
-            />
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm font-medium text-[#3a3a3c]">
-            Contraseña
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="rounded-lg border border-[#d1d1d6] px-3 py-2 text-sm outline-none focus:border-[#c9a24b] focus:ring-1 focus:ring-[#c9a24b]"
-              autoComplete="current-password"
-            />
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 rounded-lg bg-[#c9a24b] py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'Entrando…' : 'Entrar'}
-          </button>
-        </form>
-
-        <p className="mt-5 text-center text-sm text-[#6e6e73]">
-          ¿No tienes cuenta?{' '}
-          <Link to="/registro" className="font-medium text-[#c9a24b] hover:underline">
-            Regístrate
-          </Link>
-        </p>
-
-        {/* Demo users */}
-        <details className="mt-5">
-          <summary className="cursor-pointer text-xs text-[#8e8e93] hover:text-[#6e6e73]">
-            Usuarios de prueba
-          </summary>
-          <div className="mt-2 flex flex-col gap-1">
-            {DEMO_USERS.map(u => (
-              <button
-                key={u.email}
-                type="button"
-                onClick={() => fillDemo(u)}
-                className="flex items-center justify-between rounded-lg bg-[#f5f5f5] px-3 py-2 text-left text-xs hover:bg-[#ebebeb]"
-              >
-                <span className="text-[#3a3a3c]">{u.email}</span>
-                <span className="rounded-full bg-[#e5e5ea] px-2 py-0.5 text-[10px] font-semibold text-[#6e6e73]">
-                  {u.role}
-                </span>
-              </button>
-            ))}
+      {businessOptions ? (
+        <BusinessSelect businesses={businessOptions} onSelect={chooseBusiness} loading={loading} />
+      ) : (
+        <>
+          {/* Social login */}
+          <div className="flex flex-col gap-2 mb-5">
+            <SocialButton onClick={() => handleSocial('Google')} icon={<GoogleIcon />} label="Continuar con Google" />
+            <SocialButton onClick={() => handleSocial('Apple')} icon={<AppleIcon />} label="Continuar con Apple" dark />
+            <SocialButton onClick={() => handleSocial('Facebook')} icon={<FacebookIcon />} label="Continuar con Facebook" blue />
           </div>
-        </details>
-          </>
-        )}
-      </AuthShell>
-    </div>
+
+          {socialMsg && (
+            <div className="mb-4 rounded-xl border border-[#C8973E]/20 bg-[#C8973E]/5 px-3 py-2 text-xs text-[#C8973E]">{socialMsg}</div>
+          )}
+
+          <div className="relative mb-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#2A2A2A]" />
+            <span className="text-xs text-[#7A7065]">o con email</span>
+            <div className="h-px flex-1 bg-[#2A2A2A]" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+              Email
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="nombre@dominio.com"
+                autoComplete="email"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+              Contraseña
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className={inputClass}
+                autoComplete="current-password"
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-1 rounded-2xl bg-[#C8973E] py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+            >
+              {loading ? 'Entrando…' : 'Entrar'}
+            </button>
+          </form>
+
+          <p className="mt-5 text-center text-sm text-[#7A7065]">
+            ¿No tienes cuenta?{' '}
+            <Link to="/registro" className="font-semibold text-[#C8973E] hover:opacity-80 no-underline">
+              Regístrate
+            </Link>
+          </p>
+
+          {/* Demo users */}
+          <details className="mt-5">
+            <summary className="cursor-pointer text-xs text-[#7A7065] hover:text-[#7A7065] transition-colors">
+              Usuarios de prueba
+            </summary>
+            <div className="mt-2 flex flex-col gap-1">
+              {DEMO_USERS.map(u => (
+                <button
+                  key={u.email}
+                  type="button"
+                  onClick={() => fillDemo(u)}
+                  className="flex items-center justify-between rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2 text-left text-xs hover:border-[#C8973E]/30 hover:bg-[#2A2520] transition-colors"
+                >
+                  <span className="text-[#7A7065]">{u.email}</span>
+                  <span className="rounded-full border border-[#2A2520] bg-[#161410] px-2 py-0.5 text-[10px] font-bold text-[#7A7065]">
+                    {u.role}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </details>
+        </>
+      )}
+    </AuthShell>
   )
 }
 
 function SocialButton({ onClick, icon, label, dark, blue }) {
-  let cls = 'flex w-full items-center gap-3 rounded-lg border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80'
-  if (dark) cls += ' bg-black border-black text-white'
-  else if (blue) cls += ' bg-[#1877F2] border-[#1877F2] text-white'
-  else cls += ' border-[#d1d1d6] bg-white text-[#1c1c1e]'
+  let cls = 'flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80'
+  if (dark) cls += ' bg-white/5 border-[#2A2520] text-white'
+  else if (blue) cls += ' bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2]'
+  else cls += ' border-[#2A2520] bg-[#1E1B15] text-white'
   return (
     <button type="button" onClick={onClick} className={cls}>
       <span className="h-5 w-5 shrink-0">{icon}</span>

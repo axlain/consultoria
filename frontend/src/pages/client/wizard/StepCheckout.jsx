@@ -42,7 +42,7 @@ const METHODS = [
   { id: 'google', label: 'Google Pay' },
 ]
 
-// ── Brand SVG icons (inline, no external deps) ────────────────────────────────
+// ── Brand SVG icons ───────────────────────────────────────────────────────────
 
 function IconCard() {
   return (
@@ -72,14 +72,13 @@ function IconGoogle() {
   )
 }
 
-
 const METHOD_ICONS = {
   card: <IconCard />,
   apple: <IconApple />,
   google: <IconGoogle />,
 }
 
-// ── External method buttons (branded, cosmetic in Phase 1) ────────────────────
+// ── External method buttons ───────────────────────────────────────────────────
 
 function ApplePayButton({ onClick, disabled }) {
   return (
@@ -87,8 +86,7 @@ function ApplePayButton({ onClick, disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl bg-black py-4 text-white text-base font-semibold transition-opacity disabled:opacity-50"
-      style={{ letterSpacing: '0.02em' }}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-4 text-[#0C0B09] text-base font-bold transition-opacity disabled:opacity-50 hover:opacity-90"
     >
       <IconApple />
       <span>Pay</span>
@@ -102,14 +100,13 @@ function GooglePayButton({ onClick, disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#dadce0] bg-white py-4 text-[#3c4043] text-base font-medium shadow-sm transition-shadow hover:shadow disabled:opacity-50"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#2A2520] bg-[#1E1B15] py-4 text-white text-base font-medium shadow-sm transition-all hover:border-[#C8973E]/30 disabled:opacity-50"
     >
       <IconGoogle />
-      <span style={{ fontFamily: 'Google Sans, sans-serif' }}>Pay</span>
+      <span>Pay</span>
     </button>
   )
 }
-
 
 // ── Stripe Payment Element inner component ────────────────────────────────────
 
@@ -137,13 +134,11 @@ function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountC
 
   return (
     <form onSubmit={handleStripeSubmit} className="mb-4">
-      {/* wallets: 'auto' shows Apple Pay / Google Pay express buttons at the top
-          when the browser/device supports them — no extra code needed. */}
       <PaymentElement options={{ wallets: { applePay: 'auto', googlePay: 'auto' } }} />
       <button
         type="submit"
         disabled={!stripe || paying}
-        className="bg-secondary mt-4 w-full rounded-full px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        className="mt-4 w-full rounded-2xl bg-[#C8973E] px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
       >
         {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
       </button>
@@ -175,7 +170,6 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
     expiry: isExpiryValid(expiry),
     cvv:    isCvvValid(cvv),
   }
-  // Card requires all 4 fields; external methods are always ready.
   const canPay = (method === 'card' ? Object.values(cardValid).every(Boolean) : true) && !paying
 
   function touch(field) {
@@ -188,10 +182,10 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
 
   function inputClass(field) {
     return [
-      'rounded-lg border p-[0.6rem] text-base w-full transition-colors',
+      'w-full rounded-xl border px-4 py-3 text-base text-white bg-[#161410] placeholder-[#7A7065] outline-none transition-colors',
       showError(field)
-        ? 'border-[#c0392b] focus-visible:border-[#c0392b]'
-        : 'border-line focus-visible:border-secondary',
+        ? 'border-red-500/50 focus:border-red-500'
+        : 'border-[#2A2520] focus:border-[#C8973E]/50 focus:ring-1 focus:ring-[#C8973E]/20',
     ].join(' ')
   }
 
@@ -222,7 +216,6 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
     }
   }
 
-  // External methods trigger payment directly from their branded button.
   function handleExternalPay() {
     if (!paying) handlePay()
   }
@@ -233,29 +226,31 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
     setTouched({})
   }
 
+  const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]'
+
   return (
     <section>
       <h2>Pago de tu cita</h2>
 
       {/* Order summary */}
-      <div className="border-line mb-5 rounded-xl border bg-white p-4">
+      <div className="mb-5 rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
-          <dt className="text-muted">Servicio</dt>
-          <dd className="m-0 text-right font-medium">{booking.service.name}</dd>
-          <dt className="text-muted">Cita #</dt>
-          <dd className="m-0 text-right font-mono text-xs">{appointment.id}</dd>
+          <dt className="text-[#7A7065]">Servicio</dt>
+          <dd className="m-0 text-right font-medium text-white">{booking.service.name}</dd>
+          <dt className="text-[#7A7065]">Cita #</dt>
+          <dd className="m-0 text-right font-mono text-xs text-[#7A7065]">{appointment.id}</dd>
         </dl>
-        <div className="border-line mt-3 flex items-center justify-between border-t pt-3">
-          <span className="text-muted text-xs font-semibold tracking-wide uppercase">Total</span>
-          <span className="text-lg font-bold" style={{ color: booking.service.color }}>
+        <div className="mt-3 flex items-center justify-between border-t border-[#2A2520] pt-3">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Total</span>
+          <span className="text-2xl font-black" style={{ color: booking.service.color || '#C8973E', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {formatted}
           </span>
         </div>
       </div>
 
-      {/* Stripe mode — renders Stripe Payment Element when clientSecret is available */}
+      {/* Stripe mode */}
       {_stripePromise && clientSecret ? (
-        <Elements stripe={_stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+        <Elements stripe={_stripePromise} options={{ clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#C8973E' } } }}>
           <StripeForm
             formatted={formatted}
             paying={paying}
@@ -266,154 +261,155 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
           />
         </Elements>
       ) : (
-      <>
-      {/* Method selector */}
-      <div className="mb-4">
-        <p className="text-muted mb-2 text-xs font-semibold uppercase tracking-wide">Método de pago</p>
-        <div className="grid grid-cols-5 gap-1.5">
-          {METHODS.map(({ id, label }) => (
+        <>
+          {/* Method selector */}
+          <div className="mb-4">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Método de pago</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {METHODS.map(({ id, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => handleMethodChange(id)}
+                  disabled={paying}
+                  className={[
+                    'flex flex-col items-center gap-1 rounded-xl border py-2.5 px-1 text-[10px] font-bold transition-all uppercase tracking-wider',
+                    method === id
+                      ? 'border-[#C8973E]/50 bg-[#C8973E]/10 text-[#C8973E]'
+                      : 'border-[#2A2520] bg-[#1E1B15] text-[#7A7065] hover:border-[#C8973E]/30 hover:text-[#7A7065]',
+                  ].join(' ')}
+                  title={label}
+                >
+                  {METHOD_ICONS[id]}
+                  <span className="leading-tight text-center">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Method content */}
+          {method === 'card' && (
+            <fieldset className="mb-4 rounded-2xl border border-[#2A2520] p-4" disabled={paying}>
+              <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">
+                Datos de tarjeta (simulado)
+              </legend>
+
+              <div className="mb-3">
+                <label className={labelClass}>
+                  Nombre en la tarjeta
+                  <input
+                    type="text"
+                    autoComplete="cc-name"
+                    placeholder="Titular de la tarjeta"
+                    className={inputClass('holder')}
+                    value={holder}
+                    onChange={(e) => setHolder(e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''))}
+                    onBlur={() => touch('holder')}
+                  />
+                </label>
+                {showError('holder') && (
+                  <p className="mt-1 text-xs text-red-400">Ingresa el nombre tal como aparece en la tarjeta.</p>
+                )}
+              </div>
+
+              <div className="mb-3">
+                <label className={labelClass}>
+                  Número de tarjeta
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
+                    placeholder="1234 5678 9012 3456"
+                    maxLength={19}
+                    className={inputClass('card')}
+                    value={card}
+                    onChange={handleCard}
+                    onBlur={() => touch('card')}
+                  />
+                </label>
+                {showError('card') && (
+                  <p className="mt-1 text-xs text-red-400">Ingresa los 16 dígitos de tu tarjeta.</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>
+                    Vencimiento
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      placeholder="MM/AA"
+                      maxLength={5}
+                      className={inputClass('expiry')}
+                      value={expiry}
+                      onChange={handleExpiry}
+                      onBlur={() => touch('expiry')}
+                    />
+                  </label>
+                  {showError('expiry') && (
+                    <p className="mt-1 text-xs text-red-400">Fecha inválida o vencida.</p>
+                  )}
+                </div>
+                <div>
+                  <label className={labelClass}>
+                    CVV
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      placeholder="•••"
+                      maxLength={4}
+                      className={inputClass('cvv')}
+                      value={cvv}
+                      onChange={handleCvv}
+                      onBlur={() => touch('cvv')}
+                    />
+                  </label>
+                  {showError('cvv') && (
+                    <p className="mt-1 text-xs text-red-400">CVV inválido.</p>
+                  )}
+                </div>
+              </div>
+
+              <p className="mt-3 text-xs text-[#7A7065]">
+                Simulado — ningún dato de tarjeta es procesado ni almacenado.
+              </p>
+            </fieldset>
+          )}
+
+          {method !== 'card' && (
+            <div className="mb-4 rounded-2xl border border-[#2A2520] p-4">
+              {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
+              {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
+              <p className="mt-3 text-center text-xs text-[#7A7065]">
+                Simulado — entorno de prueba, no se realiza ningún cargo real.
+              </p>
+            </div>
+          )}
+
+          {apiError && (
+            <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{apiError}</p>
+          )}
+
+          {method === 'card' && (
             <button
-              key={id}
               type="button"
-              onClick={() => handleMethodChange(id)}
-              disabled={paying}
-              className={[
-                'flex flex-col items-center gap-1 rounded-xl border py-2.5 px-1 text-[10px] font-semibold transition-all',
-                method === id
-                  ? 'border-secondary bg-secondary/10 text-secondary'
-                  : 'border-line text-muted hover:border-secondary/40',
-              ].join(' ')}
-              title={label}
+              className="w-full rounded-2xl bg-[#C8973E] px-6 py-3.5 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-[0_8px_24px_rgba(200,151,62,0.25)]"
+              onClick={handlePay}
+              disabled={!canPay}
             >
-              {METHOD_ICONS[id]}
-              <span className="leading-tight text-center">{id === 'mercadopago' ? 'M. Pago' : label}</span>
+              {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Method content */}
-      {method === 'card' && (
-        <fieldset className="mb-4 rounded-xl border border-[#e2e8f0] p-4" disabled={paying}>
-          <legend className="text-muted px-1 text-xs font-semibold uppercase tracking-wide">
-            Datos de tarjeta (simulado)
-          </legend>
-
-          <div className="mb-3">
-            <label className="flex flex-col gap-1.5 text-sm font-medium">
-              Nombre en la tarjeta
-              <input
-                type="text"
-                autoComplete="cc-name"
-                placeholder="Escribe el nombre del titular..."
-                className={inputClass('holder')}
-                value={holder}
-                onChange={(e) => setHolder(e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''))}
-                onBlur={() => touch('holder')}
-              />
-            </label>
-            {showError('holder') && (
-              <p className="mt-1 text-xs text-[#c0392b]">Ingresa el nombre tal como aparece en la tarjeta.</p>
-            )}
-          </div>
-
-          <div className="mb-3">
-            <label className="flex flex-col gap-1.5 text-sm font-medium">
-              Número de tarjeta
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="cc-number"
-                placeholder="1234 5678 9012 3456"
-                maxLength={19}
-                className={inputClass('card')}
-                value={card}
-                onChange={handleCard}
-                onBlur={() => touch('card')}
-              />
-            </label>
-            {showError('card') && (
-              <p className="mt-1 text-xs text-[#c0392b]">Ingresa los 16 dígitos de tu tarjeta.</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="flex flex-col gap-1.5 text-sm font-medium">
-                Vencimiento
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="cc-exp"
-                  placeholder="MM/AA"
-                  maxLength={5}
-                  className={inputClass('expiry')}
-                  value={expiry}
-                  onChange={handleExpiry}
-                  onBlur={() => touch('expiry')}
-                />
-              </label>
-              {showError('expiry') && (
-                <p className="mt-1 text-xs text-[#c0392b]">Fecha inválida o vencida.</p>
-              )}
-            </div>
-            <div>
-              <label className="flex flex-col gap-1.5 text-sm font-medium">
-                CVV
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  autoComplete="cc-csc"
-                  placeholder="•••"
-                  maxLength={4}
-                  className={inputClass('cvv')}
-                  value={cvv}
-                  onChange={handleCvv}
-                  onBlur={() => touch('cvv')}
-                />
-              </label>
-              {showError('cvv') && (
-                <p className="mt-1 text-xs text-[#c0392b]">CVV inválido (3 o 4 dígitos).</p>
-              )}
-            </div>
-          </div>
-
-          <p className="text-muted mt-3 text-xs">
-            Simulado — ningún dato de tarjeta es procesado ni almacenado.
-          </p>
-        </fieldset>
-      )}
-
-      {method !== 'card' && (
-        <div className="mb-4 rounded-xl border border-[#e2e8f0] p-4">
-          {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
-          {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
-          <p className="text-muted mt-3 text-center text-xs">
-            Simulado — entorno de prueba, no se realiza ningún cargo real.
-          </p>
-        </div>
-      )}
-
-      {apiError && <p className="mb-4 text-sm text-[#c0392b]">{apiError}</p>}
-
-      {/* Unified pay button only for card; external methods use their own branded button */}
-      {method === 'card' && (
-        <button
-          type="button"
-          className="bg-secondary w-full rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-          onClick={handlePay}
-          disabled={!canPay}
-        >
-          {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
-        </button>
-      )}
-      </>
+          )}
+        </>
       )}
 
       <button
         type="button"
         onClick={() => onError('canceled')}
-        className="text-muted mt-3 w-full border-0 bg-transparent text-sm underline"
+        className="mt-3 w-full border-0 bg-transparent text-sm text-[#7A7065] hover:text-[#7A7065] underline transition-colors"
         disabled={paying}
       >
         Cancelar
