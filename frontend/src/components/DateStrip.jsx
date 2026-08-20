@@ -37,14 +37,14 @@ export function DateStrip({ dates, selectedDate, onSelect }) {
             onClick={() => onSelect(iso)}
             className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-3.5 py-2.5 text-sm transition-all ${
               active
-                ? 'border-[#C8973E] bg-[#C8973E] text-[#0C0B09] font-bold'
-                : 'border-[#2A2520] bg-[#1E1B15] text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0]'
+                ? 'border-accent bg-accent text-[#0C0B09] font-bold'
+                : 'border-line bg-surface text-muted hover:border-accent/40 hover:text-ink'
             }`}
           >
             <span className="font-semibold whitespace-nowrap">
               {MONTHS_ES[d.getMonth()]} {d.getDate()}
             </span>
-            <span className={active ? 'text-[#0C0B09]/70 text-xs' : 'text-[#7A7065]/70 text-xs'}>
+            <span className={active ? 'text-[#0C0B09]/70 text-xs' : 'text-muted/70 text-xs'}>
               {WEEKDAYS_ES[d.getDay()]}
             </span>
           </button>

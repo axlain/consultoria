@@ -187,7 +187,7 @@ export function BookingWizard() {
       {/* X — volver al home del tenant (mobile/tablet) */}
       <Link
         to={`/demo/${tenant.slug}`}
-        className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 text-[#7A7065] no-underline backdrop-blur-sm transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0] lg:hidden"
+        className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface/80 text-muted no-underline backdrop-blur-sm transition-colors hover:border-accent/40 hover:text-ink lg:hidden"
         aria-label="Cerrar y volver al inicio"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -196,12 +196,12 @@ export function BookingWizard() {
       </Link>
 
       {/* Shared card: contains both columns on every step so nothing floats loose on desktop. */}
-      <div className="lg:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-[#2A2520] lg:bg-[#1E1B15] lg:overflow-hidden">
+      <div className="lg:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-line lg:bg-surface lg:overflow-hidden">
       {/* Unified header bar (desktop): keeps close + menu controls anchored to the card instead of floating loose. */}
-      <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-[#2A2520] lg:px-8 lg:py-5">
+      <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-line lg:px-8 lg:py-5">
         <Link
           to={`/demo/${tenant.slug}`}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#2A2520] bg-[#161410] text-[#7A7065] no-underline transition-colors hover:border-[#C8973E]/40 hover:text-[#F2EBE0]"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-alt text-muted no-underline transition-colors hover:border-accent/40 hover:text-ink"
           aria-label="Cerrar y volver al inicio"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -216,7 +216,7 @@ export function BookingWizard() {
       <div className="max-h-dvh overflow-y-auto md:max-h-none md:overflow-visible md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0 lg:flex-1 lg:min-w-0 lg:p-10">
       <div className="mb-7 px-5 pt-10 lg:px-0 lg:pt-0">
         {rebook ? (
-          <p className="text-center text-[10px] font-bold tracking-[0.14em] uppercase text-[#7A7065]">
+          <p className="text-center text-[10px] font-bold tracking-[0.14em] uppercase text-muted">
             Reagendar — elige nueva fecha
           </p>
         ) : (
@@ -226,22 +226,22 @@ export function BookingWizard() {
               <div key={s} className="flex items-center">
                 <div className={[
                   'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-200',
-                  i < stepIndex ? 'bg-[#C8973E] text-[#0C0B09]' :
-                  i === stepIndex ? 'bg-[#C8973E] text-[#0C0B09] ring-2 ring-[#C8973E]/30 ring-offset-2 ring-offset-[#0C0B09]' :
-                  'bg-[#2A2520] text-[#7A7065]',
+                  i < stepIndex ? 'bg-accent text-[#0C0B09]' :
+                  i === stepIndex ? 'bg-accent text-[#0C0B09] ring-2 ring-accent/30 ring-offset-2 ring-offset-paper' :
+                  'bg-line text-muted',
                 ].join(' ')}>
                   {i < stepIndex ? (
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                   ) : i + 1}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`h-px w-6 mx-0.5 transition-colors duration-200 ${i < stepIndex ? 'bg-[#C8973E]' : 'bg-[#2A2520]'}`} />
+                  <div className={`h-px w-6 mx-0.5 transition-colors duration-200 ${i < stepIndex ? 'bg-accent' : 'bg-line'}`} />
                 )}
               </div>
             ))}
           </div>
         )}
-        <p className="mt-2.5 text-center text-[10px] font-bold tracking-[0.14em] uppercase text-[#7A7065]">
+        <p className="mt-2.5 text-center text-[10px] font-bold tracking-[0.14em] uppercase text-muted">
           {rebook ? '' : `Paso ${stepIndex + 1} de ${STEPS.length}`}
         </p>
       </div>
@@ -319,32 +319,32 @@ export function BookingWizard() {
       </div>
 
       {/* Live booking summary — desktop only, right column of the shared card */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:shrink-0 lg:border-l lg:border-[#2A2520] lg:p-10">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065] mb-4">
+      <aside className="hidden lg:flex lg:flex-col lg:w-80 lg:shrink-0 lg:border-l lg:border-line lg:p-10">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-4">
           {rebook ? 'Reagendar cita' : 'Resumen de tu cita'}
         </p>
         <dl className="flex flex-col gap-3 text-sm">
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[#7A7065]">Servicio</dt>
-            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.service?.name || 'Por elegir'}</dd>
+            <dt className="text-muted">Servicio</dt>
+            <dd className="m-0 text-right font-medium text-ink">{booking.service?.name || 'Por elegir'}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[#7A7065]">Profesional</dt>
-            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.professional?.name || 'Por elegir'}</dd>
+            <dt className="text-muted">Profesional</dt>
+            <dd className="m-0 text-right font-medium text-ink">{booking.professional?.name || 'Por elegir'}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[#7A7065]">Fecha</dt>
-            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.date || 'Por elegir'}</dd>
+            <dt className="text-muted">Fecha</dt>
+            <dd className="m-0 text-right font-medium text-ink">{booking.date || 'Por elegir'}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[#7A7065]">Hora</dt>
-            <dd className="m-0 text-right font-medium text-[#F2EBE0]">{booking.time || 'Por elegir'}</dd>
+            <dt className="text-muted">Hora</dt>
+            <dd className="m-0 text-right font-medium text-ink">{booking.time || 'Por elegir'}</dd>
           </div>
         </dl>
         {booking.service && (
-          <div className="mt-4 flex items-center justify-between border-t border-[#2A2520] pt-4">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Total</span>
-            <span className="text-xl font-extrabold text-[#C8973E]">${booking.service.price}</span>
+          <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Total</span>
+            <span className="text-xl font-extrabold text-accent">${booking.service.price}</span>
           </div>
         )}
       </aside>

@@ -36,23 +36,23 @@ export function Equipo() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#F2EBE0]">Equipo</h1>
+        <h1 className="text-2xl font-bold text-ink">Equipo</h1>
         <Link
           to="/panel/equipo/nueva-cita"
-          className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-semibold text-[#0C0B09] no-underline hover:bg-[#E8B86D] transition-colors"
+          className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-[#0C0B09] no-underline hover:bg-accent-light transition-colors"
         >
           + Nueva cita (walk-in)
         </Link>
       </div>
 
       <div className="mb-5 flex items-center gap-3">
-        <label className="flex items-center gap-2 text-sm font-medium text-[#7A7065]">
+        <label className="flex items-center gap-2 text-sm font-medium text-muted">
           Fecha
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-1.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors"
+            className="rounded-xl border border-line bg-surface px-3 py-1.5 text-sm text-ink outline-none focus:border-accent transition-colors"
           />
         </label>
       </div>
@@ -60,35 +60,35 @@ export function Equipo() {
       {loading && (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-[#1E1B15]" />
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-surface" />
           ))}
         </div>
       )}
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       {!loading && !error && citas.length === 0 && (
-        <div className="rounded-xl border border-dashed border-[#2A2520] p-12 text-center">
-          <p className="text-[#7A7065]">Sin citas para este día</p>
+        <div className="rounded-xl border border-dashed border-line p-12 text-center">
+          <p className="text-muted">Sin citas para este día</p>
         </div>
       )}
 
       {!loading && citas.length > 0 && (
         <ul className="flex flex-col gap-3">
           {citas.map(c => (
-            <li key={c.id} className="rounded-xl border border-[#2A2520] bg-[#1E1B15] p-4 hover:border-[#C8973E]/20 transition-colors">
+            <li key={c.id} className="rounded-xl border border-line bg-surface p-4 hover:border-accent/20 transition-colors">
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-base font-bold text-[#F2EBE0]">{c.time}</span>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-[#2A2520] text-[#7A7065]'}`}>
+                <span className="text-base font-bold text-ink">{c.time}</span>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLOR[c.status] ?? 'bg-line text-muted'}`}>
                   {STATUS_LABEL[c.status] ?? c.status}
                 </span>
               </div>
-              <p className="text-sm text-[#F2EBE0]/80">
+              <p className="text-sm text-ink/80">
                 {c.customer_name} {c.customer_last_name}
               </p>
-              <p className="text-sm text-[#7A7065]">
-                Servicio: <span className="font-medium text-[#F2EBE0]/70">{c.service_id}</span>
+              <p className="text-sm text-muted">
+                Servicio: <span className="font-medium text-ink/70">{c.service_id}</span>
                 {' · '}
-                Profesional: <span className="font-medium text-[#F2EBE0]/70">{c.professional_id}</span>
+                Profesional: <span className="font-medium text-ink/70">{c.professional_id}</span>
               </p>
             </li>
           ))}

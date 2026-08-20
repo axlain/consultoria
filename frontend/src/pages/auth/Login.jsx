@@ -90,8 +90,8 @@ export function Login() {
     if (error) setSocialMsg(error.message)
   }
 
-  const inputClass = 'w-full rounded-xl border border-[#2A2520] bg-[#1E1B15] px-4 py-3 text-sm text-white placeholder-[#7A7065] outline-none transition-colors focus:border-[#C8973E]/50 focus:ring-1 focus:ring-[#C8973E]/30'
-
+  const inputClass = 'w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink placeholder-muted outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/30'
+  
   return (
     <AuthShell showMenu={false}>
       <h1 className="mb-6 text-3xl" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
@@ -114,17 +114,17 @@ export function Login() {
           </div>
 
           {socialMsg && (
-            <div className="mb-4 rounded-xl border border-[#C8973E]/20 bg-[#C8973E]/5 px-3 py-2 text-xs text-[#C8973E]">{socialMsg}</div>
+            <div className="mb-4 rounded-xl border border-accent/20 bg-accent/5 px-3 py-2 text-xs text-accent">{socialMsg}</div>
           )}
 
           <div className="relative mb-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#2A2A2A]" />
-            <span className="text-xs text-[#7A7065]">o con email</span>
+            <span className="text-xs text-muted">o con email</span>
             <div className="h-px flex-1 bg-[#2A2A2A]" />
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
               Email
               <input
                 type="email"
@@ -137,7 +137,7 @@ export function Login() {
               />
             </label>
 
-            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+            <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
               Contraseña
               <input
                 type="password"
@@ -152,22 +152,22 @@ export function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 rounded-2xl bg-[#C8973E] py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+              className="mt-1 rounded-2xl bg-accent py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? 'Entrando…' : 'Entrar'}
             </button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-[#7A7065]">
+          <p className="mt-5 text-center text-sm text-muted">
             ¿No tienes cuenta?{' '}
-            <Link to="/registro" className="font-semibold text-[#C8973E] hover:opacity-80 no-underline">
+            <Link to="/registro" className="font-semibold text-accent hover:opacity-80 no-underline">
               Regístrate
             </Link>
           </p>
 
           {/* Demo users */}
           <details className="mt-5">
-            <summary className="cursor-pointer text-xs text-[#7A7065] hover:text-[#7A7065] transition-colors">
+            <summary className="cursor-pointer text-xs text-muted hover:text-muted transition-colors">
               Usuarios de prueba
             </summary>
             <div className="mt-2 flex flex-col gap-1">
@@ -176,10 +176,10 @@ export function Login() {
                   key={u.email}
                   type="button"
                   onClick={() => fillDemo(u)}
-                  className="flex items-center justify-between rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2 text-left text-xs hover:border-[#C8973E]/30 hover:bg-[#2A2520] transition-colors"
+                  className="flex items-center justify-between rounded-xl border border-line bg-surface px-3 py-2 text-left text-xs hover:border-accent/30 hover:bg-line transition-colors"
                 >
-                  <span className="text-[#7A7065]">{u.email}</span>
-                  <span className="rounded-full border border-[#2A2520] bg-[#161410] px-2 py-0.5 text-[10px] font-bold text-[#7A7065]">
+                  <span className="text-muted">{u.email}</span>
+                  <span className="rounded-full border border-line bg-surface-alt px-2 py-0.5 text-[10px] font-bold text-muted">
                     {u.role}
                   </span>
                 </button>
@@ -194,9 +194,9 @@ export function Login() {
 
 function SocialButton({ onClick, icon, label, dark, blue }) {
   let cls = 'flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-80'
-  if (dark) cls += ' bg-white/5 border-[#2A2520] text-white'
+  if (dark) cls += ' bg-white/5 border-line text-ink'
   else if (blue) cls += ' bg-[#1877F2]/10 border-[#1877F2]/30 text-[#1877F2]'
-  else cls += ' border-[#2A2520] bg-[#1E1B15] text-white'
+  else cls += ' border-line bg-surface text-ink'
   return (
     <button type="button" onClick={onClick} className={cls}>
       <span className="h-5 w-5 shrink-0">{icon}</span>

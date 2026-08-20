@@ -11,7 +11,7 @@ export function NotFound() {
       {slug && (
         <Link
           to={`/demo/${slug}`}
-          className="border-line hover:border-secondary mt-6 inline-block rounded-full border px-5 py-2.5 text-sm font-semibold no-underline"
+          className="border-line hover:border-accent mt-6 inline-block rounded-full border px-5 py-2.5 text-sm font-semibold no-underline"
         >
           Volver al inicio
         </Link>

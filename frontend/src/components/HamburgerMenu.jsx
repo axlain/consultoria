@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { roleHome } from './ProtectedRoute'
+import { ThemeToggleRow } from './ThemeToggle'
 
 const NAV_LINK_CLASS =
-  'block rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3.5 py-2.5 text-sm font-medium text-[#F2EBE0] no-underline transition-colors hover:border-[#C8973E]/40 hover:bg-[#2A2520]'
+  'block rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/40 hover:bg-line'
 
 export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
   const [open, setOpen] = useState(false)
@@ -22,8 +23,8 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
   }
 
   const buttonBase = inline
-    ? 'flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 backdrop-blur-sm transition-colors hover:border-[#C8973E]/40'
-    : 'absolute top-5 right-4 z-20 flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-[#2A2520] bg-[#1E1B15]/80 backdrop-blur-sm transition-colors hover:border-[#C8973E]/40'
+    ? 'flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-line bg-surface/80 backdrop-blur-sm transition-colors hover:border-accent/40'
+    : 'absolute top-5 right-4 z-20 flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-xl border border-line bg-surface/80 backdrop-blur-sm transition-colors hover:border-accent/40'
 
   return (
     <>
@@ -35,9 +36,9 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
         aria-controls="site-drawer"
         onClick={() => setOpen(true)}
       >
-        <span className="h-0.5 w-[18px] rounded-sm bg-[#F2EBE0]" />
-        <span className="h-0.5 w-[18px] rounded-sm bg-[#F2EBE0]" />
-        <span className="h-0.5 w-[18px] rounded-sm bg-[#F2EBE0]" />
+        <span className="h-0.5 w-[18px] rounded-sm bg-ink" />
+        <span className="h-0.5 w-[18px] rounded-sm bg-ink" />
+        <span className="h-0.5 w-[18px] rounded-sm bg-ink" />
       </button>
 
       {open && (
@@ -47,23 +48,23 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
         >
           <aside
             id="site-drawer"
-            className="h-full w-[min(85vw,340px)] overflow-y-auto bg-[#0C0B09] p-6 shadow-[-4px_0_32px_rgba(0,0,0,0.8)] border-l border-[#2A2520]"
+            className="h-full w-[min(85vw,340px)] overflow-y-auto bg-paper p-6 shadow-[-4px_0_32px_rgba(0,0,0,0.8)] border-l border-line"
             role="dialog"
             aria-label="Menú de navegación"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
-              <span className="font-bold text-[#F2EBE0] text-sm">Menú</span>
+              <span className="font-bold text-ink text-sm">Menú</span>
               <button
                 type="button"
-                className="border-0 bg-transparent p-1 text-[1.75rem] leading-none text-[#7A7065] hover:text-[#F2EBE0]"
+                className="border-0 bg-transparent p-1 text-[1.75rem] leading-none text-muted hover:text-ink"
                 aria-label="Cerrar menú"
                 onClick={closeDrawer}
               >×</button>
             </div>
 
             <nav aria-label="Reservas" className="mb-6">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A7065]">Reservas</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Reservas</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 <li><Link to={`/demo/${slug}`} onClick={closeDrawer} className={NAV_LINK_CLASS}>Inicio</Link></li>
                 <li><Link to={`/demo/${slug}/reservar`} onClick={closeDrawer} className={NAV_LINK_CLASS}>Agendar cita</Link></li>
@@ -72,7 +73,7 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
             </nav>
 
             <nav aria-label="Cuenta" className="mb-6">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A7065]">Cuenta</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Cuenta</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 {!user && (
                   <li><Link to="/login" onClick={closeDrawer} className={NAV_LINK_CLASS}>Iniciar sesión / Mi Panel</Link></li>
@@ -97,8 +98,13 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
               </ul>
             </nav>
 
+            <nav aria-label="Apariencia" className="mb-6">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Apariencia</p>
+              <ThemeToggleRow className={`${NAV_LINK_CLASS} flex w-full items-center justify-between`} />
+            </nav>
+
             <nav aria-label="Ayuda">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#7A7065]">Ayuda e información</p>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Ayuda e información</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 <li>
                   <button
@@ -109,26 +115,26 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
                     onClick={() => setFaqOpen((v) => !v)}
                   >
                     Preguntas frecuentes
-                    <span className={`transition-transform duration-150 text-[#7A7065] ${faqOpen ? 'rotate-180' : ''}`}>▾</span>
+                    <span className={`transition-transform duration-150 text-muted ${faqOpen ? 'rotate-180' : ''}`}>▾</span>
                   </button>
                   {faqOpen && (
                     <dl id="faq-accordion" className="mt-2 mb-0 ml-1">
                       {faqs.map((faq) => {
                         const isOpen = openQuestion === faq.question
                         return (
-                          <div key={faq.question} className="border-b border-[#2A2520] py-2 last:border-none">
+                          <div key={faq.question} className="border-b border-line py-2 last:border-none">
                             <dt>
                               <button
                                 type="button"
                                 aria-expanded={isOpen}
-                                className="flex w-full items-center justify-between border-0 bg-transparent p-0 text-left text-sm font-semibold text-[#F2EBE0]"
+                                className="flex w-full items-center justify-between border-0 bg-transparent p-0 text-left text-sm font-semibold text-ink"
                                 onClick={() => setOpenQuestion(isOpen ? null : faq.question)}
                               >
                                 {faq.question}
-                                <span className={`ml-2 shrink-0 transition-transform duration-150 text-[#7A7065] ${isOpen ? 'rotate-180' : ''}`}>▾</span>
+                                <span className={`ml-2 shrink-0 transition-transform duration-150 text-muted ${isOpen ? 'rotate-180' : ''}`}>▾</span>
                               </button>
                             </dt>
-                            {isOpen && <dd className="m-0 mt-1.5 text-sm text-[#7A7065]">{faq.answer}</dd>}
+                            {isOpen && <dd className="m-0 mt-1.5 text-sm text-muted">{faq.answer}</dd>}
                           </div>
                         )
                       })}

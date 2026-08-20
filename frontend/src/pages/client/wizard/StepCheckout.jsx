@@ -100,7 +100,7 @@ function GooglePayButton({ onClick, disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#2A2520] bg-[#1E1B15] py-4 text-white text-base font-medium shadow-sm transition-all hover:border-[#C8973E]/30 disabled:opacity-50"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface py-4 text-white text-base font-medium shadow-sm transition-all hover:border-accent/30 disabled:opacity-50"
     >
       <IconGoogle />
       <span>Pay</span>
@@ -138,7 +138,7 @@ function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountC
       <button
         type="submit"
         disabled={!stripe || paying}
-        className="mt-4 w-full rounded-2xl bg-[#C8973E] px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+        className="mt-4 w-full rounded-2xl bg-accent px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
       >
         {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
       </button>
@@ -182,10 +182,10 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
 
   function inputClass(field) {
     return [
-      'w-full rounded-xl border px-4 py-3 text-base text-white bg-[#161410] placeholder-[#7A7065] outline-none transition-colors',
+      'w-full rounded-xl border px-4 py-3 text-base text-white bg-surface-alt placeholder-muted outline-none transition-colors',
       showError(field)
         ? 'border-red-500/50 focus:border-red-500'
-        : 'border-[#2A2520] focus:border-[#C8973E]/50 focus:ring-1 focus:ring-[#C8973E]/20',
+        : 'border-line focus:border-accent/50 focus:ring-1 focus:ring-accent/20',
     ].join(' ')
   }
 
@@ -226,22 +226,22 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
     setTouched({})
   }
 
-  const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]'
+  const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted'
 
   return (
     <section>
       <h2>Pago de tu cita</h2>
 
       {/* Order summary */}
-      <div className="mb-5 rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
+      <div className="mb-5 rounded-2xl border border-line bg-surface p-4">
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
-          <dt className="text-[#7A7065]">Servicio</dt>
+          <dt className="text-muted">Servicio</dt>
           <dd className="m-0 text-right font-medium text-white">{booking.service.name}</dd>
-          <dt className="text-[#7A7065]">Cita #</dt>
-          <dd className="m-0 text-right font-mono text-xs text-[#7A7065]">{appointment.id}</dd>
+          <dt className="text-muted">Cita #</dt>
+          <dd className="m-0 text-right font-mono text-xs text-muted">{appointment.id}</dd>
         </dl>
-        <div className="mt-3 flex items-center justify-between border-t border-[#2A2520] pt-3">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Total</span>
+        <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Total</span>
           <span className="text-2xl font-black" style={{ color: booking.service.color || '#C8973E', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {formatted}
           </span>
@@ -264,7 +264,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
         <>
           {/* Method selector */}
           <div className="mb-4">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">Método de pago</p>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">Método de pago</p>
             <div className="grid grid-cols-3 gap-1.5">
               {METHODS.map(({ id, label }) => (
                 <button
@@ -275,8 +275,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
                   className={[
                     'flex flex-col items-center gap-1 rounded-xl border py-2.5 px-1 text-[10px] font-bold transition-all uppercase tracking-wider',
                     method === id
-                      ? 'border-[#C8973E]/50 bg-[#C8973E]/10 text-[#C8973E]'
-                      : 'border-[#2A2520] bg-[#1E1B15] text-[#7A7065] hover:border-[#C8973E]/30 hover:text-[#7A7065]',
+                      ? 'border-accent/50 bg-accent/10 text-accent'
+                      : 'border-line bg-surface text-muted hover:border-accent/30 hover:text-muted',
                   ].join(' ')}
                   title={label}
                 >
@@ -289,8 +289,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
 
           {/* Method content */}
           {method === 'card' && (
-            <fieldset className="mb-4 rounded-2xl border border-[#2A2520] p-4" disabled={paying}>
-              <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-[#7A7065]">
+            <fieldset className="mb-4 rounded-2xl border border-line p-4" disabled={paying}>
+              <legend className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted">
                 Datos de tarjeta (simulado)
               </legend>
 
@@ -373,17 +373,17 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
                 </div>
               </div>
 
-              <p className="mt-3 text-xs text-[#7A7065]">
+              <p className="mt-3 text-xs text-muted">
                 Simulado — ningún dato de tarjeta es procesado ni almacenado.
               </p>
             </fieldset>
           )}
 
           {method !== 'card' && (
-            <div className="mb-4 rounded-2xl border border-[#2A2520] p-4">
+            <div className="mb-4 rounded-2xl border border-line p-4">
               {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
               {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
-              <p className="mt-3 text-center text-xs text-[#7A7065]">
+              <p className="mt-3 text-center text-xs text-muted">
                 Simulado — entorno de prueba, no se realiza ningún cargo real.
               </p>
             </div>
@@ -396,7 +396,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
           {method === 'card' && (
             <button
               type="button"
-              className="w-full rounded-2xl bg-[#C8973E] px-6 py-3.5 text-sm font-bold text-[#0C0B09] transition-all hover:bg-[#E8B86D] hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-[0_8px_24px_rgba(200,151,62,0.25)]"
+              className="w-full rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-[0_8px_24px_rgba(200,151,62,0.25)]"
               onClick={handlePay}
               disabled={!canPay}
             >
@@ -409,7 +409,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
       <button
         type="button"
         onClick={() => onError('canceled')}
-        className="mt-3 w-full border-0 bg-transparent text-sm text-[#7A7065] hover:text-[#7A7065] underline transition-colors"
+        className="mt-3 w-full border-0 bg-transparent text-sm text-muted hover:text-muted underline transition-colors"
         disabled={paying}
       >
         Cancelar

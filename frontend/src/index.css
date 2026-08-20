@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #F2EBE0;
-  --color-secondary: #C8973E;
-  --color-secondary-light: #E8B86D;
+  /* Named --color-ink/--color-accent (not --color-primary/--color-secondary) —
+     those names are already used by TenantContext.jsx to push each tenant's
+     white-label brand colors onto document.documentElement as an inline style,
+     which would always win over these theme tokens and break dark/light text. */
+  --color-ink: #F2EBE0;
+  --color-accent: #C8973E;
+  --color-accent-light: #E8B86D;
   --color-line: #2A2520;
   --color-muted: #7A7065;
   --color-paper: #0C0B09;
@@ -31,11 +35,23 @@
   color-scheme: dark;
 }
 
+/* Light theme override — same token names, different values. Toggled via
+   ThemeContext setting document.documentElement.dataset.theme. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-ink: #211D17;
+  --color-line: #E4DBCB;
+  --color-muted: #8B8072;
+  --color-paper: #FAF6EF;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F1EAD9;
+}
+
 @layer base {
   body {
     margin: 0;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    color: var(--color-primary);
+    color: var(--color-ink);
     background: var(--color-paper);
     -webkit-font-smoothing: antialiased;
   }
@@ -56,7 +72,7 @@
   }
 
   a {
-    color: var(--color-secondary);
+    color: var(--color-accent);
   }
 
   button {
@@ -65,7 +81,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-secondary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 }
@@ -75,7 +91,7 @@
   transition: all 0.15s ease;
 }
 .slot-available:hover:not(:disabled) {
-  background: var(--color-secondary);
+  background: var(--color-accent);
   color: var(--color-paper);
-  border-color: var(--color-secondary);
+  border-color: var(--color-accent);
 }

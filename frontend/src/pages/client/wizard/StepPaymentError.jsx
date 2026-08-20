@@ -27,7 +27,7 @@ export function StepPaymentError({ onRetry, onCancel }) {
 
       <button
         type="button"
-        className="bg-secondary mb-3 w-full rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
+        className="bg-accent mb-3 w-full rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
         onClick={onRetry}
       >
         Intentar de nuevo

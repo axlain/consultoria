@@ -110,18 +110,18 @@ export function TeamPanel() {
     }
   }
 
-  const inputClass = 'rounded-xl border border-[#2A2520] bg-[#0C0B09] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors w-full'
-  const labelClass = 'mb-4 flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]'
-  const btnSecondary = 'rounded-xl border border-[#2A2520] px-3 py-2 text-sm font-semibold text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0] transition-colors'
+  const inputClass = 'rounded-xl border border-line bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-accent transition-colors w-full'
+  const labelClass = 'mb-4 flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted'
+  const btnSecondary = 'rounded-xl border border-line px-3 py-2 text-sm font-semibold text-muted hover:border-accent/40 hover:text-ink transition-colors'
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#F2EBE0]">Equipo / Barberos</h1>
+        <h1 className="text-2xl font-bold text-ink">Equipo / Barberos</h1>
         {editingId === null && (
           <button
             type="button"
-            className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
+            className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors"
             onClick={startCreate}
           >
             + Nuevo barbero
@@ -134,20 +134,20 @@ export function TeamPanel() {
       {/* Mobile: one card per barber instead of a table that would overflow. */}
       <div className="mb-6 flex flex-col gap-3 md:hidden">
         {tenant.professionals.map((professional) => (
-          <div key={professional.id} className="rounded-xl border border-[#2A2520] bg-[#1E1B15] p-4">
+          <div key={professional.id} className="rounded-xl border border-line bg-surface p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <span className="font-semibold text-[#F2EBE0]">{professional.name}</span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${professional.active ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20' : 'bg-[#2A2520] text-[#7A7065]'}`}>
+              <span className="font-semibold text-ink">{professional.name}</span>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${professional.active ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20' : 'bg-line text-muted'}`}>
                 {professional.active ? 'Activo' : 'Inactivo'}
               </span>
             </div>
             <dl className="mb-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[0.9rem]">
-              <dt className="text-[#7A7065]">Servicios</dt>
-              <dd className="m-0 text-[#F2EBE0]/80">{professional.service_ids.map((id) => tenant.services.find((s) => s.id === id)?.name ?? id).join(', ')}</dd>
-              <dt className="text-[#7A7065]">Horario</dt>
-              <dd className="m-0 text-[#F2EBE0]/80">{professional.schedule.start}–{professional.schedule.end}</dd>
-              <dt className="text-[#7A7065]">Descanso</dt>
-              <dd className="m-0 text-[#F2EBE0]/80">{professional.days_off.map((d) => DAYS.find((x) => x.code === d)?.label).join(', ') || '—'}</dd>
+              <dt className="text-muted">Servicios</dt>
+              <dd className="m-0 text-ink/80">{professional.service_ids.map((id) => tenant.services.find((s) => s.id === id)?.name ?? id).join(', ')}</dd>
+              <dt className="text-muted">Horario</dt>
+              <dd className="m-0 text-ink/80">{professional.schedule.start}–{professional.schedule.end}</dd>
+              <dt className="text-muted">Descanso</dt>
+              <dd className="m-0 text-ink/80">{professional.days_off.map((d) => DAYS.find((x) => x.code === d)?.label).join(', ') || '—'}</dd>
             </dl>
             <div className="flex flex-wrap gap-2">
               <button type="button" className={`flex-1 ${btnSecondary}`} onClick={() => startEdit(professional)}>Editar</button>
@@ -159,24 +159,24 @@ export function TeamPanel() {
       </div>
 
       {/* Desktop: table. */}
-      <div className="mb-6 hidden overflow-x-auto rounded-xl border border-[#2A2520] md:block">
+      <div className="mb-6 hidden overflow-x-auto rounded-xl border border-line md:block">
         <table className="w-full border-collapse">
-          <thead className="border-b border-[#2A2520] bg-[#161410]">
+          <thead className="border-b border-line bg-surface-alt">
             <tr>
               {['Nombre', 'Servicios', 'Horario', 'Descanso', 'Estado', 'Acciones'].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#7A7065]">{h}</th>
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#2A2520]">
+          <tbody className="divide-y divide-line">
             {tenant.professionals.map((professional) => (
-              <tr key={professional.id} className="hover:bg-[#1E1B15] transition-colors">
-                <td className="px-4 py-3 font-medium text-[#F2EBE0]">{professional.name}</td>
-                <td className="px-4 py-3 text-sm text-[#7A7065]">{professional.service_ids.map((id) => tenant.services.find((s) => s.id === id)?.name ?? id).join(', ')}</td>
-                <td className="px-4 py-3 text-sm text-[#7A7065]">{professional.schedule.start}–{professional.schedule.end}</td>
-                <td className="px-4 py-3 text-sm text-[#7A7065]">{professional.days_off.map((d) => DAYS.find((x) => x.code === d)?.label).join(', ') || '—'}</td>
+              <tr key={professional.id} className="hover:bg-surface transition-colors">
+                <td className="px-4 py-3 font-medium text-ink">{professional.name}</td>
+                <td className="px-4 py-3 text-sm text-muted">{professional.service_ids.map((id) => tenant.services.find((s) => s.id === id)?.name ?? id).join(', ')}</td>
+                <td className="px-4 py-3 text-sm text-muted">{professional.schedule.start}–{professional.schedule.end}</td>
+                <td className="px-4 py-3 text-sm text-muted">{professional.days_off.map((d) => DAYS.find((x) => x.code === d)?.label).join(', ') || '—'}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${professional.active ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20' : 'bg-[#2A2520] text-[#7A7065]'}`}>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${professional.active ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20' : 'bg-line text-muted'}`}>
                     {professional.active ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
@@ -194,18 +194,18 @@ export function TeamPanel() {
       </div>
 
       {editingId !== null && (
-        <form className="max-w-[480px] rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-6" onSubmit={handleSubmit}>
-          <h2 className="mb-5 text-lg font-bold text-[#F2EBE0]">{editingId === '__new__' ? 'Nuevo barbero' : 'Editar barbero'}</h2>
+        <form className="max-w-[480px] rounded-2xl border border-line bg-surface p-6" onSubmit={handleSubmit}>
+          <h2 className="mb-5 text-lg font-bold text-ink">{editingId === '__new__' ? 'Nuevo barbero' : 'Editar barbero'}</h2>
           <label className={labelClass}>
             Nombre
             <input type="text" required className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </label>
 
-          <fieldset className="mb-4 rounded-xl border border-[#2A2520] p-4">
-            <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Servicios que ofrece</legend>
+          <fieldset className="mb-4 rounded-xl border border-line p-4">
+            <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Servicios que ofrece</legend>
             {tenant.services.map((service) => (
-              <label key={service.id} className="mb-3 flex flex-row items-center gap-2 text-sm text-[#F2EBE0] cursor-pointer">
-                <input type="checkbox" className="accent-[#C8973E] w-auto p-0" checked={form.service_ids.includes(service.id)} onChange={() => toggleServiceId(service.id)} />
+              <label key={service.id} className="mb-3 flex flex-row items-center gap-2 text-sm text-ink cursor-pointer">
+                <input type="checkbox" className="accent-accent w-auto p-0" checked={form.service_ids.includes(service.id)} onChange={() => toggleServiceId(service.id)} />
                 {service.name}
               </label>
             ))}
@@ -218,24 +218,24 @@ export function TeamPanel() {
             <input type="number" min="5" className={inputClass} value={form.schedule.slot_minutes} onChange={(e) => setForm({ ...form, schedule: { ...form.schedule, slot_minutes: Number(e.target.value) } })} />
           </label>
 
-          <fieldset className="mb-4 rounded-xl border border-[#2A2520] p-4">
-            <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Días de descanso</legend>
+          <fieldset className="mb-4 rounded-xl border border-line p-4">
+            <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Días de descanso</legend>
             {DAYS.map((day) => (
-              <label key={day.code} className="mb-3 flex flex-row items-center gap-2 text-sm text-[#F2EBE0] cursor-pointer">
-                <input type="checkbox" className="accent-[#C8973E] w-auto p-0" checked={form.days_off.includes(day.code)} onChange={() => toggleDayOff(day.code)} />
+              <label key={day.code} className="mb-3 flex flex-row items-center gap-2 text-sm text-ink cursor-pointer">
+                <input type="checkbox" className="accent-accent w-auto p-0" checked={form.days_off.includes(day.code)} onChange={() => toggleDayOff(day.code)} />
                 {day.label}
               </label>
             ))}
           </fieldset>
 
-          <label className="mb-4 flex flex-row items-center gap-2 text-sm text-[#F2EBE0] cursor-pointer">
-            <input type="checkbox" className="accent-[#C8973E] w-auto p-0" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
+          <label className="mb-4 flex flex-row items-center gap-2 text-sm text-ink cursor-pointer">
+            <input type="checkbox" className="accent-accent w-auto p-0" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
             Activo (si se desmarca, desaparece del calendario de reservas)
           </label>
 
           <div className="mt-6 flex justify-between">
             <button type="button" className={btnSecondary} onClick={cancelEdit} disabled={saving}>Cancelar</button>
-            <button type="submit" className="rounded-xl bg-[#C8973E] px-4 py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled={saving}>
+            <button type="submit" className="rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar'}
             </button>
           </div>

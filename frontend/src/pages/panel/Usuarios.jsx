@@ -6,10 +6,10 @@ const ROLE_COLOR = {
   client:   'bg-blue-500/15 text-blue-400 border border-blue-500/20',
   employee: 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20',
   host:     'bg-purple-500/15 text-purple-400 border border-purple-500/20',
-  admin:    'bg-[#C8973E]/15 text-[#C8973E] border border-[#C8973E]/20',
+  admin:    'bg-accent/15 text-accent border border-accent/20',
 }
 
-const inputClass = 'rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] transition-colors'
+const inputClass = 'rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent transition-colors'
 
 export function Usuarios() {
   const { token, user: me } = useAuth()
@@ -74,10 +74,10 @@ export function Usuarios() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#F2EBE0]">Usuarios</h1>
+        <h1 className="text-2xl font-bold text-ink">Usuarios</h1>
         <button
           onClick={() => { setInvite(i => ({ ...i, open: true })); setInviteResult(null) }}
-          className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
+          className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors"
         >
           + Invitar usuario
         </button>
@@ -88,24 +88,24 @@ export function Usuarios() {
       )}
 
       {loading ? (
-        <p className="text-sm text-[#7A7065]">Cargando…</p>
+        <p className="text-sm text-muted">Cargando…</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[#2A2520]">
+        <div className="overflow-x-auto rounded-xl border border-line">
           <table className="min-w-full text-sm">
-            <thead className="border-b border-[#2A2520] bg-[#161410] text-xs text-[#7A7065]">
+            <thead className="border-b border-line bg-surface-alt text-xs text-muted">
               <tr>
                 {['Nombre', 'Email', 'Rol', 'Acciones'].map(h => (
                   <th key={h} className="px-4 py-3 text-left font-semibold uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2A2520]">
+            <tbody className="divide-y divide-line">
               {users.map(u => (
-                <tr key={u.id} className="hover:bg-[#1E1B15] transition-colors">
-                  <td className="px-4 py-3 font-medium text-[#F2EBE0]">{u.name}</td>
-                  <td className="px-4 py-3 text-[#7A7065]">{u.email}</td>
+                <tr key={u.id} className="hover:bg-surface transition-colors">
+                  <td className="px-4 py-3 font-medium text-ink">{u.name}</td>
+                  <td className="px-4 py-3 text-muted">{u.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ROLE_COLOR[u.role] ?? 'bg-[#2A2520] text-[#7A7065]'}`}>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${ROLE_COLOR[u.role] ?? 'bg-line text-muted'}`}>
                       {ROLE_LABEL[u.role]}
                     </span>
                   </td>
@@ -115,7 +115,7 @@ export function Usuarios() {
                         <select
                           value={u.role}
                           onChange={e => changeRole(u.id, e.target.value)}
-                          className="rounded-lg border border-[#2A2520] bg-[#161410] px-2 py-1 text-xs text-[#F2EBE0] outline-none focus:border-[#C8973E]"
+                          className="rounded-lg border border-line bg-surface-alt px-2 py-1 text-xs text-ink outline-none focus:border-accent"
                         >
                           {Object.entries(ROLE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                         </select>
@@ -127,7 +127,7 @@ export function Usuarios() {
                         </button>
                       </div>
                     )}
-                    {u.id === me.id && <span className="text-xs text-[#7A7065]">(tú)</span>}
+                    {u.id === me.id && <span className="text-xs text-muted">(tú)</span>}
                   </td>
                 </tr>
               ))}
@@ -139,10 +139,10 @@ export function Usuarios() {
       {/* Invite modal */}
       {invite.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setInvite(i => ({ ...i, open: false }))}>
-          <div className="w-full max-w-sm rounded-2xl border border-[#2A2520] bg-[#161410] p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-2xl border border-line bg-surface-alt p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-bold text-[#F2EBE0]">Invitar usuario</h2>
-              <button onClick={() => setInvite(i => ({ ...i, open: false }))} className="text-[#7A7065] hover:text-[#F2EBE0] text-xl leading-none transition-colors">✕</button>
+              <h2 className="font-bold text-ink">Invitar usuario</h2>
+              <button onClick={() => setInvite(i => ({ ...i, open: false }))} className="text-muted hover:text-ink text-xl leading-none transition-colors">✕</button>
             </div>
 
             {inviteResult ? (
@@ -159,22 +159,22 @@ export function Usuarios() {
                 </div>
                 <button
                   onClick={() => { setInvite(i => ({ ...i, open: false, email: '', name: '' })); setInviteResult(null) }}
-                  className="w-full rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors"
+                  className="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors"
                 >
                   Cerrar
                 </button>
               </div>
             ) : (
               <form onSubmit={sendInvite} className="flex flex-col gap-3">
-                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   Nombre
                   <input required value={invite.name} onChange={e => setInvite(i => ({ ...i, name: e.target.value }))} className={inputClass} />
                 </label>
-                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   Email
                   <input type="email" required value={invite.email} onChange={e => setInvite(i => ({ ...i, email: e.target.value }))} className={inputClass} />
                 </label>
-                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]">
+                <label className="flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   Rol
                   <select value={invite.role} onChange={e => setInvite(i => ({ ...i, role: e.target.value }))} className={inputClass}>
                     <option value="employee">Empleado</option>
@@ -185,7 +185,7 @@ export function Usuarios() {
                 <button
                   type="submit"
                   disabled={inviteLoading}
-                  className="mt-2 rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
+                  className="mt-2 rounded-xl bg-accent py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors disabled:opacity-50"
                 >
                   {inviteLoading ? 'Creando…' : 'Crear e invitar'}
                 </button>

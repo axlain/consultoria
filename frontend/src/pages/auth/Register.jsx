@@ -32,13 +32,13 @@ export function Register() {
     }
   }
 
-  const inputClass = 'rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] focus:ring-1 focus:ring-[#C8973E]/20 transition-colors'
-  const labelClass = 'flex flex-col gap-1 text-sm font-medium text-[#7A7065]'
+  const inputClass = 'rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-colors'
+  const labelClass = 'flex flex-col gap-1 text-sm font-medium text-muted'
 
   return (
-    <div className="min-h-screen bg-[#0C0B09]">
+    <div className="min-h-screen bg-paper">
       <AuthShell showMenu={false}>
-        <h1 className="mb-6 text-2xl font-bold text-[#F2EBE0]">Crear cuenta</h1>
+        <h1 className="mb-6 text-2xl font-bold text-ink">Crear cuenta</h1>
 
         {error && (
           <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
@@ -100,15 +100,15 @@ export function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
+            className="mt-2 rounded-xl bg-accent py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors disabled:opacity-50"
           >
             {loading ? 'Creando cuenta…' : 'Crear cuenta'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-[#7A7065]">
+        <p className="mt-6 text-center text-sm text-muted">
           ¿Ya tienes cuenta?{' '}
-          <Link to="/login" className="font-medium text-[#C8973E] hover:underline">
+          <Link to="/login" className="font-medium text-accent hover:underline">
             Inicia sesión
           </Link>
         </p>

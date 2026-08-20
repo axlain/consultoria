@@ -11,7 +11,7 @@ const STATUS_LABEL = {
   no_show: 'No se presentó',
 }
 const STATUS_COLOR = {
-  scheduled: 'border-[#C8973E]/30 bg-[#C8973E]/10 text-[#C8973E]',
+  scheduled: 'border-accent/30 bg-accent/10 text-accent',
   completed: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
   no_show: 'border-red-500/30 bg-red-500/10 text-red-400',
 }
@@ -80,14 +80,14 @@ export function MisCitas() {
       <HamburgerMenu faqs={tenant?.faqs ?? []} slug={slug} className="lg:hidden" />
 
       {/* Desktop card: same shared-block language as the rest of the client app. */}
-      <div className="md:max-w-2xl md:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-[#2A2520] lg:bg-[#1E1B15] lg:overflow-hidden">
+      <div className="md:max-w-2xl md:mx-auto lg:max-w-4xl lg:my-12 lg:rounded-3xl lg:border lg:border-line lg:bg-surface lg:overflow-hidden">
         {/* Unified header bar (desktop only) */}
-        <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-[#2A2520] lg:px-8 lg:py-5">
-          <h1 className="m-0 text-lg font-bold text-[#F2EBE0]">Mis citas</h1>
+        <div className="hidden lg:flex lg:items-center lg:justify-between lg:border-b lg:border-line lg:px-8 lg:py-5">
+          <h1 className="m-0 text-lg font-bold text-ink">Mis citas</h1>
           <div className="flex items-center gap-3">
             <Link
               to={`/demo/${slug}/reservar`}
-              className="rounded-xl bg-[#C8973E] px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-[#E8B86D] active:scale-[0.98]"
+              className="rounded-xl bg-accent px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-accent-light active:scale-[0.98]"
             >
               + Agendar
             </Link>
@@ -97,17 +97,17 @@ export function MisCitas() {
 
       <div className="px-5 pt-10 pb-28 lg:px-8 lg:pt-8 lg:pb-8">
         <div className="mb-6 flex items-center justify-between pr-4 lg:hidden">
-          <h1 className="text-2xl font-extrabold text-[#F2EBE0]">Mis citas</h1>
+          <h1 className="text-2xl font-extrabold text-ink">Mis citas</h1>
           <Link
             to={`/demo/${slug}/reservar`}
-            className="rounded-2xl bg-[#C8973E] px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-[#E8B86D] active:scale-[0.98]"
+            className="rounded-2xl bg-accent px-4 py-2 text-sm font-bold text-[#0C0B09] no-underline transition-all hover:bg-accent-light active:scale-[0.98]"
           >
             + Agendar
           </Link>
         </div>
 
         {/* Tabs */}
-        <div className="flex rounded-xl border border-[#2A2520] bg-[#161410] p-1 mb-6 lg:max-w-sm">
+        <div className="flex rounded-xl border border-line bg-surface-alt p-1 mb-6 lg:max-w-sm">
           {[
             { id: 'proximas', label: 'Próximas', count: proximas.length },
             { id: 'historial', label: 'Historial', count: historial.length },
@@ -119,13 +119,13 @@ export function MisCitas() {
               className={[
                 'flex-1 rounded-lg py-2 text-sm font-semibold transition-all duration-150 flex items-center justify-center gap-1.5',
                 tab === id
-                  ? 'bg-[#C8973E] text-[#0C0B09]'
-                  : 'text-[#7A7065] hover:text-[#F2EBE0]',
+                  ? 'bg-accent text-[#0C0B09]'
+                  : 'text-muted hover:text-ink',
               ].join(' ')}
             >
               {label}
               {count > 0 && tab !== id && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#2A2520] text-[#7A7065]">
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-line text-muted">
                   {count}
                 </span>
               )}
@@ -136,7 +136,7 @@ export function MisCitas() {
         {loading && (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-[140px] animate-pulse rounded-2xl bg-[#1E1B15]" />
+              <div key={i} className="h-[140px] animate-pulse rounded-2xl bg-surface" />
             ))}
           </div>
         )}
@@ -146,14 +146,14 @@ export function MisCitas() {
         )}
 
         {!loading && !error && displayed.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-[#2A2520] p-12 text-center">
-            <p className="text-base text-[#7A7065]">
+          <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+            <p className="text-base text-muted">
               {tab === 'proximas' ? 'No tienes citas próximas' : 'Sin historial de citas'}
             </p>
             {tab === 'proximas' && (
               <Link
                 to={`/demo/${slug}/reservar`}
-                className="mt-4 inline-block rounded-2xl bg-[#C8973E] px-5 py-2.5 text-sm font-bold text-[#0C0B09] no-underline hover:bg-[#E8B86D] transition-colors"
+                className="mt-4 inline-block rounded-2xl bg-accent px-5 py-2.5 text-sm font-bold text-[#0C0B09] no-underline hover:bg-accent-light transition-colors"
               >
                 Agendar ahora
               </Link>
@@ -168,33 +168,33 @@ export function MisCitas() {
               const proName = professionalNames[c.professional_id] ?? c.professional_id
               const price = servicePrices[c.service_id]
               return (
-                <li key={c.id} className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] overflow-hidden">
+                <li key={c.id} className="rounded-2xl border border-line bg-surface overflow-hidden">
                   <div className="p-4">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <p className="font-semibold text-sm text-[#F2EBE0]">{serviceName}</p>
-                        <p className="text-xs text-[#7A7065] mt-0.5">{proName}</p>
+                        <p className="font-semibold text-sm text-ink">{serviceName}</p>
+                        <p className="text-xs text-muted mt-0.5">{proName}</p>
                       </div>
-                      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold shrink-0 ml-2 ${STATUS_COLOR[c.status] ?? 'border-[#2A2520] bg-[#161410] text-[#7A7065]'}`}>
+                      <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold shrink-0 ml-2 ${STATUS_COLOR[c.status] ?? 'border-line bg-surface-alt text-muted'}`}>
                         {STATUS_LABEL[c.status] ?? c.status}
                       </span>
                     </div>
 
                     {/* Date + price */}
                     <div className="flex items-center justify-between mt-3">
-                      <span className="flex items-center gap-1.5 text-xs text-[#7A7065]">
+                      <span className="flex items-center gap-1.5 text-xs text-muted">
                         <CalendarIcon />
                         {c.date}, {c.time}
                       </span>
                       {price != null && (
-                        <span className="text-sm font-bold text-[#C8973E]">${price}</span>
+                        <span className="text-sm font-bold text-accent">${price}</span>
                       )}
                     </div>
                   </div>
 
                   {/* Action buttons */}
-                  <div className="grid grid-cols-2 border-t border-[#2A2520]">
+                  <div className="grid grid-cols-2 border-t border-line">
                     <button
                       type="button"
                       onClick={() => navigate(`/demo/${slug}/cita/${c.id}`, {
@@ -206,7 +206,7 @@ export function MisCitas() {
                           }
                         }
                       })}
-                      className="py-3 text-center text-sm font-semibold text-[#7A7065] hover:text-[#F2EBE0] transition-colors border-r border-[#2A2520] w-full"
+                      className="py-3 text-center text-sm font-semibold text-muted hover:text-ink transition-colors border-r border-line w-full"
                     >
                       Ver detalle
                     </button>
@@ -224,12 +224,12 @@ export function MisCitas() {
                             },
                           },
                         })}
-                        className="py-3 text-center text-sm font-semibold text-[#C8973E] hover:bg-[#C8973E]/8 transition-colors"
+                        className="py-3 text-center text-sm font-semibold text-accent hover:bg-accent/8 transition-colors"
                       >
                         Reagendar
                       </button>
                     ) : (
-                      <span className="py-3 text-center text-sm text-[#2A2520]">—</span>
+                      <span className="py-3 text-center text-sm text-line">—</span>
                     )}
                   </div>
                 </li>

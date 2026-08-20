@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../api/client'
 
-const inputClass = 'rounded-xl border border-[#2A2520] bg-[#1E1B15] px-3 py-2.5 text-sm text-[#F2EBE0] outline-none focus:border-[#C8973E] focus:ring-1 focus:ring-[#C8973E]/20 transition-colors w-full'
-const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7A7065]'
+const inputClass = 'rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-colors w-full'
+const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted'
 
 export function NuevaCita() {
   const { user, token } = useAuth()
@@ -85,9 +85,9 @@ export function NuevaCita() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="mb-6 text-2xl font-bold text-[#F2EBE0]">Nueva cita — walk-in</h1>
+      <h1 className="mb-6 text-2xl font-bold text-ink">Nueva cita — walk-in</h1>
 
-      <div className="mb-4 rounded-xl border border-[#C8973E]/20 bg-[#C8973E]/8 px-4 py-3 text-sm text-[#C8973E]">
+      <div className="mb-4 rounded-xl border border-accent/20 bg-accent/8 px-4 py-3 text-sm text-accent">
         Esta cita se registrará en el log de auditoría con tu usuario ({user?.email}).
       </div>
 
@@ -97,8 +97,8 @@ export function NuevaCita() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Datos del cliente */}
-        <fieldset className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
-          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Datos del cliente</legend>
+        <fieldset className="rounded-2xl border border-line bg-surface p-4">
+          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Datos del cliente</legend>
           <div className="grid grid-cols-2 gap-3 mt-3">
             <label className={labelClass}>
               Nombre
@@ -126,8 +126,8 @@ export function NuevaCita() {
         </fieldset>
 
         {/* Servicio y profesional */}
-        <fieldset className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
-          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Servicio y profesional</legend>
+        <fieldset className="rounded-2xl border border-line bg-surface p-4">
+          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Servicio y profesional</legend>
           <div className="mt-3 flex flex-col gap-3">
             <label className={labelClass}>
               Servicio
@@ -160,8 +160,8 @@ export function NuevaCita() {
         </fieldset>
 
         {/* Fecha y hora */}
-        <fieldset className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
-          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Fecha y hora</legend>
+        <fieldset className="rounded-2xl border border-line bg-surface p-4">
+          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Fecha y hora</legend>
           <div className="mt-3 flex flex-col gap-3">
             <label className={labelClass}>
               Fecha
@@ -184,27 +184,27 @@ export function NuevaCita() {
                 </select>
               </label>
             ) : form.date ? (
-              <p className="text-xs text-[#7A7065]">Selecciona un profesional para ver horarios disponibles.</p>
+              <p className="text-xs text-muted">Selecciona un profesional para ver horarios disponibles.</p>
             ) : null}
           </div>
         </fieldset>
 
         {/* Pago */}
-        <fieldset className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] p-4">
-          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-[#7A7065]">Pago</legend>
+        <fieldset className="rounded-2xl border border-line bg-surface p-4">
+          <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Pago</legend>
           <div className="mt-3 flex gap-5">
             {[
               { value: 'on_site', label: 'Se paga en sitio' },
               { value: 'gateway', label: 'Cobrar por pasarela' },
             ].map(opt => (
-              <label key={opt.value} className="flex items-center gap-2 text-sm text-[#F2EBE0] cursor-pointer">
+              <label key={opt.value} className="flex items-center gap-2 text-sm text-ink cursor-pointer">
                 <input
                   type="radio"
                   name="paymentMode"
                   value={opt.value}
                   checked={form.paymentMode === opt.value}
                   onChange={set('paymentMode')}
-                  className="accent-[#C8973E]"
+                  className="accent-accent"
                 />
                 {opt.label}
               </label>
@@ -216,14 +216,14 @@ export function NuevaCita() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex-1 rounded-xl border border-[#2A2520] py-2.5 text-sm font-semibold text-[#7A7065] hover:border-[#C8973E]/40 hover:text-[#F2EBE0] transition-colors"
+            className="flex-1 rounded-xl border border-line py-2.5 text-sm font-semibold text-muted hover:border-accent/40 hover:text-ink transition-colors"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading || !form.serviceId || !form.date || !form.time}
-            className="flex-1 rounded-xl bg-[#C8973E] py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-[#E8B86D] transition-colors disabled:opacity-50"
+            className="flex-1 rounded-xl bg-accent py-2.5 text-sm font-semibold text-[#0C0B09] hover:bg-accent-light transition-colors disabled:opacity-50"
           >
             {loading ? 'Guardando…' : 'Confirmar cita'}
           </button>

@@ -52,7 +52,7 @@ export function StepDateTime({ tenantSlug, serviceId, date, onChange, onNext, on
 
   return (
     <section>
-      <h2 className="text-xl font-bold text-[#F2EBE0] mb-5">Elige fecha y hora</h2>
+      <h2 className="text-xl font-bold text-ink mb-5">Elige fecha y hora</h2>
 
       <div className="mb-5">
         <DateStrip dates={DATE_STRIP} selectedDate={selectedDate} onSelect={handleDateSelect} />
@@ -61,15 +61,15 @@ export function StepDateTime({ tenantSlug, serviceId, date, onChange, onNext, on
       {loading && (
         <div className="grid grid-cols-4 gap-2" aria-live="polite" aria-busy="true">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-10 animate-pulse rounded-xl bg-[#1E1B15]" />
+            <div key={i} className="h-10 animate-pulse rounded-xl bg-surface" />
           ))}
         </div>
       )}
 
       {!loading && error && (
-        <div className="rounded-2xl border border-[#2A2520] bg-[#1E1B15] px-4 py-5 text-center">
-          <p className="text-sm text-[#7A7065]">Hubo un problema al cargar los horarios.</p>
-          <button type="button" className="mt-2 text-sm font-semibold text-[#C8973E] hover:opacity-70 transition-opacity"
+        <div className="rounded-2xl border border-line bg-surface px-4 py-5 text-center">
+          <p className="text-sm text-muted">Hubo un problema al cargar los horarios.</p>
+          <button type="button" className="mt-2 text-sm font-semibold text-accent hover:opacity-70 transition-opacity"
             onClick={() => setRetryCount((c) => c + 1)}>
             Reintentar
           </button>
@@ -77,16 +77,16 @@ export function StepDateTime({ tenantSlug, serviceId, date, onChange, onNext, on
       )}
 
       {!loading && !error && !open && (
-        <p className="text-sm text-[#7A7065] text-center py-4">Nadie labora este día. Elige otra fecha.</p>
+        <p className="text-sm text-muted text-center py-4">Nadie labora este día. Elige otra fecha.</p>
       )}
 
       {!loading && !error && open && slots.length === 0 && (
-        <p className="text-sm text-[#7A7065] text-center py-4">No hay horarios disponibles para esta fecha.</p>
+        <p className="text-sm text-muted text-center py-4">No hay horarios disponibles para esta fecha.</p>
       )}
 
       {!loading && !error && open && slots.length > 0 && (
         <>
-          <p className="text-xs font-bold text-[#7A7065] uppercase tracking-wider mb-3">Horarios disponibles</p>
+          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-3">Horarios disponibles</p>
           <div className="grid grid-cols-4 gap-2">
             {slots.map(({ time, available }) => (
               <button
@@ -95,8 +95,8 @@ export function StepDateTime({ tenantSlug, serviceId, date, onChange, onNext, on
                 disabled={!available}
                 className={
                   available
-                    ? 'slot-available rounded-xl border border-[#2A2520] bg-[#1E1B15] py-2.5 text-sm font-medium tabular-nums text-[#F2EBE0] transition-all duration-150 hover:border-[#C8973E] hover:bg-[#C8973E]/10 hover:text-[#C8973E] active:scale-[0.97]'
-                    : 'cursor-not-allowed rounded-xl border border-[#2A2520] bg-[#161410] py-2.5 text-sm font-medium tabular-nums text-[#2A2520] line-through opacity-40'
+                    ? 'slot-available rounded-xl border border-line bg-surface py-2.5 text-sm font-medium tabular-nums text-ink transition-all duration-150 hover:border-accent hover:bg-accent/10 hover:text-accent active:scale-[0.97]'
+                    : 'cursor-not-allowed rounded-xl border border-line bg-surface-alt py-2.5 text-sm font-medium tabular-nums text-line line-through opacity-40'
                 }
                 onClick={() => available && handleSelectSlot(time)}
               >
@@ -107,7 +107,7 @@ export function StepDateTime({ tenantSlug, serviceId, date, onChange, onNext, on
         </>
       )}
 
-      <button type="button" className="mt-6 border-0 bg-transparent p-0 text-sm font-semibold text-[#C8973E] hover:opacity-70 transition-opacity" onClick={onBack}>
+      <button type="button" className="mt-6 border-0 bg-transparent p-0 text-sm font-semibold text-accent hover:opacity-70 transition-opacity" onClick={onBack}>
         ← Atrás
       </button>
     </section>
