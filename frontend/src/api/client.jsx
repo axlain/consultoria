@@ -35,7 +35,49 @@ async function request(path, options = {}) {
   return response.json()
 }
 
+async function requestBlob(path) {
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { headers: _authHeader() })
+  } catch {
+    throw new Error('No se pudo conectar con el servidor. Verifica tu conexión e intenta de nuevo.')
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    const error = new Error(body.detail || `Error ${response.status}`)
+    error.status = response.status
+    throw error
+  }
+
+  return response.blob()
+}
+
 export const api = {
+  login: (email, password, businessId = null) =>
+    request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, business_id: businessId }),
+    }),
+
+  register: (email, password, name, businessId = 'barberia') =>
+    request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name, business_id: businessId }),
+    }),
+
+  oauthSession: (supabaseAccessToken, businessId = null) =>
+    request('/api/auth/oauth-session', {
+      method: 'POST',
+      body: JSON.stringify({ access_token: supabaseAccessToken, business_id: businessId }),
+    }),
+
+  inviteUser: ({ email, name, role, businessId }) =>
+    request('/api/auth/invite', {
+      method: 'POST',
+      body: JSON.stringify({ email, name, role, business_id: businessId }),
+    }),
+
   getTenant: (slug) => request(`/api/tenants/${slug}`),
 
   // Full grid of the day's slots (never hides a taken one — tags it `available: false`
@@ -62,6 +104,14 @@ export const api = {
 
   cancelAppointment: (slug, appointmentId) =>
     request(`/api/tenants/${slug}/appointments/${appointmentId}`, { method: 'DELETE' }),
+
+  getMyAppointments: (slug) => request(`/api/tenants/${slug}/my-appointments`),
+
+  getAppointmentQrUrl: (slug, appointmentId, baseUrl) =>
+    request(`/api/tenants/${slug}/appointments/${appointmentId}/qr?base_url=${encodeURIComponent(baseUrl)}`),
+
+  validateAppointmentQr: (slug, appointmentId, token) =>
+    request(`/api/tenants/${slug}/appointments/${appointmentId}/validate-qr?t=${encodeURIComponent(token)}`),
 
   getAgenda: (slug, date) =>
     request(`/api/tenants/${slug}/admin/appointments${date ? `?date=${encodeURIComponent(date)}` : ''}`),
@@ -139,4 +189,23 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
+
+  getTransactions: (params) => request(`/api/admin/transactions?${params}`),
+
+  getTransactionsSummary: () => request('/api/admin/transactions/summary'),
+
+  getTransactionEvents: (paymentId) => request(`/api/admin/transactions/${paymentId}/events`),
+
+  exportTransactionsCsv: () => requestBlob('/api/admin/transactions/export/csv'),
+
+  getUsers: () => request('/api/admin/users'),
+
+  updateUserRole: (userId, role) =>
+    request(`/api/admin/users/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }),
+
+  deactivateUser: (userId) =>
+    request(`/api/admin/users/${userId}/deactivate`, { method: 'PATCH' }),
 }

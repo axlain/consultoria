@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useTenant } from '../../context/TenantContext'
 import { ClientShell } from '../../components/ClientShell'
 import { HamburgerMenu } from '../../components/HamburgerMenu'
+import { api } from '../../api/client'
 
 const STATUS_LABEL = {
   scheduled: 'Confirmada',
@@ -34,7 +35,7 @@ function CalendarIcon() {
 }
 
 export function MisCitas() {
-  const { user, token } = useAuth()
+  const { user } = useAuth()
   const { tenant } = useTenant()
   const navigate = useNavigate()
   const [citas, setCitas] = useState([])
@@ -46,17 +47,11 @@ export function MisCitas() {
 
   useEffect(() => {
     if (!user) return
-    fetch(`/api/tenants/${slug}/my-appointments`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async res => {
-        if (!res.ok) throw new Error(`Error ${res.status}`)
-        return res.json()
-      })
+    api.getMyAppointments(slug)
       .then(data => setCitas(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [user, token, slug])
+  }, [user, slug])
 
   const serviceNames = useMemo(
     () => Object.fromEntries((tenant?.services ?? []).map(s => [s.id, s.name])),

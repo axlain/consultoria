@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { api } from '../../api/client'
 
 const ROLE_LABEL = { client: 'Cliente', employee: 'Empleado', host: 'Host', admin: 'Admin' }
 const ROLE_COLOR = {
@@ -20,7 +21,7 @@ const ROLE_FILTERS = [
 ]
 
 export function Usuarios() {
-  const { token, user: me } = useAuth()
+  const { user: me } = useAuth()
   const [users, setUsers] = useState([])
   const [roleFilter, setRoleFilter] = useState('all')
   const [loading, setLoading] = useState(true)
@@ -31,18 +32,9 @@ export function Usuarios() {
 
   const filteredUsers = roleFilter === 'all' ? users : users.filter(u => u.role === roleFilter)
 
-  async function apiFetch(path, opts = {}) {
-    const res = await fetch(path, {
-      ...opts,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(opts.headers ?? {}) },
-    })
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail ?? 'Error')
-    return res.json()
-  }
-
   async function load() {
     setLoading(true)
-    try { setUsers(await apiFetch('/api/admin/users')) }
+    try { setUsers(await api.getUsers()) }
     catch (e) { setError(e.message) }
     finally { setLoading(false) }
   }
@@ -51,10 +43,7 @@ export function Usuarios() {
 
   async function changeRole(userId, role) {
     try {
-      const updated = await apiFetch(`/api/admin/users/${userId}/role`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role }),
-      })
+      const updated = await api.updateUserRole(userId, role)
       setUsers(u => u.map(x => x.id === updated.id ? { ...x, role: updated.role } : x))
     } catch (e) { alert(e.message) }
   }
@@ -62,7 +51,7 @@ export function Usuarios() {
   async function deactivate(userId) {
     if (!confirm('¿Desactivar este usuario?')) return
     try {
-      await apiFetch(`/api/admin/users/${userId}/deactivate`, { method: 'PATCH' })
+      await api.deactivateUser(userId)
       setUsers(u => u.filter(x => x.id !== userId))
     } catch (e) { alert(e.message) }
   }
@@ -72,10 +61,7 @@ export function Usuarios() {
     setInviteLoading(true)
     setInviteResult(null)
     try {
-      const result = await apiFetch('/api/auth/invite', {
-        method: 'POST',
-        body: JSON.stringify({ email: invite.email, name: invite.name, role: invite.role, business_id: me.business_id }),
-      })
+      const result = await api.inviteUser({ email: invite.email, name: invite.name, role: invite.role, businessId: me.business_id })
       setInviteResult(result)
       await load()
     } catch (e) { alert(e.message) }
