@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api } from '../../api/client'
-import { buildDateRange, toIso } from '../../components/DateStrip'
+import { api } from '../api/client'
+import { buildDateRange, toIso } from './DateStrip'
 import { appointmentAccentColor, isClosedStatus } from './appointmentStatus'
 
 const WEEK_DAYS = 7

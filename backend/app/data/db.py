@@ -169,6 +169,19 @@ def update_appointment(apt_id: str, fields: dict) -> dict | None:
     return rows[0] if rows else None
 
 
+def delete_appointment(tenant_slug: str, apt_id: str) -> bool:
+    rows = (
+        _client()
+        .table("appointments")
+        .delete()
+        .eq("tenant_slug", tenant_slug)
+        .eq("id", apt_id)
+        .execute()
+        .data
+    )
+    return bool(rows)
+
+
 def get_user_appointments(user_id: str, tenant_slug: str) -> list[dict]:
     return (
         _client()
@@ -204,6 +217,13 @@ def get_payment(payment_id: str) -> dict | None:
 
 def update_payment_status(payment_id: str, status: str) -> None:
     _client().table("payments").update({"status": status, "updated_at": _now_iso()}).eq("id", payment_id).execute()
+
+
+def delete_payments_for_appointment(appointment_id: str) -> None:
+    """Payments FK-reference appointments without cascade, so a canceled/unpaid
+    appointment's payment intent (and its cascaded events) must go first or the
+    appointment delete fails with a foreign-key violation."""
+    _client().table("payments").delete().eq("appointment_id", appointment_id).execute()
 
 
 def get_payments_for_business(business_id: str) -> list[dict]:

@@ -95,3 +95,46 @@
   color: var(--color-paper);
   border-color: var(--color-accent);
 }
+
+/* ── Mobile step scroll + floating CTA ──────────────────────────────────
+   Shared contract for every client-facing step/screen that pairs a form
+   with a primary action button on small screens (booking wizard steps,
+   availability view): the step content is capped to the real visible
+   viewport (dvh, not vh — vh is measured against the largest possible
+   viewport and can overshoot what's actually on screen on short laptop
+   displays or a height-squeezed device simulator, pushing the floating
+   button below the visible area) and scrolls internally on its own — the
+   *only* scrollable region on the page at this width, so there's never a
+   second region competing for the touch-scroll gesture. The CTA button
+   itself never sits inside this region at all (position: fixed, portaled
+   to <body> — see .wizard-cta-bar), so its visibility never depends on
+   this container's height or scroll position in the first place. */
+@media (max-width: 768px) {
+  .wizard-step-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100vh; /* fallback for browsers without dvh support */
+  }
+
+  /* A separate rule (not a second max-height in the block above) survives
+     minification — build tools collapse duplicate properties in one block
+     down to the last one, which would silently drop the vh fallback. */
+  @supports (max-height: 100dvh) {
+    .wizard-step-scroll {
+      max-height: 100dvh;
+    }
+  }
+}
+
+.wizard-cta-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.wizard-cta-spacer {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}

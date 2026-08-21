@@ -43,7 +43,7 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex justify-end bg-black/60 motion-safe:animate-fade-in"
+          className="fixed inset-0 z-[10000] flex justify-end bg-black/60 motion-safe:animate-fade-in"
           onClick={closeDrawer}
         >
           <aside

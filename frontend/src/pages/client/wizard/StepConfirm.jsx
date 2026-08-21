@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom'
+
 const NAME_RE = /^[A-Za-zÀ-ÿ\s]+$/
 
 export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, error }) {
@@ -71,7 +73,11 @@ export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, 
         <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</p>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
+      {/* Spacer so the fixed mobile action bar never covers the fields above it. */}
+      <div className="wizard-cta-spacer lg:hidden" />
+
+      {/* Desktop: buttons sit inline in the card, no scrolling viewport to fight. */}
+      <div className="hidden lg:flex lg:items-center lg:justify-between lg:gap-3 lg:pt-6">
         <button
           type="button"
           className="border-0 bg-transparent p-0 text-sm font-semibold text-accent hover:opacity-70 transition-opacity disabled:opacity-30"
@@ -89,6 +95,30 @@ export function StepConfirm({ booking, onChange, onBack, onConfirm, submitting, 
           {submitting ? 'Confirmando...' : 'Confirmar cita'}
         </button>
       </div>
+
+      {/* Mobile: portaled to <body> so `position: fixed` is anchored to the real
+          viewport instead of the step's transformed (animate-fade-in) ancestor. */}
+      {createPortal(
+        <div className="wizard-cta-bar mx-auto flex max-w-[430px] items-center justify-between gap-3 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur-sm md:max-w-2xl lg:hidden">
+          <button
+            type="button"
+            className="border-0 bg-transparent p-0 text-sm font-semibold text-accent hover:opacity-70 transition-opacity disabled:opacity-30"
+            onClick={onBack}
+            disabled={submitting}
+          >
+            ← Atrás
+          </button>
+          <button
+            type="button"
+            className="rounded-2xl bg-accent px-6 py-2.5 text-sm font-bold text-[#0C0B09] transition-all duration-150 hover:bg-accent-light active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={onConfirm}
+            disabled={!canSubmit || submitting}
+          >
+            {submitting ? 'Confirmando...' : 'Confirmar cita'}
+          </button>
+        </div>,
+        document.body
+      )}
     </section>
   )
 }

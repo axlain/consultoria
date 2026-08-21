@@ -1,3 +1,4 @@
+import random
 from datetime import date, datetime, timedelta
 
 from app.data import db, store
@@ -94,8 +95,10 @@ def get_professionals_available_at(
 
 
 def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
-    """Load-balances the 'cualquier profesional' option: fewest active appointments
-    that day wins; ties keep the input order (deterministic)."""
+    """Fewest active appointments that day wins; ties keep the input order
+    (deterministic). Kept available as an opt-in strategy — see pick_professional —
+    for whenever a business explicitly wants clients routed by workload instead
+    of at random."""
     apts = _get_appointments(tenant.slug)
     counts = {
         professional.id: sum(
@@ -108,6 +111,16 @@ def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
         for professional in professionals
     }
     return min(professionals, key=lambda p: counts[p.id])
+
+
+def pick_professional(tenant: TenantConfig, professionals: list, date_str: str, strategy: str = "random"):
+    """Tie-break for the 'cualquier profesional disponible' option. Default is a
+    random pick among everyone free at that slot; 'least_busy' is preserved for
+    when a client/business explicitly asks to be routed to whoever has fewer
+    appointments that day."""
+    if strategy == "least_busy":
+        return pick_least_busy(tenant, professionals, date_str)
+    return random.choice(professionals)
 
 
 def _is_slot_taken(
@@ -136,7 +149,9 @@ def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appoint
         )
         if not candidates:
             raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
-        professional_id = pick_least_busy(tenant, candidates, booking.date).id
+        professional_id = pick_professional(
+            tenant, candidates, booking.date, strategy=booking.assignment_strategy
+        ).id
 
     available = get_available_slots(tenant, professional_id, booking.date)
     if booking.time not in available:
@@ -182,3 +197,15 @@ def reschedule_appointment(
     appointment.professional_id = professional_id
     appointment.date = date_str
     appointment.time = time_str
+
+
+def cancel_appointment(tenant_slug: str, appointment_id: str) -> bool:
+    """Releases a just-created, unpaid appointment (e.g. the client backs out of
+    payment) so it never counts as a real booking or blocks the slot. Its payment
+    intent (if any — checkout creates one eagerly) is torn down first since
+    payments reference the appointment and would otherwise block the delete."""
+    if db.IS_ENABLED:
+        db.delete_payments_for_appointment(appointment_id)
+        return db.delete_appointment(tenant_slug, appointment_id)
+    store.delete_payments_for_appointment(appointment_id)
+    return store.delete_appointment(tenant_slug, appointment_id)

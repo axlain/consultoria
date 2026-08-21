@@ -7,6 +7,7 @@ const EMPTY_FORM = {
   duration_minutes: 30,
   price: 0,
   color: '#4c6ef5',
+  professional_ids: [],
 }
 
 export function ServiceCatalog() {
@@ -29,8 +30,18 @@ export function ServiceCatalog() {
       duration_minutes: service.duration_minutes,
       price: service.price,
       color: service.color,
+      professional_ids: tenant.professionals.filter((p) => p.service_ids.includes(service.id)).map((p) => p.id),
     })
     setError(null)
+  }
+
+  function toggleProfessionalId(professionalId) {
+    setForm((prev) => ({
+      ...prev,
+      professional_ids: prev.professional_ids.includes(professionalId)
+        ? prev.professional_ids.filter((id) => id !== professionalId)
+        : [...prev.professional_ids, professionalId],
+    }))
   }
 
   function cancelEdit() {
@@ -66,6 +77,11 @@ export function ServiceCatalog() {
     } catch (err) {
       setError(err.message)
     }
+  }
+
+  function professionalNamesFor(serviceId) {
+    const names = tenant.professionals.filter((p) => p.service_ids.includes(serviceId)).map((p) => p.name)
+    return names.length > 0 ? names.join(', ') : '—'
   }
 
   const inputClass = 'rounded-xl border border-line bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-accent transition-colors w-full'
@@ -105,6 +121,8 @@ export function ServiceCatalog() {
               <dd className="m-0 text-ink/80">{service.duration_minutes} min</dd>
               <dt className="text-muted">Precio</dt>
               <dd className="m-0 text-accent font-semibold">${service.price}</dd>
+              <dt className="text-muted">Profesionales</dt>
+              <dd className="m-0 text-ink/80">{professionalNamesFor(service.id)}</dd>
             </dl>
             <div className="flex gap-2">
               <button type="button" className={`flex-1 ${btnSecondary}`} onClick={() => startEdit(service)}>Editar</button>
@@ -119,7 +137,7 @@ export function ServiceCatalog() {
         <table className="w-full border-collapse">
           <thead className="border-b border-line bg-surface-alt">
             <tr>
-              {['Color', 'Nombre', 'Duración', 'Precio', 'Acciones'].map(h => (
+              {['Color', 'Nombre', 'Duración', 'Precio', 'Profesionales', 'Acciones'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">{h}</th>
               ))}
             </tr>
@@ -133,6 +151,7 @@ export function ServiceCatalog() {
                 <td className="px-4 py-3 font-medium text-ink">{service.name}</td>
                 <td className="px-4 py-3 text-muted">{service.duration_minutes} min</td>
                 <td className="px-4 py-3 font-semibold text-accent">${service.price}</td>
+                <td className="px-4 py-3 text-sm text-muted">{professionalNamesFor(service.id)}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button type="button" className={btnSecondary} onClick={() => startEdit(service)}>Editar</button>
@@ -164,6 +183,24 @@ export function ServiceCatalog() {
             Color
             <input type="color" className="h-10 w-16 rounded-lg border border-line bg-paper p-[0.2rem] cursor-pointer" value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} />
           </label>
+
+          <fieldset className="mb-4 rounded-xl border border-line p-4">
+            <legend className="px-2 text-xs font-bold uppercase tracking-wider text-muted">Profesionales que lo ofrecen</legend>
+            {tenant.professionals.length === 0 && (
+              <p className="text-sm text-muted">Aún no hay profesionales en el equipo.</p>
+            )}
+            {tenant.professionals.map((professional) => (
+              <label key={professional.id} className="mb-3 flex flex-row items-center gap-2 text-sm text-ink cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-accent w-auto p-0"
+                  checked={form.professional_ids.includes(professional.id)}
+                  onChange={() => toggleProfessionalId(professional.id)}
+                />
+                {professional.name}
+              </label>
+            ))}
+          </fieldset>
 
           <div className="mt-6 flex justify-between">
             <button type="button" className={btnSecondary} onClick={cancelEdit} disabled={saving}>Cancelar</button>

@@ -60,6 +60,9 @@ export const api = {
       body: JSON.stringify(booking),
     }),
 
+  cancelAppointment: (slug, appointmentId) =>
+    request(`/api/tenants/${slug}/appointments/${appointmentId}`, { method: 'DELETE' }),
+
   getAgenda: (slug, date) =>
     request(`/api/tenants/${slug}/admin/appointments${date ? `?date=${encodeURIComponent(date)}` : ''}`),
 

@@ -136,6 +136,10 @@ class ServiceInput(BaseModel):
     duration_minutes: int
     price: float
     color: str = "#c9a24b"
+    # Which professionals offer this service — Professional.service_ids is the
+    # source of truth, so creating a service with this set immediately adds
+    # the new service id to each listed professional.
+    professional_ids: list[str] = []
 
 
 class ServiceUpdate(BaseModel):
@@ -143,6 +147,10 @@ class ServiceUpdate(BaseModel):
     duration_minutes: Optional[int] = None
     price: Optional[float] = None
     color: Optional[str] = None
+    # When provided, replaces the full set of professionals offering this
+    # service (added to professionals now included, removed from any that
+    # had it but were dropped). Omit to leave existing associations alone.
+    professional_ids: Optional[list[str]] = None
 
 
 class Schedule(BaseModel):
@@ -227,6 +235,9 @@ class BookingRequest(BaseModel):
     customer_last_name: str
     customer_phone: str = Field(pattern=r"^\d{10}$")
     client_user_id: Optional[str] = None  # logged-in user UUID, links appointment to account
+    # Tie-break for professional_id == "any": "random" (default) or "least_busy",
+    # kept available for a future explicit "assign me the least busy barber" option.
+    assignment_strategy: Literal["random", "least_busy"] = "random"
 
     _validate_names = field_validator("customer_name", "customer_last_name")(_validate_name)
 

@@ -57,6 +57,13 @@ def add_appointment(tenant_slug: str, appointment: Appointment) -> None:
     _appointments.setdefault(tenant_slug, []).append(appointment)
 
 
+def delete_appointment(tenant_slug: str, appointment_id: str) -> bool:
+    appointments = _appointments.setdefault(tenant_slug, [])
+    before = len(appointments)
+    appointments[:] = [apt for apt in appointments if apt.id != appointment_id]
+    return len(appointments) < before
+
+
 def next_appointment_id() -> str:
     global _next_appointment_id
     appointment_id = f"apt-{_next_appointment_id}"
@@ -76,18 +83,41 @@ def _slugify(name: str, existing_ids: set[str]) -> str:
 
 # ---- Services (catalog CRUD) --------------------------------------------
 
+def _sync_service_professionals(tenant: TenantConfig, service_id: str, professional_ids: list[str]) -> None:
+    """Professional.service_ids is the source of truth for who offers what —
+    this reconciles it from the Service-side form (add to newly-selected
+    professionals, remove from any that had it but were unchecked)."""
+    selected = set(professional_ids)
+    for index, professional in enumerate(tenant.professionals):
+        has_it = service_id in professional.service_ids
+        should_have_it = professional.id in selected
+        if has_it and not should_have_it:
+            tenant.professionals[index] = professional.model_copy(
+                update={"service_ids": [s for s in professional.service_ids if s != service_id]}
+            )
+        elif should_have_it and not has_it:
+            tenant.professionals[index] = professional.model_copy(
+                update={"service_ids": [*professional.service_ids, service_id]}
+            )
+
+
 def add_service(tenant: TenantConfig, data: ServiceInput) -> Service:
     service_id = _slugify(data.name, {s.id for s in tenant.services})
-    service = Service(id=service_id, **data.model_dump())
+    fields = data.model_dump(exclude={"professional_ids"})
+    service = Service(id=service_id, **fields)
     tenant.services.append(service)
+    _sync_service_professionals(tenant, service_id, data.professional_ids)
     return service
 
 
 def update_service(tenant: TenantConfig, service_id: str, data: ServiceUpdate) -> Service | None:
     for index, service in enumerate(tenant.services):
         if service.id == service_id:
-            updated = service.model_copy(update=data.model_dump(exclude_unset=True))
+            fields = data.model_dump(exclude_unset=True, exclude={"professional_ids"})
+            updated = service.model_copy(update=fields)
             tenant.services[index] = updated
+            if data.professional_ids is not None:
+                _sync_service_professionals(tenant, service_id, data.professional_ids)
             return updated
     return None
 
@@ -95,7 +125,10 @@ def update_service(tenant: TenantConfig, service_id: str, data: ServiceUpdate) -
 def delete_service(tenant: TenantConfig, service_id: str) -> bool:
     before = len(tenant.services)
     tenant.services[:] = [s for s in tenant.services if s.id != service_id]
-    return len(tenant.services) < before
+    deleted = len(tenant.services) < before
+    if deleted:
+        _sync_service_professionals(tenant, service_id, [])
+    return deleted
 
 
 # ---- Professionals (team CRUD) -------------------------------------------
@@ -159,6 +192,13 @@ def update_payment_status(payment_id: str, status: str) -> None:
     payment = _payments.get(payment_id)
     if payment:
         _payments[payment_id] = payment.model_copy(update={"status": status, "updated_at": _now_iso()})
+
+
+def delete_payments_for_appointment(appointment_id: str) -> None:
+    stale_ids = [pid for pid, p in _payments.items() if p.appointment_id == appointment_id]
+    for pid in stale_ids:
+        del _payments[pid]
+    _payment_events[:] = [e for e in _payment_events if e.payment_id not in stale_ids]
 
 
 def add_payment_event(payment_id: str, event_type: str, metadata: dict | None = None) -> PaymentEvent:

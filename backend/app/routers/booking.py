@@ -10,6 +10,7 @@ from app.data import db, store
 from app.models.schemas import Appointment, BookingRequest, DayAvailability, Professional, TenantConfig, UserProfile
 from app.services.booking_service import (
     SlotUnavailableError,
+    cancel_appointment,
     create_appointment,
     get_day_slots,
     get_professionals_available_at,
@@ -58,6 +59,15 @@ def book_appointment(slug: str, booking: BookingRequest) -> Appointment:
         return create_appointment(tenant, booking)
     except SlotUnavailableError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.delete("/appointments/{apt_id}", status_code=204)
+def cancel_appointment_endpoint(slug: str, apt_id: str) -> None:
+    """Lets the client back out before paying — e.g. hitting 'Cancelar' on the
+    payment step — without leaving a phantom appointment behind."""
+    _get_tenant_or_404(slug)
+    if not cancel_appointment(slug, apt_id):
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
 
 
 @router.get("/appointments/{apt_id}", response_model=Appointment)

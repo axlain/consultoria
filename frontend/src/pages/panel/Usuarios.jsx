@@ -11,14 +11,25 @@ const ROLE_COLOR = {
 
 const inputClass = 'rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent transition-colors'
 
+const ROLE_FILTERS = [
+  { value: 'all', label: 'Ver todos' },
+  { value: 'client', label: 'Clientes' },
+  { value: 'employee', label: 'Empleados' },
+  { value: 'admin', label: 'Administradores' },
+  { value: 'host', label: 'Host' },
+]
+
 export function Usuarios() {
   const { token, user: me } = useAuth()
   const [users, setUsers] = useState([])
+  const [roleFilter, setRoleFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [invite, setInvite] = useState({ open: false, email: '', name: '', role: 'employee' })
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteResult, setInviteResult] = useState(null)
+
+  const filteredUsers = roleFilter === 'all' ? users : users.filter(u => u.role === roleFilter)
 
   async function apiFetch(path, opts = {}) {
     const res = await fetch(path, {
@@ -87,6 +98,25 @@ export function Usuarios() {
         <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
       )}
 
+      <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por rol">
+        {ROLE_FILTERS.map(f => (
+          <button
+            key={f.value}
+            type="button"
+            role="tab"
+            aria-selected={roleFilter === f.value}
+            onClick={() => setRoleFilter(f.value)}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+              roleFilter === f.value
+                ? 'bg-accent text-[#0C0B09]'
+                : 'border border-line bg-surface text-muted hover:border-accent/40 hover:text-ink'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <p className="text-sm text-muted">Cargando…</p>
       ) : (
@@ -100,7 +130,14 @@ export function Usuarios() {
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {users.map(u => (
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-sm text-muted">
+                    No hay usuarios con este filtro.
+                  </td>
+                </tr>
+              )}
+              {filteredUsers.map(u => (
                 <tr key={u.id} className="hover:bg-surface transition-colors">
                   <td className="px-4 py-3 font-medium text-ink">{u.name}</td>
                   <td className="px-4 py-3 text-muted">{u.email}</td>

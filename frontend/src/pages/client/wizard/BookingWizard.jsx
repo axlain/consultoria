@@ -12,8 +12,11 @@ import { StepConfirm } from './StepConfirm'
 import { StepCheckout } from './StepCheckout'
 import { StepPaymentError } from './StepPaymentError'
 
-const STEPS = ['service', 'datetime', 'professional', 'confirm', 'checkout']
-const CHECKOUT_IDX = STEPS.indexOf('checkout')
+// The official 5 steps — always what the progress indicator counts against,
+// regardless of which ones a given session actually has to render. A step
+// skipped via preselected data still "happened" (it's pre-filled), so the
+// indicator shows it as done rather than shrinking the total.
+const CANONICAL_STEPS = ['service', 'datetime', 'professional', 'confirm', 'checkout']
 const STRIPE_ENABLED = Boolean(import.meta.env.VITE_STRIPE_PK)
 
 export function BookingWizard() {
@@ -22,6 +25,26 @@ export function BookingWizard() {
   const navigate = useNavigate()
   const { state: locationState } = useLocation()
   const rebook = locationState?.rebook ?? null
+  // Carried over from the "Ver disponibilidad" page: a date+time (both
+  // mandatory there) and, if the client had a specific barber selected
+  // rather than "todos los profesionales", that professional too.
+  const preselect = locationState?.preselect ?? null
+  const preselectedProfessional = preselect?.professionalId
+    ? tenant.professionals.find((p) => p.id === preselect.professionalId) ?? null
+    : null
+  // Date+time already chosen means step 2 has nothing left to ask; a
+  // professional locked in before the client even picks a service means
+  // step 3 doesn't either. Narrow step 1 to only the services that
+  // professional actually offers when they're locked in.
+  const skipDatetimeStep = Boolean(preselect?.date && preselect?.time)
+  const skipProfessionalStep = Boolean(preselectedProfessional)
+
+  const STEPS = CANONICAL_STEPS.filter((s) => {
+    if (s === 'datetime') return !skipDatetimeStep
+    if (s === 'professional') return !skipProfessionalStep
+    return true
+  })
+  const CHECKOUT_IDX = STEPS.indexOf('checkout')
 
   const [stepIndex, setStepIndex] = useState(rebook ? STEPS.indexOf('datetime') : 0)
 
@@ -33,9 +56,9 @@ export function BookingWizard() {
 
   const [booking, setBooking] = useState({
     service: rebook?.service ?? null,
-    professional: rebook?.professional ?? null,
-    date: '',
-    time: '',
+    professional: rebook?.professional ?? preselectedProfessional,
+    date: preselect?.date ?? '',
+    time: preselect?.time ?? '',
     customerPhone: rebook?.customerPhone ?? '',
     customerName: rebook?.customerName ?? _prefillFromUser().customerName,
     customerLastName: rebook?.customerLastName ?? _prefillFromUser().customerLastName,
@@ -96,6 +119,11 @@ export function BookingWizard() {
         ...(user ? { client_user_id: user.id } : {}),
       })
       setAppointment(apt)
+      // "Cualquier profesional" is a placeholder until the backend actually
+      // assigns someone — swap it for the real name so the summary/checkout
+      // tell the client exactly who they're booked with.
+      const assignedProfessional = tenant.professionals.find((p) => p.id === apt.professional_id)
+      if (assignedProfessional) updateBooking({ professional: assignedProfessional })
       if (user && booking.customerPhone) {
         api.updateProfile({ phone: booking.customerPhone }).catch(() => {})
       }
@@ -126,6 +154,8 @@ export function BookingWizard() {
         ...(user ? { client_user_id: user.id } : {}),
       })
       setAppointment(apt)
+      const assignedProfessional = tenant.professionals.find((p) => p.id === apt.professional_id)
+      if (assignedProfessional) updateBooking({ professional: assignedProfessional })
       await _initStripePayment(apt, rebook.service)
       setStepIndex(CHECKOUT_IDX)
     } catch (err) {
@@ -161,15 +191,26 @@ export function BookingWizard() {
     })
   }
 
+  // Step 5 "Cancelar" — the client is backing out before paying, not confirming
+  // anything, so the reserved appointment must be released rather than left
+  // sitting in the DB looking like a real booking (it must never land on the
+  // "¡Cita confirmada!" screen).
   function handlePaymentError(reason) {
     if (reason === 'canceled') {
-      navigate(`/demo/${tenant.slug}/gracias`, { state: { appointment, payment: null } })
+      if (appointment) {
+        api.cancelAppointment(tenant.slug, appointment.id).catch(() => {})
+      }
+      navigate(`/demo/${tenant.slug}`)
     } else {
       setPaymentFailed(true)
     }
   }
 
   const step = STEPS[stepIndex]
+  // Where this step sits in the *official* 5-step sequence — what the
+  // progress indicator always counts against, independent of which steps
+  // this session actually renders.
+  const currentCanonicalIndex = CANONICAL_STEPS.indexOf(step)
   if (paymentFailed) {
     return (
       <ClientShell wide>
@@ -211,38 +252,47 @@ export function BookingWizard() {
         <HamburgerMenu faqs={tenant.faqs} slug={tenant.slug} inline />
       </div>
       <div className="lg:flex lg:items-stretch">
-      {/* Scrollable body: keeps the header fixed-looking while step content
-          (and its final CTA row) always stays reachable, even under a mobile keyboard. */}
-      <div className="max-h-dvh overflow-y-auto md:max-h-none md:overflow-visible md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0 lg:flex-1 lg:min-w-0 lg:p-10">
+      {/* Body: `.wizard-step-scroll` (see index.css) makes the container itself the
+          mobile scroll owner — min-height (never a hard cap) + overflow-y:auto — so
+          touch-scroll always has somewhere to go and never gets trapped. The CTA bars
+          are `fixed`/portaled, so they stay reachable regardless of how tall this
+          content grows. */}
+      <div className="wizard-step-scroll md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0 lg:flex-1 lg:min-w-0 lg:p-10">
       <div className="mb-7 px-5 pt-10 lg:px-0 lg:pt-0">
         {rebook ? (
           <p className="text-center text-[10px] font-bold tracking-[0.14em] uppercase text-muted">
             Reagendar — elige nueva fecha
           </p>
         ) : (
-          <div role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={STEPS.length}
+          <div role="progressbar" aria-valuenow={currentCanonicalIndex + 1} aria-valuemin={1} aria-valuemax={CANONICAL_STEPS.length}
             className="flex items-center justify-center pr-10">
-            {STEPS.map((s, i) => (
-              <div key={s} className="flex items-center">
-                <div className={[
-                  'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-200',
-                  i < stepIndex ? 'bg-accent text-[#0C0B09]' :
-                  i === stepIndex ? 'bg-accent text-[#0C0B09] ring-2 ring-accent/30 ring-offset-2 ring-offset-paper' :
-                  'bg-line text-muted',
-                ].join(' ')}>
-                  {i < stepIndex ? (
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  ) : i + 1}
+            {CANONICAL_STEPS.map((s, i) => {
+              // A step this session never renders (pre-filled via preselect) still
+              // counts as "done" — only steps genuinely still ahead look pending.
+              const isDone = !STEPS.includes(s) || i < currentCanonicalIndex
+              const isCurrent = s === step
+              return (
+                <div key={s} className="flex items-center">
+                  <div className={[
+                    'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-200',
+                    isDone ? 'bg-accent text-[#0C0B09]' :
+                    isCurrent ? 'bg-accent text-[#0C0B09] ring-2 ring-accent/30 ring-offset-2 ring-offset-paper' :
+                    'bg-line text-muted',
+                  ].join(' ')}>
+                    {isDone ? (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    ) : i + 1}
+                  </div>
+                  {i < CANONICAL_STEPS.length - 1 && (
+                    <div className={`h-px w-6 mx-0.5 transition-colors duration-200 ${isDone ? 'bg-accent' : 'bg-line'}`} />
+                  )}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`h-px w-6 mx-0.5 transition-colors duration-200 ${i < stepIndex ? 'bg-accent' : 'bg-line'}`} />
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
         <p className="mt-2.5 text-center text-[10px] font-bold tracking-[0.14em] uppercase text-muted">
-          {rebook ? '' : `Paso ${stepIndex + 1} de ${STEPS.length}`}
+          {rebook ? '' : `Paso ${currentCanonicalIndex + 1} de ${CANONICAL_STEPS.length}`}
         </p>
       </div>
 
@@ -258,9 +308,13 @@ export function BookingWizard() {
       <div key={step} className="motion-safe:animate-fade-in">
         {step === 'service' && (
           <StepService
-            services={tenant.services}
+            services={
+              skipProfessionalStep
+                ? tenant.services.filter((s) => preselectedProfessional.service_ids.includes(s.id))
+                : tenant.services
+            }
             onSelect={(service) => {
-              updateBooking({ service, professional: null })
+              updateBooking({ service, professional: skipProfessionalStep ? booking.professional : null })
               goNext()
             }}
           />
@@ -272,7 +326,7 @@ export function BookingWizard() {
             serviceId={booking.service.id}
             date={booking.date}
             onChange={(patch) => {
-              updateBooking(rebook ? patch : { ...patch, professional: null })
+              updateBooking((rebook || skipProfessionalStep) ? patch : { ...patch, professional: null })
               if (rebook && patch.time) _rebookSlot.current = patch
             }}
             onNext={rebook ? handleRebookSlotNext : goNext}

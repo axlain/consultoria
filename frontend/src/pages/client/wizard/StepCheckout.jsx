@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
@@ -110,13 +111,12 @@ function GooglePayButton({ onClick, disabled }) {
 
 // ── Stripe Payment Element inner component ────────────────────────────────────
 
-function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountCents }) {
+function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountCents, onCancel }) {
   const stripe = useStripe()
   const elements = useElements()
 
-  async function handleStripeSubmit(e) {
-    e.preventDefault()
-    if (!stripe || !elements) return
+  async function submitPayment() {
+    if (!stripe || !elements || paying) return
     setPaying(true)
     setApiError(null)
     try {
@@ -132,17 +132,59 @@ function StripeForm({ formatted, paying, setPaying, setApiError, onPaid, amountC
     }
   }
 
+  const payLabel = paying ? 'Procesando pago...' : `Pagar ${formatted}`
+
   return (
-    <form onSubmit={handleStripeSubmit} className="mb-4">
+    <div className="mb-4">
       <PaymentElement options={{ wallets: { applePay: 'auto', googlePay: 'auto' } }} />
-      <button
-        type="submit"
-        disabled={!stripe || paying}
-        className="mt-4 w-full rounded-2xl bg-accent px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
-      >
-        {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
-      </button>
-    </form>
+
+      {/* Spacer so the fixed mobile action bar never covers the Payment Element above it. */}
+      <div className="wizard-cta-spacer lg:hidden" />
+
+      {/* Desktop: buttons sit inline in the card, no scrolling viewport to fight. */}
+      <div className="hidden lg:flex lg:flex-col lg:gap-2 lg:pt-4">
+        <button
+          type="button"
+          onClick={submitPayment}
+          disabled={!stripe || paying}
+          className="w-full rounded-2xl bg-accent px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+        >
+          {payLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={paying}
+          className="w-full border-0 bg-transparent text-sm text-muted hover:text-muted underline transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+
+      {/* Mobile: portaled to <body> so `position: fixed` is anchored to the real
+          viewport instead of the step's transformed (animate-fade-in) ancestor. */}
+      {createPortal(
+        <div className="wizard-cta-bar mx-auto flex max-w-[430px] flex-col gap-2 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur-sm md:max-w-2xl lg:hidden">
+          <button
+            type="button"
+            onClick={submitPayment}
+            disabled={!stripe || paying}
+            className="w-full rounded-2xl bg-accent px-6 py-3 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+          >
+            {payLabel}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={paying}
+            className="w-full border-0 bg-transparent text-sm text-muted hover:text-muted underline transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>,
+        document.body
+      )}
+    </div>
   )
 }
 
@@ -228,6 +270,31 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
 
   const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted'
 
+  const actionButtons = (
+    <>
+      {method === 'card' && (
+        <button
+          type="button"
+          className="w-full rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-[0_8px_24px_rgba(200,151,62,0.25)]"
+          onClick={handlePay}
+          disabled={!canPay}
+        >
+          {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
+        </button>
+      )}
+      {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
+      {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
+      <button
+        type="button"
+        onClick={() => onError('canceled')}
+        className="w-full border-0 bg-transparent text-sm text-muted hover:text-muted underline transition-colors"
+        disabled={paying}
+      >
+        Cancelar
+      </button>
+    </>
+  )
+
   return (
     <section>
       <h2>Pago de tu cita</h2>
@@ -237,6 +304,8 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
           <dt className="text-muted">Servicio</dt>
           <dd className="m-0 text-right font-medium text-white">{booking.service.name}</dd>
+          <dt className="text-muted">Profesional</dt>
+          <dd className="m-0 text-right font-medium text-white">{booking.professional?.name}</dd>
           <dt className="text-muted">Cita #</dt>
           <dd className="m-0 text-right font-mono text-xs text-muted">{appointment.id}</dd>
         </dl>
@@ -258,6 +327,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
             setApiError={setApiError}
             onPaid={onPaid}
             amountCents={amountCents}
+            onCancel={() => onError('canceled')}
           />
         </Elements>
       ) : (
@@ -381,9 +451,7 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
 
           {method !== 'card' && (
             <div className="mb-4 rounded-2xl border border-line p-4">
-              {method === 'apple'  && <ApplePayButton  onClick={handleExternalPay} disabled={paying} />}
-              {method === 'google' && <GooglePayButton onClick={handleExternalPay} disabled={paying} />}
-              <p className="mt-3 text-center text-xs text-muted">
+              <p className="text-center text-xs text-muted">
                 Simulado — entorno de prueba, no se realiza ningún cargo real.
               </p>
             </div>
@@ -393,27 +461,24 @@ export function StepCheckout({ booking, appointment, onPaid, onError, clientSecr
             <p className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">{apiError}</p>
           )}
 
-          {method === 'card' && (
-            <button
-              type="button"
-              className="w-full rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold text-[#0C0B09] transition-all hover:bg-accent-light hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-[0_8px_24px_rgba(200,151,62,0.25)]"
-              onClick={handlePay}
-              disabled={!canPay}
-            >
-              {paying ? 'Procesando pago...' : `Pagar ${formatted}`}
-            </button>
+          {/* Spacer so the fixed mobile action bar never covers the form above it. */}
+          <div className="wizard-cta-spacer lg:hidden" />
+
+          {/* Desktop: buttons sit inline in the card, no scrolling viewport to fight. */}
+          <div className="hidden lg:flex lg:flex-col lg:gap-2 lg:pt-4">
+            {actionButtons}
+          </div>
+
+          {/* Mobile: portaled to <body> so `position: fixed` is anchored to the real
+              viewport instead of the step's transformed (animate-fade-in) ancestor. */}
+          {createPortal(
+            <div className="wizard-cta-bar mx-auto flex max-w-[430px] flex-col gap-2 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur-sm md:max-w-2xl lg:hidden">
+              {actionButtons}
+            </div>,
+            document.body
           )}
         </>
       )}
-
-      <button
-        type="button"
-        onClick={() => onError('canceled')}
-        className="mt-3 w-full border-0 bg-transparent text-sm text-muted hover:text-muted underline transition-colors"
-        disabled={paying}
-      >
-        Cancelar
-      </button>
     </section>
   )
 }

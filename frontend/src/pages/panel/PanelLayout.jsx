@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { ThemeToggle, ThemeToggleRow } from '../../components/ThemeToggle'
+import { ThemeToggleRow } from '../../components/ThemeToggle'
+import { PanelMobileNav } from './PanelMobileNav'
 
 const ROLE_LABEL = { employee: 'Empleado', host: 'Host', admin: 'Admin' }
 
@@ -62,14 +63,12 @@ export function PanelLayout() {
         </button>
       </aside>
 
-      {/* Mobile top bar */}
-      <header className="flex items-center justify-between border-b border-line bg-surface-alt px-4 py-3 text-ink md:hidden">
-        <span className="font-semibold text-sm">Panel · {ROLE_LABEL[user?.role]}</span>
-        <div className="flex items-center gap-3">
-          <ThemeToggle className="text-muted hover:text-ink transition-colors" />
-          <button onClick={handleLogout} className="text-sm text-muted hover:text-red-400">Salir</button>
-        </div>
-      </header>
+      <PanelMobileNav
+        links={links}
+        roleLabel={ROLE_LABEL[user?.role]}
+        userName={user?.name}
+        onLogout={handleLogout}
+      />
 
       <main className="flex-1 overflow-x-auto p-4 md:p-8 text-ink">
         <Outlet />
