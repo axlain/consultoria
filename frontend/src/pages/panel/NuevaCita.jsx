@@ -7,7 +7,7 @@ const inputClass = 'rounded-xl border border-line bg-surface px-3 py-2.5 text-sm
 const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-wider text-muted'
 
 export function NuevaCita() {
-  const { user, token } = useAuth()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const slug = user?.business_id || 'barberia'
 
@@ -57,23 +57,14 @@ export function NuevaCita() {
     setError('')
     setLoading(true)
     try {
-      await fetch(`/api/tenants/${slug}/appointments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          service_id: form.serviceId,
-          professional_id: form.professionalId || 'any',
-          date: form.date,
-          time: form.time,
-          customer_name: form.customerName,
-          customer_last_name: form.customerLastName,
-          customer_phone: form.customerPhone,
-        }),
-      }).then(async res => {
-        if (!res.ok) {
-          const d = await res.json().catch(() => ({}))
-          throw new Error(d.detail ?? 'Error al crear cita')
-        }
+      await api.createAppointment(slug, {
+        service_id: form.serviceId,
+        professional_id: form.professionalId || 'any',
+        date: form.date,
+        time: form.time,
+        customer_name: form.customerName,
+        customer_last_name: form.customerLastName,
+        customer_phone: form.customerPhone,
       })
       navigate('/panel/equipo')
     } catch (err) {

@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams, useLocation } from 'react-router-dom'
 import { useTenant } from '../../context/TenantContext'
 import { ClientShell } from '../../components/ClientShell'
 import { HamburgerMenu } from '../../components/HamburgerMenu'
+import { api } from '../../api/client'
 
 const STATUS_LABEL = {
   scheduled: 'Confirmada',
@@ -34,14 +35,7 @@ export function CitaView() {
       setLoading(false)
       return
     }
-    fetch(`/api/tenants/${tenant.slug}/appointments/${aptId}/validate-qr?t=${encodeURIComponent(token)}`)
-      .then(async res => {
-        if (!res.ok) {
-          const d = await res.json().catch(() => ({}))
-          throw new Error(d.detail ?? `Error ${res.status}`)
-        }
-        return res.json()
-      })
+    api.validateAppointmentQr(tenant.slug, aptId, token)
       .then(data => setCita(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))

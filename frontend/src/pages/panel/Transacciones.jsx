@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from '../../context/AuthContext'
+import { api } from '../../api/client'
 
 const STATUS_LABEL = {
   pending: 'Pendiente',
@@ -28,19 +28,13 @@ function fmtDate(iso) {
 }
 
 export function Transacciones() {
-  const { token } = useAuth()
   const [payments, setPayments] = useState([])
   const [summary, setSummary] = useState(null)
   const [filters, setFilters] = useState({ status: '', date_from: '', date_to: '' })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [detail, setDetail] = useState(null)
-
-  async function apiFetch(path) {
-    const res = await fetch(path, { headers: { Authorization: `Bearer ${token}` } })
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail ?? 'Error')
-    return res.json()
-  }
+  const [csvLoading, setCsvLoading] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -51,8 +45,8 @@ export function Transacciones() {
       if (filters.date_from) params.set('date_from', filters.date_from)
       if (filters.date_to) params.set('date_to', filters.date_to)
       const [data, sum] = await Promise.all([
-        apiFetch(`/api/admin/transactions?${params}`),
-        apiFetch('/api/admin/transactions/summary'),
+        api.getTransactions(params),
+        api.getTransactionsSummary(),
       ])
       setPayments(data)
       setSummary(sum)
@@ -66,12 +60,28 @@ export function Transacciones() {
   useEffect(() => { load() }, [filters])
 
   async function loadDetail(id) {
-    const events = await apiFetch(`/api/admin/transactions/${id}/events`)
+    const events = await api.getTransactionEvents(id)
     setDetail({ id, events })
   }
 
-  function downloadCsv() {
-    window.open(`/api/admin/transactions/export/csv`, '_blank')
+  async function downloadCsv() {
+    setCsvLoading(true)
+    setError('')
+    try {
+      const blob = await api.exportTransactionsCsv()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'transacciones.csv'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setCsvLoading(false)
+    }
   }
 
   function setFilter(k, v) { setFilters(f => ({ ...f, [k]: v })) }
@@ -84,9 +94,10 @@ export function Transacciones() {
         <h1 className="text-2xl font-bold text-ink">Transacciones</h1>
         <button
           onClick={downloadCsv}
-          className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/10 transition-colors"
+          disabled={csvLoading}
+          className="rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/10 transition-colors disabled:opacity-50"
         >
-          Exportar CSV
+          {csvLoading ? 'Exportando…' : 'Exportar CSV'}
         </button>
       </div>
 

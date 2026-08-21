@@ -4,15 +4,12 @@ import QRCode from 'qrcode'
 import { useTenant } from '../../context/TenantContext'
 import { ClientShell } from '../../components/ClientShell'
 import { HamburgerMenu } from '../../components/HamburgerMenu'
+import { api } from '../../api/client'
 
 async function fetchQrUrl(slug, aptId) {
   const baseUrl = window.location.origin
-  const res = await fetch(
-    `/api/tenants/${slug}/appointments/${aptId}/qr?base_url=${encodeURIComponent(baseUrl)}`
-  )
-  if (!res.ok) return null
-  const data = await res.json()
-  return data.url
+  const data = await api.getAppointmentQrUrl(slug, aptId, baseUrl).catch(() => null)
+  return data?.url ?? null
 }
 
 export function ThankYou() {

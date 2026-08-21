@@ -13,12 +13,14 @@ const ROLE_NAV = {
     { to: '/panel/mi-agenda', label: 'Mi agenda' },
     { to: '/panel/equipo', label: 'Equipo' },
     { to: '/panel/equipo/nueva-cita', label: 'Nueva cita (walk-in)' },
+    { to: '/panel/servicios', label: 'Servicios' },
   ],
   admin: [
     { to: '/panel/transacciones', label: 'Transacciones' },
     { to: '/panel/usuarios', label: 'Usuarios' },
     { to: '/panel/equipo', label: 'Equipo' },
     { to: '/panel/equipo/nueva-cita', label: 'Nueva cita (walk-in)' },
+    { to: '/panel/servicios', label: 'Servicios' },
   ],
 }
 
@@ -38,9 +40,9 @@ export function PanelLayout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper md:flex-row">
+    <div className="flex h-screen flex-col overflow-hidden bg-paper md:flex-row">
       {/* Sidebar */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-line bg-surface-alt py-6 px-4 md:flex">
+      <aside className="hidden h-full w-56 shrink-0 flex-col border-r border-line bg-surface-alt py-6 px-4 md:flex">
         <div className="mb-1 px-2 text-[1rem] font-bold text-ink">Panel</div>
         <div className="mb-6 px-2 text-xs text-muted">
           {user?.name} · <span className="capitalize">{ROLE_LABEL[user?.role]}</span>
@@ -70,7 +72,7 @@ export function PanelLayout() {
         onLogout={handleLogout}
       />
 
-      <main className="flex-1 overflow-x-auto p-4 md:p-8 text-ink">
+      <main className="flex-1 overflow-y-auto overflow-x-auto p-4 md:p-8 text-ink">
         <Outlet />
       </main>
     </div>

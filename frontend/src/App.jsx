@@ -21,6 +21,7 @@ import { MisCitas } from './pages/panel/MisCitas'
 import { MisRewards } from './pages/panel/MisRewards'
 import { MiAgenda } from './pages/panel/MiAgenda'
 import { Equipo } from './pages/panel/Equipo'
+import { Servicios } from './pages/panel/Servicios'
 import { NuevaCita } from './pages/panel/NuevaCita'
 import { Transacciones } from './pages/panel/Transacciones'
 import { Usuarios } from './pages/panel/Usuarios'
@@ -79,6 +80,9 @@ function App() {
           } />
           <Route path="equipo/nueva-cita" element={
             <ProtectedRoute roles={['host', 'admin']}><NuevaCita /></ProtectedRoute>
+          } />
+          <Route path="servicios" element={
+            <ProtectedRoute roles={['host', 'admin']}><Servicios /></ProtectedRoute>
           } />
 
           {/* admin only */}

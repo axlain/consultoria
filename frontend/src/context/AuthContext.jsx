@@ -1,21 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { api } from '../api/client'
 
 const AuthContext = createContext(null)
 
 const STORAGE_KEY = 'auth_session'
-
-async function authFetch(path, body) {
-  const res = await fetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err.detail ?? `Error ${res.status}`)
-  }
-  return res.json()
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -47,20 +35,20 @@ export function AuthProvider({ children }) {
   // when the account belongs to more than one business and none was specified —
   // callers should re-call with the chosen businessId to finish logging in.
   const login = useCallback(async (email, password, businessId = null) => {
-    const data = await authFetch('/api/auth/login', { email, password, business_id: businessId })
+    const data = await api.login(email, password, businessId)
     if (data.requires_business_selection) return data
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])
 
   const register = useCallback(async (email, password, name, businessId = 'barberia') => {
-    const data = await authFetch('/api/auth/register', { email, password, name, business_id: businessId })
+    const data = await api.register(email, password, name, businessId)
     _persist(data.user, data.access_token)
     return data.user
   }, [_persist])
 
   const loginWithSupabaseToken = useCallback(async (supabaseAccessToken, businessId = null) => {
-    const data = await authFetch('/api/auth/oauth-session', { access_token: supabaseAccessToken, business_id: businessId })
+    const data = await api.oauthSession(supabaseAccessToken, businessId)
     if (data.requires_business_selection) return data
     _persist(data.user, data.access_token)
     return data.user
