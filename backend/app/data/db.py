@@ -17,10 +17,23 @@ def _client():
     # Reused across calls — creating a fresh supabase-py client per query (the
     # previous behavior) opens a new underlying httpx client with no connection
     # reuse, paying a full TCP/TLS handshake on every single db.* call.
+    #
+    # FastAPI runs each sync route handler in its own worker thread, so this
+    # singleton is hit concurrently. postgrest-py's httpx client defaults to
+    # HTTP/2, and httpcore's HTTP/2 implementation isn't safe under genuine
+    # concurrent use of one connection from multiple threads — it corrupts its
+    # internal stream-id bookkeeping (`KeyError` in httpcore's `http2.py:
+    # _response_closed`), which aborts the connection and surfaces to the
+    # browser as a raw network failure. Force HTTP/1.1 (which pools a
+    # connection per concurrent request instead of multiplexing one) to avoid
+    # the race while keeping the connection-reuse win.
     global _client_instance
     if _client_instance is None:
+        import httpx
         from supabase import create_client
-        _client_instance = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        from supabase.lib.client_options import SyncClientOptions
+        options = SyncClientOptions(httpx_client=httpx.Client(http2=False))
+        _client_instance = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY, options=options)
     return _client_instance
 
 
