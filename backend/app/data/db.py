@@ -10,10 +10,18 @@ from app.core.config import SUPABASE_SERVICE_KEY, SUPABASE_URL
 
 IS_ENABLED = bool(SUPABASE_URL and SUPABASE_SERVICE_KEY)
 
+_client_instance = None
+
 
 def _client():
-    from supabase import create_client
-    return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    # Reused across calls — creating a fresh supabase-py client per query (the
+    # previous behavior) opens a new underlying httpx client with no connection
+    # reuse, paying a full TCP/TLS handshake on every single db.* call.
+    global _client_instance
+    if _client_instance is None:
+        from supabase import create_client
+        _client_instance = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    return _client_instance
 
 
 def _now_iso() -> str:
@@ -135,6 +143,20 @@ def get_appointments(tenant_slug: str) -> list[dict]:
         .table("appointments")
         .select("*")
         .eq("tenant_slug", tenant_slug)
+        .execute()
+        .data
+    )
+
+
+def get_appointments_for_date(tenant_slug: str, date_str: str) -> list[dict]:
+    """Same as get_appointments but scoped to one day — availability/slot-picking
+    only ever needs that day's appointments, not the tenant's full history."""
+    return (
+        _client()
+        .table("appointments")
+        .select("*")
+        .eq("tenant_slug", tenant_slug)
+        .eq("date", date_str)
         .execute()
         .data
     )

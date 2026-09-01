@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 import stripe
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import STRIPE_SECRET_KEY
 from app.data import db, store
@@ -17,7 +18,11 @@ class StripePaymentProvider(PaymentProvider):
         stripe.api_key = secret_key or STRIPE_SECRET_KEY
 
     async def create_payment(self, input: CreatePaymentInput) -> PaymentResult:
-        intent = stripe.PaymentIntent.create(
+        # stripe-py and supabase-py are both synchronous (blocking) clients — run
+        # them off the event loop so this request doesn't stall every other
+        # concurrent request on this worker for the duration of the network call.
+        intent = await run_in_threadpool(
+            stripe.PaymentIntent.create,
             amount=input.amount_cents,
             currency=input.currency.lower(),
             automatic_payment_methods={"enabled": True},
@@ -25,7 +30,7 @@ class StripePaymentProvider(PaymentProvider):
         )
         payment_id = str(uuid.uuid4())
         if db.IS_ENABLED:
-            db.insert_payment({
+            await run_in_threadpool(db.insert_payment, {
                 "id": payment_id,
                 "appointment_id": input.appointment_id,
                 "business_id": input.business_id,
@@ -57,7 +62,7 @@ class StripePaymentProvider(PaymentProvider):
         # Verify the actual PaymentIntent status with Stripe so the frontend
         # gets 'paid' immediately after stripe.confirmPayment() succeeds.
         if db.IS_ENABLED:
-            row = db.get_payment(payment_id)
+            row = await run_in_threadpool(db.get_payment, payment_id)
         else:
             p = store.get_payment(payment_id)
             row = {"status": p.status, "provider_reference": getattr(p, "provider_reference", None)} if p else None
@@ -67,11 +72,11 @@ class StripePaymentProvider(PaymentProvider):
 
         ref_id = row.get("provider_reference")
         if ref_id:
-            intent = stripe.PaymentIntent.retrieve(ref_id)
+            intent = await run_in_threadpool(stripe.PaymentIntent.retrieve, ref_id)
             if intent.status == "succeeded":
                 if db.IS_ENABLED:
-                    db.update_payment_status(payment_id, "paid")
-                    db.insert_payment_event({
+                    await run_in_threadpool(db.update_payment_status, payment_id, "paid")
+                    await run_in_threadpool(db.insert_payment_event, {
                         "payment_id": payment_id,
                         "event_type": "captured",
                         "metadata": {"provider": "stripe", "intent": ref_id},
@@ -85,7 +90,7 @@ class StripePaymentProvider(PaymentProvider):
     async def refund_payment(self, payment_id: str) -> PaymentResult:
         ref_id = None
         if db.IS_ENABLED:
-            row = db.get_payment(payment_id)
+            row = await run_in_threadpool(db.get_payment, payment_id)
             if row:
                 ref_id = row.get("provider_reference")
         else:
@@ -94,11 +99,11 @@ class StripePaymentProvider(PaymentProvider):
                 ref_id = p.provider_reference
 
         if ref_id:
-            stripe.Refund.create(payment_intent=ref_id)
+            await run_in_threadpool(stripe.Refund.create, payment_intent=ref_id)
 
         if db.IS_ENABLED:
-            db.update_payment_status(payment_id, "refunded")
-            db.insert_payment_event({
+            await run_in_threadpool(db.update_payment_status, payment_id, "refunded")
+            await run_in_threadpool(db.insert_payment_event, {
                 "payment_id": payment_id,
                 "event_type": "refunded",
                 "metadata": {"provider": "stripe"},

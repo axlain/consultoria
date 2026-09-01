@@ -22,14 +22,22 @@ def _generate_daily_slots(schedule: Schedule) -> list[str]:
     return slots
 
 
-def _get_appointments(tenant_slug: str) -> list:
-    """Return appointments as Appointment models, from DB or memory."""
+def _get_appointments(tenant_slug: str, date_str: str | None = None) -> list:
+    """Return appointments as Appointment models, from DB or memory. Pass date_str
+    so the DB query itself is scoped to that day — availability/slot-picking never
+    needs the tenant's full appointment history, and fetching it on every call
+    (previously: once per professional, per request) was the main source of
+    booking-flow latency."""
     if db.IS_ENABLED:
-        return [Appointment(**row) for row in db.get_appointments(tenant_slug)]
-    return store.get_appointments(tenant_slug)
+        rows = db.get_appointments_for_date(tenant_slug, date_str) if date_str else db.get_appointments(tenant_slug)
+        return [Appointment(**row) for row in rows]
+    apts = store.get_appointments(tenant_slug)
+    return [a for a in apts if a.date == date_str] if date_str else apts
 
 
-def get_available_slots(tenant: TenantConfig, professional_id: str, date_str: str) -> list[str]:
+def get_available_slots(
+    tenant: TenantConfig, professional_id: str, date_str: str, *, appointments: list | None = None
+) -> list[str]:
     professional = next((p for p in tenant.professionals if p.id == professional_id), None)
     if professional is None or not professional.active:
         return []
@@ -39,9 +47,10 @@ def get_available_slots(tenant: TenantConfig, professional_id: str, date_str: st
         return []
 
     all_slots = _generate_daily_slots(professional.schedule)
+    apts = appointments if appointments is not None else _get_appointments(tenant.slug, date_str)
     booked = {
         apt.time
-        for apt in _get_appointments(tenant.slug)
+        for apt in apts
         if apt.professional_id == professional_id
         and apt.date == date_str
         and apt.status != "no_show"
@@ -73,9 +82,14 @@ def get_day_slots(
         p.active and weekday_code not in p.days_off for p in professionals
     )
 
+    # Fetched once and reused for every professional below — this used to be a
+    # separate appointments fetch per professional (N Supabase round-trips for
+    # N professionals on a single "which times are open today" request).
+    appointments = _get_appointments(tenant.slug, date_str)
+
     times: dict[str, bool] = {}
     for prof in professionals:
-        free = set(get_available_slots(tenant, prof.id, date_str))
+        free = set(get_available_slots(tenant, prof.id, date_str, appointments=appointments))
         for slot in _generate_daily_slots(prof.schedule):
             times[slot] = times.get(slot, False) or slot in free
 
@@ -84,22 +98,23 @@ def get_day_slots(
 
 
 def get_professionals_available_at(
-    tenant: TenantConfig, service_id: str, date_str: str, time_str: str
+    tenant: TenantConfig, service_id: str, date_str: str, time_str: str, *, appointments: list | None = None
 ):
+    apts = appointments if appointments is not None else _get_appointments(tenant.slug, date_str)
     return [
         professional
         for professional in tenant.professionals
         if service_id in professional.service_ids
-        and time_str in get_available_slots(tenant, professional.id, date_str)
+        and time_str in get_available_slots(tenant, professional.id, date_str, appointments=apts)
     ]
 
 
-def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
+def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str, *, appointments: list | None = None):
     """Fewest active appointments that day wins; ties keep the input order
     (deterministic). Kept available as an opt-in strategy — see pick_professional —
     for whenever a business explicitly wants clients routed by workload instead
     of at random."""
-    apts = _get_appointments(tenant.slug)
+    apts = appointments if appointments is not None else _get_appointments(tenant.slug, date_str)
     counts = {
         professional.id: sum(
             1
@@ -113,13 +128,20 @@ def pick_least_busy(tenant: TenantConfig, professionals: list, date_str: str):
     return min(professionals, key=lambda p: counts[p.id])
 
 
-def pick_professional(tenant: TenantConfig, professionals: list, date_str: str, strategy: str = "random"):
+def pick_professional(
+    tenant: TenantConfig,
+    professionals: list,
+    date_str: str,
+    strategy: str = "random",
+    *,
+    appointments: list | None = None,
+):
     """Tie-break for the 'cualquier profesional disponible' option. Default is a
     random pick among everyone free at that slot; 'least_busy' is preserved for
     when a client/business explicitly asks to be routed to whoever has fewer
     appointments that day."""
     if strategy == "least_busy":
-        return pick_least_busy(tenant, professionals, date_str)
+        return pick_least_busy(tenant, professionals, date_str, appointments=appointments)
     return random.choice(professionals)
 
 
@@ -132,28 +154,32 @@ def _is_slot_taken(
 ) -> bool:
     return any(
         apt.professional_id == professional_id
-        and apt.date == date_str
         and apt.time == time_str
         and apt.status != "no_show"
         and apt.id != exclude_appointment_id
-        for apt in _get_appointments(tenant_slug)
+        for apt in _get_appointments(tenant_slug, date_str)
     )
 
 
 def create_appointment(tenant: TenantConfig, booking: BookingRequest) -> Appointment:
     """RF05: the slot is re-checked and locked at confirmation time to avoid double-booking."""
+    # One fetch for the whole call, instead of one per helper below (candidates
+    # lookup, tie-break, and the final re-check were each independently
+    # re-fetching the same day's appointments).
+    appointments = _get_appointments(tenant.slug, booking.date)
+
     professional_id = booking.professional_id
     if professional_id == "any":
         candidates = get_professionals_available_at(
-            tenant, booking.service_id, booking.date, booking.time
+            tenant, booking.service_id, booking.date, booking.time, appointments=appointments
         )
         if not candidates:
             raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
         professional_id = pick_professional(
-            tenant, candidates, booking.date, strategy=booking.assignment_strategy
+            tenant, candidates, booking.date, strategy=booking.assignment_strategy, appointments=appointments
         ).id
 
-    available = get_available_slots(tenant, professional_id, booking.date)
+    available = get_available_slots(tenant, professional_id, booking.date, appointments=appointments)
     if booking.time not in available:
         raise SlotUnavailableError("El horario seleccionado ya no está disponible.")
 
