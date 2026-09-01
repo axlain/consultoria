@@ -32,3 +32,10 @@ export function roleHome(role) {
     default:        return '/'
   }
 }
+
+// Where to send a logged-in user after auth. Clients land on their own
+// tenant's storefront (never a hardcoded business), everyone else on their panel.
+export function authHome(user) {
+  if (!user) return '/login'
+  return user.role === 'client' ? `/demo/${user.business_id}` : roleHome(user.role)
+}

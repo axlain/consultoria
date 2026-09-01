@@ -19,7 +19,7 @@ export function HamburgerMenu({ faqs, slug, inline = false, className = '' }) {
   function handleLogout() {
     logout()
     closeDrawer()
-    navigate('/', { replace: true })
+    navigate(`/demo/${slug}`, { replace: true })
   }
 
   const buttonBase = inline

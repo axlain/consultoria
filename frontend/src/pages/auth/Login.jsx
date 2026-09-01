@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { roleHome } from '../../components/ProtectedRoute'
+import { authHome } from '../../components/ProtectedRoute'
 import { AuthShell } from '../../components/AuthShell'
 import { BusinessSelect } from '../../components/BusinessSelect'
 import { supabase } from '../../lib/supabase'
@@ -9,10 +9,10 @@ import { supabase } from '../../lib/supabase'
 const OAUTH_PROVIDERS = { Google: 'google', Facebook: 'facebook' }
 
 const DEMO_USERS = [
-  { email: 'admin@barberia.com', password: 'admin123', role: 'Admin' },
-  { email: 'host@barberia.com', password: 'host123', role: 'Host' },
-  { email: 'empleado@barberia.com', password: 'empleado123', role: 'Empleado' },
-  { email: 'cliente@barberia.com', password: 'cliente123', role: 'Cliente' },
+  { email: 'admin@levisalon-keratinas.com', password: 'admin123', role: 'Admin' },
+  { email: 'host@levisalon-keratinas.com', password: 'host123', role: 'Host' },
+  { email: 'empleado@levisalon-keratinas.com', password: 'empleado123', role: 'Empleado' },
+  { email: 'cliente@levisalon-keratinas.com', password: 'cliente123', role: 'Cliente' },
 ]
 
 export function Login() {
@@ -28,10 +28,10 @@ export function Login() {
   const [socialMsg, setSocialMsg] = useState('')
   const [businessOptions, setBusinessOptions] = useState(null)
 
-  if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : (from ?? roleHome(user.role))} replace />
+  if (user) return <Navigate to={from ?? authHome(user)} replace />
 
   function goHome(u) {
-    navigate(u.role === 'client' ? '/demo/barberia' : (from ?? roleHome(u.role)), { replace: true })
+    navigate(from ?? authHome(u), { replace: true })
   }
 
   async function handleSubmit(e) {

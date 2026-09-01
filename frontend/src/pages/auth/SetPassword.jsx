@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { roleHome } from '../../components/ProtectedRoute'
+import { authHome } from '../../components/ProtectedRoute'
 import { AuthShell } from '../../components/AuthShell'
 
 // Landing page for Supabase invite-by-email links. Supabase-js parses the
@@ -29,7 +29,7 @@ export function SetPassword() {
     })
   }, [])
 
-  if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : roleHome(user.role)} replace />
+  if (user) return <Navigate to={authHome(user)} replace />
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -44,7 +44,7 @@ export function SetPassword() {
 
       const { data } = await supabase.auth.getSession()
       const u = await loginWithSupabaseToken(data.session.access_token)
-      navigate(u.role === 'client' ? '/demo/barberia' : roleHome(u.role), { replace: true })
+      navigate(authHome(u), { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {

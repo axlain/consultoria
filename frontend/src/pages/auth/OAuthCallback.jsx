@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { roleHome } from '../../components/ProtectedRoute'
+import { authHome } from '../../components/ProtectedRoute'
 import { AuthShell } from '../../components/AuthShell'
 import { BusinessSelect } from '../../components/BusinessSelect'
 
@@ -37,7 +37,7 @@ export function OAuthCallback() {
           setBusinessOptions(result.businesses)
           return
         }
-        navigate(result.role === 'client' ? '/demo/barberia' : roleHome(result.role), { replace: true })
+        navigate(authHome(result), { replace: true })
       } catch (err) {
         handled = false
         if (!cancelled) setError(err.message)
@@ -67,7 +67,7 @@ export function OAuthCallback() {
     setChoosing(true)
     try {
       const u = await loginWithSupabaseToken(accessToken, businessId)
-      navigate(u.role === 'client' ? '/demo/barberia' : roleHome(u.role), { replace: true })
+      navigate(authHome(u), { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -75,7 +75,7 @@ export function OAuthCallback() {
     }
   }
 
-  if (user) return <Navigate to={user.role === 'client' ? '/demo/barberia' : roleHome(user.role)} replace />
+  if (user) return <Navigate to={authHome(user)} replace />
 
   return (
     <div className="min-h-screen bg-paper">
