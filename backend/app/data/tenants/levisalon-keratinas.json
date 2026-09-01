@@ -1,0 +1,73 @@
+{
+  "slug": "levisalon-keratinas",
+  "business": {
+    "name": "Levi Alta Peluquería y Keratinas",
+    "type": "peluqueria",
+    "address": "Paseo 17 de Octubre, interior #6, Col. Sahop, 2do. Piso, Xalapa-Enríquez, Ver.",
+    "phone": "+52 228 218 1548",
+    "map_embed_url": "https://www.google.com/maps?q=Levi+Alta+Peluqueria+y+Keratinas,+Paseo+17+de+Octubre,+Xalapa+Enriquez+Ver&output=embed",
+    "lat": 19.5282154,
+    "lng": -96.8937111
+  },
+  "theme": {
+    "primary_color": "#2b1b2e",
+    "secondary_color": "#c98a9c",
+    "logo_url": "/tenants/levisalon-keratinas/logo.svg",
+    "font_family": "Playfair Display, serif",
+    "cover_image_url": "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=800&h=600&fit=crop&auto=format"
+  },
+  "seo": {
+    "title": "Levi Alta Peluquería y Keratinas - Agenda tu cita",
+    "description": "Reserva tu cita de peluquería y keratinas en Levi, Xalapa-Enríquez, Ver. Agenda en menos de un minuto.",
+    "og_image": "/tenants/levisalon-keratinas/og-image.jpg"
+  },
+  "services": [
+    {
+      "id": "corte-dama",
+      "name": "Corte Dama",
+      "duration_minutes": 45,
+      "price": 200,
+      "color": "#c98a9c"
+    },
+    {
+      "id": "keratina",
+      "name": "Keratina",
+      "duration_minutes": 150,
+      "price": 1200,
+      "color": "#2b1b2e"
+    },
+    {
+      "id": "tinte",
+      "name": "Tinte / Color",
+      "duration_minutes": 120,
+      "price": 800,
+      "color": "#8a6d9c"
+    },
+    {
+      "id": "peinado",
+      "name": "Peinado",
+      "duration_minutes": 40,
+      "price": 250,
+      "color": "#d4a373"
+    }
+  ],
+  "professionals": [
+    {
+      "id": "levi",
+      "name": "Levi",
+      "service_ids": ["corte-dama", "keratina", "tinte", "peinado"],
+      "schedule": { "start": "10:00", "end": "19:00", "slot_minutes": 30 },
+      "active": true,
+      "days_off": ["sun"]
+    }
+  ],
+  "faqs": [
+    { "question": "¿Necesito llegar antes de mi cita?", "answer": "Te recomendamos llegar 10 minutos antes de tu horario reservado." },
+    { "question": "¿Puedo cancelar o reagendar?", "answer": "Sí, contáctanos por teléfono con al menos 2 horas de anticipación." },
+    { "question": "¿Aceptan pagos con tarjeta?", "answer": "Aceptamos efectivo, tarjeta y pagos por transferencia." },
+    { "question": "¿Cuánto dura un tratamiento de keratina?", "answer": "En promedio entre 2 y 3 horas, dependiendo del largo y grosor del cabello." },
+    { "question": "¿Tienen estacionamiento?", "answer": "Contamos con espacio de estacionamiento cercano al local." }
+  ],
+  "reviews": [],
+  "privacy_policy_url": "/tenants/levisalon-keratinas/privacidad"
+}
