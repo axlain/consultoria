@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* Named --color-ink/--color-accent (not --color-primary/--color-secondary) —
-     those names are already used by TenantContext.jsx to push each tenant's
-     white-label brand colors onto document.documentElement as an inline style,
-     which would always win over these theme tokens and break dark/light text. */
+  /* Defaults below are the dark-mode palette; ThemeContext overrides them for
+     light mode via :root[data-theme="light"]. --color-accent (+ accent-light)
+     is additionally overridden per-tenant by TenantContext.jsx, which sets it
+     as an inline style on documentElement from theme.secondary_color — ink/
+     paper/surface stay theme-mode-only so contrast is never at the mercy of a
+     tenant's color choice. */
   --color-ink: #F2EBE0;
   --color-accent: #C8973E;
   --color-accent-light: #E8B86D;

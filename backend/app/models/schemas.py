@@ -115,6 +115,7 @@ class Theme(BaseModel):
     secondary_color: str
     logo_url: str
     font_family: str
+    cover_image_url: Optional[str] = None
 
 
 class Seo(BaseModel):

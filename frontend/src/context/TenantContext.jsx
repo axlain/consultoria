@@ -44,11 +44,14 @@ export function TenantProvider({ slug, children }) {
   }, [slug])
 
   useEffect(() => {
-    if (!tenant) return
+    if (!tenant?.theme?.secondary_color) return
     const root = document.documentElement
-    root.style.setProperty('--color-primary', tenant.theme.primary_color)
-    root.style.setProperty('--color-secondary', tenant.theme.secondary_color)
-    root.style.setProperty('--font-family', tenant.theme.font_family)
+    // Only the accent (brand highlight) is tenant-driven — ink/paper/surface stay
+    // owned by ThemeContext's light/dark tokens so contrast stays guaranteed
+    // regardless of what color a tenant picks. accent-light is derived via
+    // color-mix so tenants don't need to supply a matching hover shade.
+    root.style.setProperty('--color-accent', tenant.theme.secondary_color)
+    root.style.setProperty('--color-accent-light', `color-mix(in srgb, ${tenant.theme.secondary_color} 70%, white)`)
   }, [tenant])
 
   // Exposed so CRUD screens (services/team) can refetch after a mutation without a full reload.
