@@ -13,7 +13,7 @@ function navClass({ isActive }) {
 // Mobile-only top bar + off-canvas drawer standing in for the fixed sidebar
 // (hidden below md) — same pattern as admin/AdminMobileNav.jsx, adapted for
 // the role-scoped /panel/* links instead of a fixed tenant-admin list.
-export function PanelMobileNav({ links, roleLabel, userName, onLogout }) {
+export function PanelMobileNav({ links, roleLabel, userName, businessName, onLogout }) {
   const [open, setOpen] = useState(false)
 
   function closeDrawer() {
@@ -35,7 +35,7 @@ export function PanelMobileNav({ links, roleLabel, userName, onLogout }) {
           <span className="h-0.5 w-[18px] rounded-[1px] bg-ink" />
           <span className="h-0.5 w-[18px] rounded-[1px] bg-ink" />
         </button>
-        <span className="truncate font-semibold text-sm">Panel · {roleLabel}</span>
+        <span className="truncate font-semibold text-sm">{businessName ?? 'Panel'} · {roleLabel}</span>
       </header>
 
       {open && (
@@ -50,7 +50,7 @@ export function PanelMobileNav({ links, roleLabel, userName, onLogout }) {
             aria-label="Menú de navegación"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-1 px-2 text-[1.1rem] font-bold">Panel</div>
+            <div className="mb-1 px-2 text-[1.1rem] font-bold">{businessName ?? 'Panel'}</div>
             <div className="mb-6 px-2 text-xs text-muted">
               {userName} · <span className="capitalize">{roleLabel}</span>
             </div>

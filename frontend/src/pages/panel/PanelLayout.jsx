@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { TenantProvider, useTenant } from '../../context/TenantContext'
 import { ThemeToggleRow } from '../../components/ThemeToggle'
 import { PanelMobileNav } from './PanelMobileNav'
 
@@ -29,8 +30,22 @@ const INACTIVE = `${BASE} text-muted hover:bg-surface hover:text-ink`
 const ACTIVE = `${BASE} bg-accent font-semibold text-[#0C0B09]`
 const navClass = ({ isActive }) => (isActive ? ACTIVE : INACTIVE)
 
+// Wraps the whole staff/admin panel in the same TenantProvider the public
+// site uses, keyed by the logged-in user's own business — so the accent
+// color (and, once loaded, the business name in the sidebar) reflect
+// whichever tenant this user belongs to instead of a fixed site-wide look.
 export function PanelLayout() {
+  const { user } = useAuth()
+  return (
+    <TenantProvider slug={user.business_id}>
+      <PanelLayoutInner />
+    </TenantProvider>
+  )
+}
+
+function PanelLayoutInner() {
   const { user, logout } = useAuth()
+  const { tenant } = useTenant()
   const navigate = useNavigate()
   const links = ROLE_NAV[user?.role] ?? []
 
@@ -43,7 +58,7 @@ export function PanelLayout() {
     <div className="flex h-screen flex-col overflow-hidden bg-paper md:flex-row">
       {/* Sidebar */}
       <aside className="hidden h-full w-56 shrink-0 flex-col border-r border-line bg-surface-alt py-6 px-4 md:flex">
-        <div className="mb-1 px-2 text-[1rem] font-bold text-ink">Panel</div>
+        <div className="mb-1 px-2 text-[1rem] font-bold text-ink">{tenant?.business?.name ?? 'Panel'}</div>
         <div className="mb-6 px-2 text-xs text-muted">
           {user?.name} · <span className="capitalize">{ROLE_LABEL[user?.role]}</span>
         </div>
@@ -69,6 +84,7 @@ export function PanelLayout() {
         links={links}
         roleLabel={ROLE_LABEL[user?.role]}
         userName={user?.name}
+        businessName={tenant?.business?.name}
         onLogout={handleLogout}
       />
 
