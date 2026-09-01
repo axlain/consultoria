@@ -75,10 +75,10 @@ Con ambos servidores corriendo, abre el navegador en:
 
 | URL | Qué es |
 |---|---|
-| `http://localhost:5173/demo/barberia` | Página pública del negocio piloto |
-| `http://localhost:5173/demo/barberia/reservar` | Wizard de reservación (5 pasos) |
-| `http://localhost:5173/demo/barberia/disponibilidad` | Calendario de disponibilidad pública |
-| `http://localhost:5173/demo/barberia/admin/agenda` | Panel de administración |
+| `http://localhost:5173/demo/levisalon-keratinas` | Página pública del negocio |
+| `http://localhost:5173/demo/levisalon-keratinas/reservar` | Wizard de reservación (5 pasos) |
+| `http://localhost:5173/demo/levisalon-keratinas/disponibilidad` | Calendario de disponibilidad pública |
+| `http://localhost:5173/demo/levisalon-keratinas/admin/agenda` | Panel de administración |
 | `http://127.0.0.1:8000/docs` | Documentación interactiva de la API |
 
 ---

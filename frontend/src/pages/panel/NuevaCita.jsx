@@ -9,7 +9,7 @@ const labelClass = 'flex flex-col gap-1.5 text-xs font-bold uppercase tracking-w
 export function NuevaCita() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const slug = user?.business_id || 'barberia'
+  const slug = user?.business_id || 'levisalon-keratinas'
 
   const [tenant, setTenant] = useState(null)
   const [slots, setSlots] = useState([])

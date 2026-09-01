@@ -31,7 +31,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str
-    business_id: str = "barberia"
+    business_id: str = "levisalon-keratinas"
 
 
 class LoginRequest(BaseModel):

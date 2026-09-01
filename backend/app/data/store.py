@@ -224,16 +224,23 @@ def list_payments(business_id: str) -> list[Payment]:
 # ---- Users (mock auth store) --------------------------------------------
 
 def seed_users() -> None:
-    """Pre-load demo users so the app is usable without a real DB."""
+    """Pre-load demo users so the app is usable without a real DB.
+
+    One admin/host/employee/client set per onboarded tenant (each a JSON file
+    dropped in `data/tenants/`), so a new business is usable in dev without
+    hand-editing this list.
+    """
     from app.auth.pwd import hash_password
 
-    demo = [
-        ("admin@barberia.com", "admin123", "Admin Barbería", "admin"),
-        ("host@barberia.com", "host123", "Host Barbería", "host"),
-        ("empleado@barberia.com", "empleado123", "Juan Empleado", "employee"),
-        ("cliente@barberia.com", "cliente123", "Ana Cliente", "client"),
-    ]
-    for email, password, name, role in demo:
+    demo = []
+    for slug in list_tenant_slugs():
+        demo += [
+            (f"admin@{slug}.com", "admin123", "Admin", "admin", slug),
+            (f"host@{slug}.com", "host123", "Host", "host", slug),
+            (f"empleado@{slug}.com", "empleado123", "Empleado", "employee", slug),
+            (f"cliente@{slug}.com", "cliente123", "Cliente", "client", slug),
+        ]
+    for email, password, name, role, business_id in demo:
         if email not in _users:
             uid = str(uuid.uuid4())
             _users[email] = UserProfile(
@@ -241,7 +248,7 @@ def seed_users() -> None:
                 email=email,
                 name=name,
                 role=role,
-                business_id="barberia",
+                business_id=business_id,
                 created_at=_now_iso(),
             )
             _password_hashes[uid] = hash_password(password)

@@ -15,7 +15,7 @@ const EMPTY_FORM = {
 // through TenantContext, since /panel/* isn't wrapped in TenantGate.
 export function Servicios() {
   const { user } = useAuth()
-  const slug = user?.business_id || 'barberia'
+  const slug = user?.business_id || 'levisalon-keratinas'
 
   const [tenant, setTenant] = useState(null)
   const [loadError, setLoadError] = useState('')

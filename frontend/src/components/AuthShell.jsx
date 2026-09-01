@@ -78,8 +78,8 @@ export function AuthShell({ children, showMenu = true }) {
               <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Navegación</p>
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 <li><Link to="/" onClick={() => setOpen(false)} className={LINK_CLASS}>Inicio</Link></li>
-                <li><Link to="/demo/barberia" onClick={() => setOpen(false)} className={LINK_CLASS}>Barbería Demo</Link></li>
-                <li><Link to="/demo/barberia/reservar" onClick={() => setOpen(false)} className={LINK_CLASS}>Agendar cita</Link></li>
+                <li><Link to="/demo/levisalon-keratinas" onClick={() => setOpen(false)} className={LINK_CLASS}>Levi Alta Peluquería</Link></li>
+                <li><Link to="/demo/levisalon-keratinas/reservar" onClick={() => setOpen(false)} className={LINK_CLASS}>Agendar cita</Link></li>
               </ul>
             </nav>
 

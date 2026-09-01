@@ -15,7 +15,7 @@ function ClientPanelGateInner({ children }) {
 export function ClientPanelGate({ children }) {
   const { user } = useAuth()
   return (
-    <TenantProvider slug={user?.business_id || 'barberia'}>
+    <TenantProvider slug={user?.business_id || 'levisalon-keratinas'}>
       <ClientPanelGateInner>{children}</ClientPanelGateInner>
     </TenantProvider>
   )

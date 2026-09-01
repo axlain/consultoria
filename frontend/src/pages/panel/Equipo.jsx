@@ -10,7 +10,7 @@ import { TeamCalendar } from '../../components/TeamCalendar'
 // the tenant's public storefront theme onto the page — not wanted here).
 export function Equipo() {
   const { user } = useAuth()
-  const slug = user?.business_id || 'barberia'
+  const slug = user?.business_id || 'levisalon-keratinas'
 
   const [tenant, setTenant] = useState(null)
   const [error, setError] = useState('')

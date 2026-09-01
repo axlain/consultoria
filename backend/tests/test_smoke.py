@@ -40,7 +40,7 @@ def test_tenants_loaded_at_startup():
     from app.main import app
 
     with TestClient(app):
-        assert "barberia" in store.list_tenant_slugs()
+        assert "levisalon-keratinas" in store.list_tenant_slugs()
 
 
 def test_login_requires_valid_credentials():

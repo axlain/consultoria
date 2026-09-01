@@ -43,7 +43,7 @@ export function MisCitas() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState('proximas')
 
-  const slug = tenant?.slug || user?.business_id || 'barberia'
+  const slug = tenant?.slug || user?.business_id || 'levisalon-keratinas'
 
   useEffect(() => {
     if (!user) return

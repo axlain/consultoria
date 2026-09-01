@@ -60,7 +60,7 @@ export const api = {
       body: JSON.stringify({ email, password, business_id: businessId }),
     }),
 
-  register: (email, password, name, businessId = 'barberia') =>
+  register: (email, password, name, businessId = 'levisalon-keratinas') =>
     request('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, name, business_id: businessId }),

@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
     return data.user
   }, [_persist])
 
-  const register = useCallback(async (email, password, name, businessId = 'barberia') => {
+  const register = useCallback(async (email, password, name, businessId = 'levisalon-keratinas') => {
     const data = await api.register(email, password, name, businessId)
     _persist(data.user, data.access_token)
     return data.user

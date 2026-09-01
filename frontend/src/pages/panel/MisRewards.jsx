@@ -6,7 +6,7 @@ import { HamburgerMenu } from '../../components/HamburgerMenu'
 export function MisRewards() {
   const { user } = useAuth()
   const { tenant } = useTenant()
-  const slug = tenant?.slug || user?.business_id || 'barberia'
+  const slug = tenant?.slug || user?.business_id || 'levisalon-keratinas'
 
   return (
     <ClientShell wide>

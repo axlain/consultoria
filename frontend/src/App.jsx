@@ -52,7 +52,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* Public */}
-        <Route path="/" element={<Navigate to="/demo/barberia" replace />} />
+        <Route path="/" element={<Navigate to="/demo/levisalon-keratinas" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/auth/callback" element={<OAuthCallback />} />

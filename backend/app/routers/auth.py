@@ -170,7 +170,7 @@ def oauth_session(body: OAuthSessionRequest):
     if not role_rows:
         # First time this Supabase user logs in — auto-provision a client role
         # for the business they're signing in from (defaults to the demo tenant).
-        role_rows = [db.upsert_user_role(user_id, email, name, "client", body.business_id or "barberia")]
+        role_rows = [db.upsert_user_role(user_id, email, name, "client", body.business_id or "levisalon-keratinas")]
 
     row = _resolve_business_row(role_rows, body.business_id)
     if row is None:

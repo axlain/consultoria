@@ -27,7 +27,7 @@ from supabase import create_client
 
 sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-BUSINESS_ID = "barberia"
+BUSINESS_ID = "levisalon-keratinas"
 TEST_PASSWORD = "Test1234!"  # cámbiala después de la primera prueba
 
 USERS = [

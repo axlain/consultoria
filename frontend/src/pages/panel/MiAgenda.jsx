@@ -15,7 +15,7 @@ const STATUS_COLOR = {
 
 export function MiAgenda() {
   const { user } = useAuth()
-  const slug = user?.business_id || 'barberia'
+  const slug = user?.business_id || 'levisalon-keratinas'
   const today = new Date().toISOString().slice(0, 10)
 
   const [citas, setCitas] = useState([])

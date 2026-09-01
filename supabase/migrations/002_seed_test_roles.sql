@@ -1,4 +1,4 @@
--- Usuarios de prueba para 'barberia'.
+-- Usuarios de prueba para 'levisalon-keratinas'.
 -- NO ejecutar directamente — usar el script de Python:
 --
 --   cd backend && source .venv/bin/activate
@@ -14,9 +14,9 @@
 
 -- INSERT INTO user_business_roles (user_id, business_id, role, email, name, is_active)
 -- VALUES
---   ('<uuid-client>',   'barberia', 'client',   'client@test.local',   'Cliente Test',  true),
---   ('<uuid-employee>', 'barberia', 'employee', 'employee@test.local',  'Empleado Test', true),
---   ('<uuid-host>',     'barberia', 'host',     'host@test.local',      'Host Test',     true),
---   ('<uuid-admin>',    'barberia', 'admin',    'admin@test.local',     'Admin Test',    true)
+--   ('<uuid-client>',   'levisalon-keratinas', 'client',   'client@test.local',   'Cliente Test',  true),
+--   ('<uuid-employee>', 'levisalon-keratinas', 'employee', 'employee@test.local',  'Empleado Test', true),
+--   ('<uuid-host>',     'levisalon-keratinas', 'host',     'host@test.local',      'Host Test',     true),
+--   ('<uuid-admin>',    'levisalon-keratinas', 'admin',    'admin@test.local',     'Admin Test',    true)
 -- ON CONFLICT (user_id, business_id) DO UPDATE
 --   SET role = EXCLUDED.role, name = EXCLUDED.name, is_active = true;
